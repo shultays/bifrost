@@ -38,12 +38,8 @@ class gGame{
 	FixedSizedArray<gTickable*, 2048> tickList;
 	FixedSizedPriorityArray<gUpdatable*, 2048> updateList;
 	FixedSizedPriorityArray<gRenderable*, 2048> renderList;
-
-	void render(){
-		for (int i = renderList.size() - 1; i >= 0; i--){
-			if (renderList[i]->enabled) renderList[i]->render();
-		}
-	}
+	
+	void render();
 
 	void tick(float dt){
 		for (int i = tickList.size() - 1; i >= 0; i--){

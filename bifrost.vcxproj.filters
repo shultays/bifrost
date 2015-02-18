@@ -16,6 +16,9 @@
     <Filter Include="engine">
       <UniqueIdentifier>{a14c8f40-3737-4a40-838a-bbbdb8452dfa}</UniqueIdentifier>
     </Filter>
+    <Filter Include="engine\math">
+      <UniqueIdentifier>{8f6c5baf-12b9-497b-8159-480904888b65}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="gears.cpp">
@@ -38,6 +41,9 @@
     </ClCompile>
     <ClCompile Include="Perlin.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="gMat.cpp">
+      <Filter>engine\math</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -76,6 +82,18 @@
     </ClInclude>
     <ClInclude Include="gTools.h">
       <Filter>engine</Filter>
+    </ClInclude>
+    <ClInclude Include="PerlinShell.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="__gVec_Imp.h">
+      <Filter>engine\math</Filter>
+    </ClInclude>
+    <ClInclude Include="gVec.h">
+      <Filter>engine\math</Filter>
+    </ClInclude>
+    <ClInclude Include="gMat.h">
+      <Filter>engine\math</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

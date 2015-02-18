@@ -15,6 +15,7 @@
     <ClCompile Include="gGears.cpp" />
     <ClCompile Include="gGlobals.cpp" />
     <ClCompile Include="gInput.cpp" />
+    <ClCompile Include="gMat.cpp" />
     <ClCompile Include="Perlin.cpp" />
     <ClCompile Include="Valhalla.cpp" />
     <ClCompile Include="gears.cpp" />
@@ -28,9 +29,13 @@
     <ClInclude Include="gGears.h" />
     <ClInclude Include="gGlobals.h" />
     <ClInclude Include="gInput.h" />
+    <ClInclude Include="gMat.h" />
     <ClInclude Include="gTime.h" />
+    <ClInclude Include="gVec.h" />
+    <ClInclude Include="__gVec_Imp.h" />
     <ClInclude Include="Perlin.h" />
     <ClInclude Include="gTools.h" />
+    <ClInclude Include="PerlinShell.h" />
     <ClInclude Include="Valhalla.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

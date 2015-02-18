@@ -6,6 +6,7 @@ void gGears::init(int argc, char *argv[]){
 }
 
 void gGears::resize(int width, int height){
+	glViewport(0, 0, (GLint)gears.width, (GLint)gears.height);
 	game->resize(width, height);
 }
 
