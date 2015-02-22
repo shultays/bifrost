@@ -15,30 +15,30 @@
 #define G_IS_TYPE_FLOATING
 #endif
 
-struct G_VEC_IMP_NAME{
+struct G_VEC_IMP_NAME {
 public:
-	union{
-		struct{
+	union {
+		struct {
 			G_VEC_TYPE data[GVEC_N];
 		};
 #if GVEC_N == 2
-		struct{
+		struct {
 			G_VEC_TYPE w, h;
 		};
 #endif
 
 #ifdef G_VEC_PREV_1_CLASS
-		struct{
+		struct {
 			G_VEC_PREV_1_CLASS G_VEC_PREV_1_NAME;
 		};
 #endif
 #ifdef G_VEC_PREV_2_CLASS
-		struct{
+		struct {
 			G_VEC_PREV_2_CLASS G_VEC_PREV_2_NAME;
 		};
 #endif
 
-		struct{
+		struct {
 			G_VEC_TYPE x;
 			G_VEC_TYPE y;
 #if GVEC_N >= 3
@@ -49,7 +49,7 @@ public:
 #endif
 #endif
 		};
-		struct{
+		struct {
 			G_VEC_TYPE r;
 			G_VEC_TYPE g;
 #if GVEC_N >= 3
@@ -66,153 +66,153 @@ public:
 		return G_VEC_IMP_NAME(0);
 	}
 
-	G_VEC_IMP_NAME(){
+	G_VEC_IMP_NAME() {
 		/*for (int i = 0; i < GVEC_N; ++i)
 			data[i] = 0;*/
 	}
 
-	G_VEC_IMP_NAME(const G_VEC_TYPE& con){
+	G_VEC_IMP_NAME(const G_VEC_TYPE& con) {
 		for (int i = 0; i < GVEC_N; ++i)
 			data[i] = con;
 	}
 
-	bool isZero(){
+	bool isZero() {
 		bool ret = true;
 		for (int i = 0; ret && i < GVEC_N; ++i)
-			ret &= (data[i]==0.0f);
+			ret &= (data[i] == 0.0f);
 		return ret;
 	}
 
-	inline bool isGVEC_NonZero(){
+	inline bool isGVEC_NonZero() {
 		return !isZero();
 	}
 
-	G_VEC_IMP_NAME operator-() const{
+	G_VEC_IMP_NAME operator-() const {
 		G_VEC_IMP_NAME cpy = *this;
 		for (int i = 0; i < GVEC_N; ++i)
 			cpy.data[i] = -cpy.data[i];
 		return cpy;
 	}
 
-	inline G_VEC_IMP_NAME operator+() const{
+	inline G_VEC_IMP_NAME operator+() const {
 		return *this;
 	}
-	G_VEC_IMP_NAME operator+(const G_VEC_IMP_NAME& other) const{
+	G_VEC_IMP_NAME operator+(const G_VEC_IMP_NAME& other) const {
 		G_VEC_IMP_NAME cpy = *this;
 		for (int i = 0; i < GVEC_N; ++i)
 			cpy.data[i] += other[i];
 		return cpy;
 	}
-	G_VEC_IMP_NAME operator-(const G_VEC_IMP_NAME& other) const{
+	G_VEC_IMP_NAME operator-(const G_VEC_IMP_NAME& other) const {
 		G_VEC_IMP_NAME cpy = *this;
 		for (int i = 0; i < GVEC_N; ++i)
 			cpy.data[i] -= other[i];
 		return cpy;
 	}
-	G_VEC_IMP_NAME operator*(const G_VEC_IMP_NAME& other) const{
+	G_VEC_IMP_NAME operator*(const G_VEC_IMP_NAME& other) const {
 		G_VEC_IMP_NAME cpy = *this;
 		for (int i = 0; i < GVEC_N; ++i)
 			cpy.data[i] *= other[i];
 		return cpy;
 	}
-	G_VEC_IMP_NAME operator/(const G_VEC_IMP_NAME& other) const{
+	G_VEC_IMP_NAME operator/(const G_VEC_IMP_NAME& other) const {
 		G_VEC_IMP_NAME cpy = *this;
 		for (int i = 0; i < GVEC_N; ++i)
 			cpy.data[i] /= other[i];
 		return cpy;
 	}
-	G_VEC_IMP_NAME operator+(const G_VEC_TYPE& con) const{
+	G_VEC_IMP_NAME operator+(const G_VEC_TYPE& con) const {
 		G_VEC_IMP_NAME cpy = *this;
 		for (int i = 0; i < GVEC_N; ++i)
 			cpy.data[i] += con;
 		return cpy;
 	}
-	G_VEC_IMP_NAME operator-(const G_VEC_TYPE& con) const{
+	G_VEC_IMP_NAME operator-(const G_VEC_TYPE& con) const {
 		G_VEC_IMP_NAME cpy = *this;
 		for (int i = 0; i < GVEC_N; ++i)
 			cpy.data[i] -= con;
 		return cpy;
 	}
-	G_VEC_IMP_NAME operator*(const G_VEC_TYPE& con) const{
+	G_VEC_IMP_NAME operator*(const G_VEC_TYPE& con) const {
 		G_VEC_IMP_NAME cpy = *this;
 		for (int i = 0; i < GVEC_N; ++i)
 			cpy.data[i] *= con;
 		return cpy;
 	}
-	G_VEC_IMP_NAME operator/(const G_VEC_TYPE& con) const{
+	G_VEC_IMP_NAME operator/(const G_VEC_TYPE& con) const {
 		G_VEC_IMP_NAME cpy = *this;
 		for (int i = 0; i < GVEC_N; ++i)
 			cpy.data[i] /= con;
 		return cpy;
 	}
-	G_VEC_IMP_NAME& operator=(const G_VEC_IMP_NAME& other){
+	G_VEC_IMP_NAME& operator=(const G_VEC_IMP_NAME& other) {
 		for (int i = 0; i < GVEC_N; ++i)
 			data[i] = other[i];
 		return *this;
 	}
-	G_VEC_IMP_NAME& operator=(const G_VEC_TYPE& con){
+	G_VEC_IMP_NAME& operator=(const G_VEC_TYPE& con) {
 		for (int i = 0; i < GVEC_N; ++i)
 			data[i] = con;
 		return *this;
 	}
-	G_VEC_IMP_NAME& operator+=(const G_VEC_IMP_NAME& other){
+	G_VEC_IMP_NAME& operator+=(const G_VEC_IMP_NAME& other) {
 		for (int i = 0; i < GVEC_N; ++i)
 			data[i] += other[i];
 		return *this;
 	}
-	G_VEC_IMP_NAME& operator-=(const G_VEC_IMP_NAME& other){
+	G_VEC_IMP_NAME& operator-=(const G_VEC_IMP_NAME& other) {
 		for (int i = 0; i < GVEC_N; ++i)
 			data[i] -= other[i];
 		return *this;
 	}
-	G_VEC_IMP_NAME& operator/=(const G_VEC_IMP_NAME& other){
+	G_VEC_IMP_NAME& operator/=(const G_VEC_IMP_NAME& other) {
 		for (int i = 0; i < GVEC_N; ++i)
 			data[i] /= other[i];
 		return *this;
 	}
-	G_VEC_IMP_NAME& operator*=(const G_VEC_IMP_NAME& other){
+	G_VEC_IMP_NAME& operator*=(const G_VEC_IMP_NAME& other) {
 		for (int i = 0; i < GVEC_N; ++i)
 			data[i] *= other[i];
 		return *this;
 	}
 
-	G_VEC_IMP_NAME& operator+=(const G_VEC_TYPE& con){
+	G_VEC_IMP_NAME& operator+=(const G_VEC_TYPE& con) {
 		for (int i = 0; i < GVEC_N; ++i)
 			data[i] += con;
 		return *this;
 	}
-	G_VEC_IMP_NAME& operator-=(const G_VEC_TYPE& con){
+	G_VEC_IMP_NAME& operator-=(const G_VEC_TYPE& con) {
 		for (int i = 0; i < GVEC_N; ++i)
 			data[i] -= con;
 		return *this;
 	}
-	G_VEC_IMP_NAME& operator*=(const G_VEC_TYPE& con){
+	G_VEC_IMP_NAME& operator*=(const G_VEC_TYPE& con) {
 		for (int i = 0; i < GVEC_N; ++i)
 			data[i] *= con;
 		return *this;
 	}
-	G_VEC_IMP_NAME& operator/=(const G_VEC_TYPE& con){
+	G_VEC_IMP_NAME& operator/=(const G_VEC_TYPE& con) {
 		for (int i = 0; i < GVEC_N; ++i)
 			data[i] /= con;
 		return *this;
 	}
 
-	bool operator==(const G_VEC_IMP_NAME& other) const{
+	bool operator==(const G_VEC_IMP_NAME& other) const {
 		bool ret = true;
 		for (int i = 0; i < GVEC_N && ret; ++i)
 			ret &= (other[i] == data[i]);
 		return ret;
 	}
 
-	inline G_VEC_TYPE& operator[](int index){
+	inline G_VEC_TYPE& operator[](int index) {
 		return ((G_VEC_TYPE*)this)[index];
 	}
 
-	inline G_VEC_TYPE const& operator[](int index) const{
+	inline G_VEC_TYPE const& operator[](int index) const {
 		return ((G_VEC_TYPE*)this)[index];
 	}
 
-	G_VEC_TYPE length() const{
+	G_VEC_TYPE length() const {
 		G_VEC_TYPE ret = 0;
 		for (int i = 0; i < GVEC_N; ++i)
 			ret += data[i] * data[i];
@@ -223,14 +223,14 @@ public:
 #endif
 	}
 
-	G_VEC_TYPE lengthSquared() const{
+	G_VEC_TYPE lengthSquared() const {
 		G_VEC_TYPE ret = 0;
 		for (int i = 0; i < GVEC_N; ++i)
 			ret += data[i] * data[i];
 		return ret;
 	}
 
-	static G_VEC_TYPE length(const G_VEC_IMP_NAME& vec){
+	static G_VEC_TYPE length(const G_VEC_IMP_NAME& vec) {
 		G_VEC_TYPE ret = 0;
 		for (int i = 0; i < GVEC_N; ++i)
 			ret += vec.data[i] * vec.data[i];
@@ -241,16 +241,16 @@ public:
 #endif
 	}
 
-	static G_VEC_TYPE lengthSquared(const G_VEC_IMP_NAME& vec){
+	static G_VEC_TYPE lengthSquared(const G_VEC_IMP_NAME& vec) {
 		G_VEC_TYPE ret = 0;
 		for (int i = 0; i < GVEC_N; ++i)
 			ret += vec.data[i] * vec.data[i];
 		return ret;
 	}
 
-	G_VEC_TYPE distance(const G_VEC_IMP_NAME& other) const{
+	G_VEC_TYPE distance(const G_VEC_IMP_NAME& other) const {
 		G_VEC_TYPE ret = 0;
-		for (int i = 0; i < GVEC_N; ++i){
+		for (int i = 0; i < GVEC_N; ++i) {
 			G_VEC_TYPE diff = data[i] - other.data[i];
 			ret += diff*diff;
 		}
@@ -261,18 +261,18 @@ public:
 #endif
 	}
 
-	G_VEC_TYPE distanceSquared(const G_VEC_IMP_NAME& other) const{
+	G_VEC_TYPE distanceSquared(const G_VEC_IMP_NAME& other) const {
 		G_VEC_TYPE ret = 0;
-		for (int i = 0; i < GVEC_N; ++i){
+		for (int i = 0; i < GVEC_N; ++i) {
 			G_VEC_TYPE diff = data[i] - other.data[i];
 			ret += diff*diff;
 		}
 		return ret;
 	}
 
-	static G_VEC_TYPE distance(const G_VEC_IMP_NAME& vec1, const G_VEC_IMP_NAME& vec2){
+	static G_VEC_TYPE distance(const G_VEC_IMP_NAME& vec1, const G_VEC_IMP_NAME& vec2) {
 		G_VEC_TYPE ret = 0;
-		for (int i = 0; i < GVEC_N; ++i){
+		for (int i = 0; i < GVEC_N; ++i) {
 			G_VEC_TYPE diff = vec1.data[i] - vec2.data[i];
 			ret += diff*diff;
 		}
@@ -283,9 +283,9 @@ public:
 #endif
 	}
 
-	static G_VEC_TYPE distanceSquared(const G_VEC_IMP_NAME& vec1, const G_VEC_IMP_NAME& vec2){
+	static G_VEC_TYPE distanceSquared(const G_VEC_IMP_NAME& vec1, const G_VEC_IMP_NAME& vec2) {
 		G_VEC_TYPE ret = 0;
-		for (int i = 0; i < GVEC_N; ++i){
+		for (int i = 0; i < GVEC_N; ++i) {
 			G_VEC_TYPE diff = vec1.data[i] - vec2.data[i];
 			ret += diff*diff;
 		}
@@ -294,53 +294,55 @@ public:
 
 	//
 
-	G_VEC_TYPE dot(const G_VEC_IMP_NAME& other) const{
+	G_VEC_TYPE dot(const G_VEC_IMP_NAME& other) const {
 		G_VEC_TYPE ret = 0;
 		for (int i = 0; i < GVEC_N; ++i)
-			ret += data[i]*other.data[i];
+			ret += data[i] * other.data[i];
 		return ret;
 	}
 
-	static G_VEC_TYPE dot(const G_VEC_IMP_NAME& vec1, const G_VEC_IMP_NAME& vec2){
+	static G_VEC_TYPE dot(const G_VEC_IMP_NAME& vec1, const G_VEC_IMP_NAME& vec2) {
 		G_VEC_TYPE ret = 0;
 		for (int i = 0; i < GVEC_N; ++i)
 			ret += vec1.data[i] * vec2.data[i];
 		return ret;
 	}
 
-	
+
 #ifdef G_IS_TYPE_FLOATING
-	static G_VEC_IMP_NAME normalize(const G_VEC_IMP_NAME& vec){
+	static G_VEC_IMP_NAME normalize(const G_VEC_IMP_NAME& vec) {
 		G_VEC_TYPE d = vec.length();
 		G_VEC_IMP_NAME ret;
 		for (int i = 0; i < GVEC_N; ++i)
 			ret.data[i] = vec.data[i] / d;
 		return ret;
 	}
-	G_VEC_TYPE normalize(){
+	G_VEC_TYPE normalize() {
 		G_VEC_TYPE d = length();
-		G_VEC_IMP_NAME ret;
 		for (int i = 0; i < GVEC_N; ++i)
 			data[i] /= d;
 		return d;
 	}
+	G_VEC_IMP_NAME normalized() {
+		return G_VEC_IMP_NAME::normalize(*this);
+	}
 #endif
 
 #if GVEC_N == 2
-	G_VEC_IMP_NAME(G_VEC_TYPE x, G_VEC_TYPE y){
+	G_VEC_IMP_NAME(G_VEC_TYPE x, G_VEC_TYPE y) {
 		data[0] = x;
 		data[1] = y;
 	}
 #endif
 
 #if GVEC_N == 3
-	G_VEC_IMP_NAME(G_VEC_TYPE x, G_VEC_TYPE y, G_VEC_TYPE z){
+	G_VEC_IMP_NAME(G_VEC_TYPE x, G_VEC_TYPE y, G_VEC_TYPE z) {
 		data[0] = x;
 		data[1] = y;
 		data[2] = z;
 	}
 
-	G_VEC_IMP_NAME cross(const G_VEC_IMP_NAME& other) const{
+	G_VEC_IMP_NAME cross(const G_VEC_IMP_NAME& other) const {
 		return G_VEC_IMP_NAME(
 			y * other.z - other.y * z,
 			z * other.x - other.z * x,
@@ -348,7 +350,7 @@ public:
 	}
 
 
-	static G_VEC_IMP_NAME cross(const G_VEC_IMP_NAME& vec1, const G_VEC_IMP_NAME& vec2){
+	static G_VEC_IMP_NAME cross(const G_VEC_IMP_NAME& vec1, const G_VEC_IMP_NAME& vec2) {
 		return G_VEC_IMP_NAME(
 			vec1.y * vec2.z - vec2.y * vec1.z,
 			vec1.z * vec2.x - vec2.z * vec1.x,
@@ -357,19 +359,19 @@ public:
 #endif
 
 #if GVEC_N == 4
-	G_VEC_IMP_NAME(G_VEC_PREV_1_CLASS vec, G_VEC_TYPE con){
+	G_VEC_IMP_NAME(G_VEC_PREV_1_CLASS vec, G_VEC_TYPE con) {
 		data[0] = vec.x;
 		data[1] = vec.y;
 		data[2] = vec.z;
 		data[3] = con;
 	}
-	G_VEC_IMP_NAME(G_VEC_TYPE x, G_VEC_TYPE y, G_VEC_TYPE z){
+	G_VEC_IMP_NAME(G_VEC_TYPE x, G_VEC_TYPE y, G_VEC_TYPE z) {
 		data[0] = x;
 		data[1] = y;
 		data[2] = z;
 		data[3] = (G_VEC_TYPE)1;
 	}
-	G_VEC_IMP_NAME(G_VEC_TYPE x, G_VEC_TYPE y, G_VEC_TYPE z, G_VEC_TYPE o){
+	G_VEC_IMP_NAME(G_VEC_TYPE x, G_VEC_TYPE y, G_VEC_TYPE z, G_VEC_TYPE o) {
 		data[0] = x;
 		data[1] = y;
 		data[2] = z;

@@ -1,8 +1,8 @@
 #include "Perlin.h"
 
 
-void addRandomMapC(int w, int h, float k, int size, Array2D<float> &map, int chance){
-	Array2D<int> temp(w+2, h+2);
+void addRandomMapC(int w, int h, float k, int size, Grid<float> &map, int chance){
+	Grid<int> temp(w+2, h+2);
   int i, j, a, b;
   float x, y;
   int r = (int)((w+2)*(h+2)*(chance/100.0f));
@@ -46,13 +46,13 @@ void addRandomMapC(int w, int h, float k, int size, Array2D<float> &map, int cha
 }
 
 
-void addRandomMap(int w, int h, float k, int size, Array2D<float> &map){
+void addRandomMap(int w, int h, float k, int size, Grid<float> &map){
   
   addRandomMapC(w,h,k, size, map, 40+rand()%20);
 }
 
 
-void lcg_addRandomMap(int x, int y, int s, float k, Array2D<float> &map){
+void lcg_addRandomMap(int x, int y, int s, float k, Grid<float> &map){
   /*int i, j, a, b;
   unsigned int r=0;
   

@@ -7,26 +7,33 @@
 #include <math.h>
 
 class Mat4;
+class Mat3;
+class Mat2;
 Vec4 operator*(const Vec4 &v, const Mat4 &m);
 Vec4 &operator*=(Vec4 &v, const Mat4 &m);
 
 
-class Mat4{
+Vec3 operator*(const Vec3 &v, const Mat3 &m);
+Vec3 &operator*=(Vec3 &v, const Mat3 &m);
+Vec2 operator*(const Vec2 &v, const Mat2 &m);
+Vec2 &operator*=(Vec2 &v, const Mat2 &m);
+
+class Mat4 {
 public:
-	union{
-		struct{
+	union {
+		struct {
 			float arr[4][4];
 		};
-		struct{
-			float data[4*4];
+		struct {
+			float data[4 * 4];
 		};
-		struct{
+		struct {
 			Vec4 row0;
 			Vec4 row1;
 			Vec4 row2;
 			Vec4 row3;
 		};
-		struct{
+		struct {
 			float _00, _01, _02, _03;
 			float _10, _11, _12, _13;
 			float _20, _21, _22, _23;
@@ -35,27 +42,26 @@ public:
 
 	};
 
-	Mat4(){
-	}
+	Mat4() {}
 
-	Mat4(float con){
+	Mat4(float con) {
 		for (int i = 0; i < 4 * 4; i++)
 			data[i] = con;
 	}
 
-	Mat4(Vec4 v0, Vec4 v1, Vec4 v2, Vec4 v3){
+	Mat4(Vec4 v0, Vec4 v1, Vec4 v2, Vec4 v3) {
 		row0 = v0;
 		row1 = v1;
 		row2 = v2;
 		row3 = v3;
 	}
-	static Mat4 identity(){
+	static Mat4 identity() {
 		Mat4 mat;
 		mat.makeIdentity();
 		return mat;
 	}
 
-	void makeIdentity(){
+	void makeIdentity() {
 		_00 = 1.0f;
 		_01 = 0.0f;
 		_02 = 0.0f;
@@ -75,7 +81,7 @@ public:
 	}
 
 
-	static Mat4 rotation(float angle, const Vec3& axis){
+	static Mat4 rotation(float angle, const Vec3& axis) {
 		float s = sin(angle);
 		float c = cos(angle);
 		float s_1 = 1.0f - s;
@@ -102,7 +108,7 @@ public:
 	}
 
 
-	static Mat4 rotationX(float angle){
+	static Mat4 rotationX(float angle) {
 		float s = sin(angle);
 		float c = cos(angle);
 		float s_1 = 1.0f - s;
@@ -130,7 +136,7 @@ public:
 		return mat;
 	}
 
-	static Mat4 rotationY(float angle){
+	static Mat4 rotationY(float angle) {
 		float s = sin(angle);
 		float c = cos(angle);
 		float s_1 = 1.0f - s;
@@ -146,7 +152,7 @@ public:
 		mat._11 = c_1 + c;
 		mat._12 = 0.0f;
 		mat._13 = 0.0f;
-		mat._20 = - s;
+		mat._20 = -s;
 		mat._21 = 0.0f;
 		mat._22 = c;
 		mat._23 = 0.0f;
@@ -159,7 +165,7 @@ public:
 		return mat;
 	}
 
-	static Mat4 rotationZ(float angle){
+	static Mat4 rotationZ(float angle) {
 		float s = sin(angle);
 		float c = cos(angle);
 		float s_1 = 1.0f - s;
@@ -168,7 +174,7 @@ public:
 		Mat4 mat;
 
 		mat._00 = c;
-		mat._01 = - s;
+		mat._01 = -s;
 		mat._02 = 0.0f;
 		mat._03 = 0.0f;
 		mat._10 = s;
@@ -188,7 +194,7 @@ public:
 		return mat;
 	}
 
-	static Mat4 translate(const Vec3& vec){
+	static Mat4 translate(const Vec3& vec) {
 		Mat4 mat;
 
 		mat._00 = 1.0f;
@@ -211,14 +217,14 @@ public:
 		return mat;
 	}
 
-	Mat4& translateBy(const Vec3& vec){
+	Mat4& translateBy(const Vec3& vec) {
 		*this = *this*Mat4::translate(vec);
 		return *this;
 	}
 
 
 
-	Mat4& scaleBy(const Vec3& vec){
+	Mat4& scaleBy(const Vec3& vec) {
 		_00 *= vec[0];
 		_01 *= vec[1];
 		_02 *= vec[2];
@@ -238,7 +244,7 @@ public:
 		return *this;
 	}
 
-	Mat4& scaleBy(float con){
+	Mat4& scaleBy(float con) {
 		_00 *= con;
 		_01 *= con;
 		_02 *= con;
@@ -258,24 +264,24 @@ public:
 		return *this;
 	}
 
-	Mat4& rotateBy(float angle, const Vec3& axis){
+	Mat4& rotateBy(float angle, const Vec3& axis) {
 		*this *= Mat4::rotation(angle, axis);
 		return *this;
 	}
-	
-	Mat4& rotateByX(float angle){ //optimize
+
+	Mat4& rotateByX(float angle) { //optimize
 		*this *= Mat4::rotationX(angle);
 		return *this;
 	}
-	Mat4& rotateByY(float angle){ //optimize
+	Mat4& rotateByY(float angle) { //optimize
 		*this *= Mat4::rotationY(angle);
 		return *this;
-	} 
-	Mat4& rotateByZ(float angle){ //optimize
+	}
+	Mat4& rotateByZ(float angle) { //optimize
 		*this *= Mat4::rotationZ(angle);
 		return *this;
 	}
-	static Mat4 scale(const Vec3& vec){
+	static Mat4 scale(const Vec3& vec) {
 		Mat4 mat;
 
 		mat._00 = vec.x;
@@ -298,7 +304,7 @@ public:
 		return mat;
 	}
 
-	static Mat4 scale(const float scale){
+	static Mat4 scale(const float scale) {
 		Mat4 mat;
 
 		mat._00 = scale;
@@ -322,10 +328,10 @@ public:
 	}
 
 
-	Mat4 transpose(){
+	Mat4 transpose() {
 		Mat4 mat;
-		for (int i = 0; i < 4; i++){
-			for (int j = 0; j < 4; j++){
+		for (int i = 0; i < 4; i++) {
+			for (int j = 0; j < 4; j++) {
 				mat.arr[i][j] = arr[j][i];
 			}
 		}
@@ -333,15 +339,15 @@ public:
 	}
 
 
-	bool operator==(const Mat4& other){
+	bool operator==(const Mat4& other) {
 		bool ret = true;
-		for (int i = 0; i < 4*4 && ret; ++i)
+		for (int i = 0; i < 4 * 4 && ret; ++i)
 			ret &= (other.data[i] == data[i]);
 		return ret;
 	}
 
 
-	Mat4 Mat4::operator*(const Mat4 &other) const{
+	Mat4 Mat4::operator*(const Mat4 &other) const {
 		Mat4 result;
 
 		result._00 = _00 * other._00 + _01 * other._10 + _02 * other._20 + _03 * other._30;
@@ -368,7 +374,7 @@ public:
 	}
 
 
-	Mat4 &Mat4::operator *= (const Mat4 &m){
+	Mat4 &Mat4::operator *= (const Mat4 &m) {
 		*this = *this * m;
 		return *this;
 	}
@@ -385,32 +391,25 @@ public:
 		return result;
 	}
 
-	static Mat4 perspective(float zNear, float zFar, float povInRadian, float width, float height) {
-		float h = cos(0.5f * povInRadian) / sin(0.5f * povInRadian);
-		float w = h * height / width; 
-		float zRange = zFar - zNear;
-		
-		Mat4 mat;
-		mat._00 = w;
-		mat._01 = 0.0f;
-		mat._02 = 0.0f;
-		mat._03 = 0.0f;
-		mat._10 = 0.0f;
-		mat._11 = h;
-		mat._12 = 0.0f;
-		mat._13 = 0.0f;
-		mat._20 = 0.0f;
-		mat._21 = 0.0f;
-		mat._22 = -(zNear +zFar) / zRange;
-		mat._23 = -1.0f;
-		mat._30 = 0.0f;
-		mat._31 = 0.0f;
-		mat._32 = -2.0f * zFar * zNear / zRange;
-		mat._33 = 0.0f;
+	static Mat4 perspective(float zNear, float zFar, float fovInRadian, float width, float height) {
+		float aspect = width / height;
+		float range = tanf(fovInRadian / 2.0f) * zNear;
+		float sx = (2.0f * zNear) / (range * aspect + range * aspect);
+		float sy = zNear / range;
+		float sz = -(zFar + zNear) / (zFar - zNear);
+		float pz = -(2.0f * zFar * zNear) / (zFar - zNear);
+
+		Mat4 mat(0.0f);
+
+		mat.data[0] = sx;
+		mat.data[5] = sy;
+		mat.data[10] = sz;
+		mat.data[14] = pz;
+		mat.data[11] = -1.0f;
 		return mat;
 	}
 
-	Mat4 inverse() const{
+	Mat4 inverse() const {
 		Mat4 ret;
 		float det;
 
@@ -539,23 +538,8 @@ public:
 		return ret;
 	}
 
-	static Mat4 lookAt(const Vec3& eye, const Vec3& focus, const Vec3& up){
-		/*Vec3 t = eye - focus;
-
-		Vec3 vz = Vec3::normalize(eye - focus);
-		Vec3 vx = Vec3::normalize(Vec3::cross(up, vz));
-		// vy doesn't need to be normalized because it's a cross
-		// product of 2 normalized vectors
-		Vec3 vy = Vec3::cross(vz, vx);
-		Mat4 inverseViewMatrix = Mat4(Vec4(vx, 0),
-			Vec4(vy, 0),
-			Vec4(vz, 0),
-			Vec4(eye, 1));
-
-		
-		inverseViewMatrix = inverseViewMatrix.inverse();
-		*/
-		Vec3 Z = eye-focus;
+	static Mat4 lookAt(const Vec3& eye, const Vec3& focus, const Vec3& up) {
+		Vec3 Z = eye - focus;
 		Z.normalize();
 
 		Vec3 Y = up;
@@ -586,10 +570,442 @@ public:
 		mat._33 = 1.0f;
 
 
-
 		return mat;
 	}
 };
 
+class Mat3 {
+public:
+	union {
+		struct {
+			float arr[3][3];
+		};
+		struct {
+			float data[3 * 3];
+		};
+		struct {
+			Vec3 row0;
+			Vec3 row1;
+			Vec3 row2;
+		};
+		struct {
+			float _00, _01, _02;
+			float _10, _11, _12;
+			float _20, _21, _22;
+		};
 
+	};
+
+	Mat3() {}
+
+	Mat3(float con) {
+		for (int i = 0; i < 3 * 3; i++)
+			data[i] = con;
+	}
+
+	Mat3(Vec3 v0, Vec3 v1, Vec3 v2) {
+		row0 = v0;
+		row1 = v1;
+		row2 = v2;
+	}
+	static Mat3 identity() {
+		Mat3 mat;
+		mat.makeIdentity();
+		return mat;
+	}
+
+	void makeIdentity() {
+		_00 = 1.0f;
+		_01 = 0.0f;
+		_02 = 0.0f;
+		_10 = 0.0f;
+		_11 = 1.0f;
+		_12 = 0.0f;
+		_20 = 0.0f;
+		_21 = 0.0f;
+		_22 = 1.0f;
+	}
+
+
+	static Mat3 rotation(float angle, const Vec3& axis) {
+		float s = sin(angle);
+		float c = cos(angle);
+		float s_1 = 1.0f - s;
+		float c_1 = 1.0f - s;
+
+		Mat3 mat;
+
+		mat._00 = axis[0] * axis[0] * c_1 + c;
+		mat._01 = axis[1] * axis[0] * c_1 - axis[2] * s;
+		mat._02 = axis[2] * axis[0] * c_1 + axis[1] * s;
+		mat._10 = axis[0] * axis[1] * c_1 + axis[2] * s;
+		mat._11 = axis[1] * axis[1] * c_1 + c;
+		mat._12 = axis[2] * axis[1] * c_1 - axis[0] * s;
+		mat._20 = axis[0] * axis[2] * c_1 - axis[1] * s;
+		mat._21 = axis[1] * axis[2] * c_1 + axis[0] * s;
+		mat._22 = axis[2] * axis[2] * c_1 + c;
+
+		return mat;
+	}
+
+
+	static Mat3 rotationX(float angle) {
+		float s = sin(angle);
+		float c = cos(angle);
+		float s_1 = 1.0f - s;
+		float c_1 = 1.0f - s;
+
+		Mat3 mat;
+
+		mat._00 = c_1 + c;
+		mat._01 = 0.0f;
+		mat._02 = 0.0f;
+		mat._10 = 0.0f;
+		mat._11 = c;
+		mat._12 = -s;
+		mat._20 = 0.0f;
+		mat._21 = s;
+		mat._22 = c;
+
+		return mat;
+	}
+
+	static Mat3 rotationY(float angle) {
+		float s = sin(angle);
+		float c = cos(angle);
+		float s_1 = 1.0f - s;
+		float c_1 = 1.0f - s;
+
+		Mat3 mat;
+
+		mat._00 = c;
+		mat._01 = 0.0f;
+		mat._02 = s;
+		mat._10 = 0.0f;
+		mat._11 = c_1 + c;
+		mat._12 = 0.0f;
+		mat._20 = -s;
+		mat._21 = 0.0f;
+		mat._22 = c;
+
+		return mat;
+	}
+
+	static Mat3 rotationZ(float angle) {
+		float s = sin(angle);
+		float c = cos(angle);
+		float s_1 = 1.0f - s;
+		float c_1 = 1.0f - s;
+
+		Mat3 mat;
+
+		mat._00 = c;
+		mat._01 = -s;
+		mat._02 = 0.0f;
+		mat._10 = s;
+		mat._11 = c;
+		mat._12 = 0.0f;
+		mat._20 = 0.0f;
+		mat._21 = 0.0f;
+		mat._22 = c_1 + c;
+
+		return mat;
+	}
+
+	Mat3& scaleBy(const Vec3& vec) {
+		_00 *= vec[0];
+		_01 *= vec[1];
+		_02 *= vec[2];
+
+		_10 *= vec[0];
+		_11 *= vec[1];
+		_12 *= vec[2];
+
+		_20 *= vec[0];
+		_21 *= vec[1];
+		_22 *= vec[2];
+
+		return *this;
+	}
+
+	Mat3& scaleBy(float con) {
+		_00 *= con;
+		_01 *= con;
+		_02 *= con;
+
+		_10 *= con;
+		_11 *= con;
+		_12 *= con;
+
+		_20 *= con;
+		_21 *= con;
+		_22 *= con;
+
+		return *this;
+	}
+
+	Mat3& rotateBy(float angle, const Vec3& axis) {
+		*this *= Mat3::rotation(angle, axis);
+		return *this;
+	}
+
+	Mat3& rotateByX(float angle) { //optimize
+		*this *= Mat3::rotationX(angle);
+		return *this;
+	}
+	Mat3& rotateByY(float angle) { //optimize
+		*this *= Mat3::rotationY(angle);
+		return *this;
+	}
+	Mat3& rotateByZ(float angle) { //optimize
+		*this *= Mat3::rotationZ(angle);
+		return *this;
+	}
+	static Mat3 scale(const Vec3& vec) {
+		Mat3 mat;
+
+		mat._00 = vec.x;
+		mat._01 = 0.0f;
+		mat._02 = 0.0f;
+		mat._10 = 0.0f;
+		mat._11 = vec.y;
+		mat._12 = 0.0f;
+		mat._20 = 0.0f;
+		mat._21 = 0.0f;
+		mat._22 = vec.z;
+
+		return mat;
+	}
+
+	static Mat3 scale(const float scale) {
+		Mat3 mat;
+
+		mat._00 = scale;
+		mat._01 = 0.0f;
+		mat._02 = 0.0f;
+		mat._10 = 0.0f;
+		mat._11 = scale;
+		mat._12 = 0.0f;
+		mat._20 = 0.0f;
+		mat._21 = 0.0f;
+		mat._22 = scale;
+
+		return mat;
+	}
+
+
+	Mat3 transpose() {
+		Mat3 mat;
+		for (int i = 0; i < 3; i++) {
+			for (int j = 0; j < 3; j++) {
+				mat.arr[i][j] = arr[j][i];
+			}
+		}
+		return mat;
+	}
+
+
+	bool operator==(const Mat3& other) {
+		bool ret = true;
+		for (int i = 0; i < 4 * 4 && ret; ++i)
+			ret &= (other.data[i] == data[i]);
+		return ret;
+	}
+
+
+	Mat3 Mat3::operator*(const Mat3 &other) const {
+		Mat3 result;
+
+		result._00 = _00 * other._00 + _01 * other._10 + _02 * other._20;
+		result._01 = _00 * other._01 + _01 * other._11 + _02 * other._21;
+		result._02 = _00 * other._02 + _01 * other._12 + _02 * other._22;
+
+
+		result._10 = _10 * other._00 + _11 * other._10 + _12 * other._20;
+		result._11 = _10 * other._01 + _11 * other._11 + _12 * other._21;
+		result._12 = _10 * other._02 + _11 * other._12 + _12 * other._22;
+
+		result._20 = _20 * other._00 + _21 * other._10 + _22 * other._20;
+		result._21 = _20 * other._01 + _21 * other._11 + _22 * other._21;
+		result._22 = _20 * other._02 + _21 * other._12 + _22 * other._22;
+
+		return result;
+	}
+
+
+	Mat3 &Mat3::operator *= (const Mat3 &m) {
+		*this = *this * m;
+		return *this;
+	}
+
+
+	Vec3 operator*(const Vec3 &v) {
+		Vec3 result;
+
+		result[0] = v[0] * _00 + v[1] * _01 + v[2] * _02;
+		result[1] = v[0] * _10 + v[1] * _11 + v[2] * _12;
+		result[2] = v[0] * _20 + v[1] * _21 + v[2] * _22;
+
+		return result;
+	}
+};
+
+
+
+class Mat2 {
+public:
+	union {
+		struct {
+			float arr[2][2];
+		};
+		struct {
+			float data[2 * 2];
+		};
+		struct {
+			Vec2 row0;
+			Vec2 row1;
+		};
+		struct {
+			float _00, _01;
+			float _10, _11;
+		};
+
+	};
+
+	Mat2() {}
+
+	Mat2(float con) {
+		for (int i = 0; i < 3 * 3; i++)
+			data[i] = con;
+	}
+
+	Mat2(Vec2 v0, Vec2 v1) {
+		row0 = v0;
+		row1 = v1;
+	}
+	static Mat2 identity() {
+		Mat2 mat;
+		mat.makeIdentity();
+		return mat;
+	}
+
+	void makeIdentity() {
+		_00 = 1.0f;
+		_01 = 0.0f;
+		_10 = 0.0f;
+		_11 = 1.0f;
+	}
+
+
+	static Mat2 rotation(float angle) {
+		float s = sin(angle);
+		float c = cos(angle);
+
+		Mat2 mat;
+
+		mat._00 = c;
+		mat._01 = -s;
+		mat._10 = s;
+		mat._11 = c;
+
+		return mat;
+	}
+
+
+	Mat2& scaleBy(const Vec2& vec) {
+		_00 *= vec[0];
+		_01 *= vec[1];
+
+		_10 *= vec[0];
+		_11 *= vec[1];
+
+		return *this;
+	}
+
+	Mat2& scaleBy(float con) {
+		_00 *= con;
+		_01 *= con;
+
+		_10 *= con;
+		_11 *= con;
+
+		return *this;
+	}
+
+	Mat2& rotateBy(float angle) {
+		*this *= Mat2::rotation(angle);
+		return *this;
+	}
+
+	static Mat2 scale(const Vec2& vec) {
+		Mat2 mat;
+
+		mat._00 = vec.x;
+		mat._01 = 0.0f;
+		mat._10 = 0.0f;
+		mat._11 = vec.y;
+
+		return mat;
+	}
+
+	static Mat2 scale(const float scale) {
+		Mat2 mat;
+
+		mat._00 = scale;
+		mat._01 = 0.0f;
+		mat._10 = 0.0f;
+		mat._11 = scale;
+
+		return mat;
+	}
+
+
+	Mat2 transpose() {
+		Mat2 mat;
+		for (int i = 0; i < 2; i++) {
+			for (int j = 0; j < 2; j++) {
+				mat.arr[i][j] = arr[j][i];
+			}
+		}
+		return mat;
+	}
+
+
+	bool operator==(const Mat2& other) {
+		bool ret = true;
+		for (int i = 0; i < 4 * 4 && ret; ++i)
+			ret &= (other.data[i] == data[i]);
+		return ret;
+	}
+
+
+	Mat2 Mat2::operator*(const Mat2 &other) const {
+		Mat2 result;
+
+		result._00 = _00 * other._00 + _01 * other._10;
+		result._01 = _00 * other._01 + _01 * other._11;
+
+
+		result._10 = _10 * other._00 + _11 * other._10;
+		result._11 = _10 * other._01 + _11 * other._11;
+
+		return result;
+	}
+
+
+	Mat2 &Mat2::operator *= (const Mat2 &m) {
+		*this = *this * m;
+		return *this;
+	}
+
+
+	Vec3 operator*(const Vec3 &v) {
+		Vec3 result;
+
+		result[0] = v[0] * _00 + v[1] * _01;
+		result[1] = v[0] * _10 + v[1] * _11;
+
+		return result;
+	}
+};
 #endif

@@ -19,11 +19,11 @@
     <Filter Include="engine\math">
       <UniqueIdentifier>{8f6c5baf-12b9-497b-8159-480904888b65}</UniqueIdentifier>
     </Filter>
+    <Filter Include="engine\drawables">
+      <UniqueIdentifier>{5cbda668-67f7-4666-ba25-2e381aa13aef}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="gears.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Valhalla.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -44,6 +44,18 @@
     </ClCompile>
     <ClCompile Include="gMat.cpp">
       <Filter>engine\math</Filter>
+    </ClCompile>
+    <ClCompile Include="gears.cpp">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="gTools.cpp">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="PngExporter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lodepng.cpp">
+      <Filter>Resource Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -71,9 +83,6 @@
     <ClInclude Include="Perlin.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Array2D.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="FixedSizedPriorityArray.h">
       <Filter>engine</Filter>
     </ClInclude>
@@ -95,5 +104,34 @@
     <ClInclude Include="gMat.h">
       <Filter>engine\math</Filter>
     </ClInclude>
+    <ClInclude Include="gPrimitives.h">
+      <Filter>engine\drawables</Filter>
+    </ClInclude>
+    <ClInclude Include="PerlinMap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Grid.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WorldMap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="gShader.h">
+      <Filter>engine</Filter>
+    </ClInclude>
+    <ClInclude Include="PngExporter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lodepng.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="default.vs">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="default.ps">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

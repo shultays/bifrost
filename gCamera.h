@@ -5,13 +5,13 @@
 #include "gVec.h"
 #include "gMat.h"
 
-class gCamera{
+class gCamera {
 public:
 	virtual Vec3 getDir() = 0;
 	virtual Vec3 getPos() = 0;
 	virtual Vec3 getUp() = 0;
 
-	Mat4 getLookAt(){
+	Mat4 getLookAt() {
 		Vec3 dir = getDir();
 		Vec3 pos = getPos();
 		Vec3 up = getUp();
@@ -19,19 +19,19 @@ public:
 	}
 };
 
-class gFocusCamera : public gCamera{
+class gFocusCamera : public gCamera {
 public:
 	Vec3 focusPoint;
 	float distanceToFocus;
 	float angle;
 
-	Vec3 getDir() override{
-		return Vec3::normalize(Vec3(sin(angle), cos(angle), -0.5f));
+	Vec3 getDir() override {
+		return Vec3::normalize(Vec3(sin(angle), cos(angle), -0.9f));
 	}
-	Vec3 getPos() override{
+	Vec3 getPos() override {
 		return focusPoint - (getDir()*distanceToFocus);
 	}
-	Vec3 getUp() override{
+	Vec3 getUp() override {
 		return Vec3(0.0f, 0.0f, 1.0f);
 	}
 };

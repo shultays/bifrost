@@ -8,44 +8,46 @@
 #include "Valhalla.h"
 
 
-void key( GLFWwindow* window, int k, int s, int action, int mods )
-{
+void key(GLFWwindow* window, int k, int s, int action, int mods) {
 	gears.key(k, s, action, mods);
 }
 
 
-void reshape( GLFWwindow* window, int width, int height )
-{
+void reshape(GLFWwindow* window, int width, int height) {
 	gears.resize(width, height);
 }
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
 	GLFWwindow* window;
 	int width, height;
-    if( !glfwInit() )
-    {
-        fprintf( stderr, "Failed to initialize GLFW\n" );
-        exit( EXIT_FAILURE );
-    }
 
-    glfwWindowHint(GLFW_DEPTH_BITS, 16);
+	if (!glfwInit()) {
+		fprintf(stderr, "Failed to initialize GLFW\n");
+		exit(EXIT_FAILURE);
+	}
 
-    window = glfwCreateWindow( 600, 480, "Gears", NULL, NULL );
-    if (!window)
-    {
-        fprintf( stderr, "Failed to open GLFW window\n" );
-        glfwTerminate();
-        exit( EXIT_FAILURE );
-    }
+	glfwWindowHint(GLFW_DEPTH_BITS, 16);
+
+	window = glfwCreateWindow(600, 480, "Gears", NULL, NULL);
+	if (!window) {
+		fprintf(stderr, "Failed to open GLFW window\n");
+		glfwTerminate();
+		exit(EXIT_FAILURE);
+	}
 
 	glfwSetFramebufferSizeCallback(window, reshape);
-    glfwSetKeyCallback(window, key);
+	glfwSetKeyCallback(window, key);
 
-    glfwMakeContextCurrent(window);
-    glfwSwapInterval( 1 );
+	glfwMakeContextCurrent(window);
+	glfwSwapInterval(1);
 
-    glfwGetFramebufferSize(window, &width, &height);
+	if (glewInit() != GLEW_OK) {
+		fprintf(stderr, "Failed to initialize glew\n");
+		exit(EXIT_FAILURE);
+	}
+
+
+	glfwGetFramebufferSize(window, &width, &height);
 
 	gears.window = window;
 	gears.width = width;
@@ -53,20 +55,19 @@ int main(int argc, char *argv[])
 
 	gears.game = new Valhalla();
 
-    reshape(window, width, height);
+	reshape(window, width, height);
 
 
-    gears.init(argc, argv);
+	gears.init(argc, argv);
 
-    while( !glfwWindowShouldClose(window) )
-    {
-        gears.tick();
+	while (!glfwWindowShouldClose(window)) {
+		gears.tick();
 
-        glfwPollEvents();
-    }
+		glfwPollEvents();
+	}
 
-    glfwTerminate();
+	glfwTerminate();
 
-    exit( EXIT_SUCCESS );
+	exit(EXIT_SUCCESS);
 }
 

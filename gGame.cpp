@@ -1,12 +1,13 @@
 #include "gGame.h"
 #include "gGlobals.h"
+#include <stdio.h>
+#include <stdlib.h>
 
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-void gGame::render(){
-	Mat4 projection = Mat4::perspective(0.01f, 1000.0f, degreeToRadian(90.0f), (float)gears.width, (float)gears.height);
+void gGame::render() {
+	Mat4 projection = Mat4::perspective(100.0f, 2500.0f, degreeToRadian(90.0f), (float)gears.width, (float)gears.height);
 	Mat4 world = activeCamera->getLookAt();
-	
+
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadMatrixf(projection.data);
@@ -18,13 +19,13 @@ void gGame::render(){
 	Vec3 focus = pos + activeCamera->getDir();
 	Vec3 up = activeCamera->getUp();
 
-	
 
-
-
-
+	shader.begin();
+	shader.setWorldViewMatrix(world);
+	shader.setProjectionMatrix(projection);
+	/*
 	//
-	glMatrixMode(GL_PROJECTION); 
+	glMatrixMode(GL_PROJECTION);
 	glLoadMatrixf(projection.data);
 
 	glMatrixMode(GL_MODELVIEW);
@@ -33,13 +34,29 @@ void gGame::render(){
 	glLoadMatrixf(world.data);
 	//
 
-	glShadeModel(GL_FLAT);
-	for (int i = renderList.size() - 1; i >= 0; i--){
+
+
+
+	glShadeModel(GL_SMOOTH);*/
+	for (int i = renderList.size() - 1; i >= 0; i--) {
 		if (renderList[i]->enabled) renderList[i]->render();
 	}
+	/*
+	glUseProgram(0);
+	glMatrixMode(GL_PROJECTION);
+	glLoadMatrixf(projection.data);
+
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	gluLookAt(0, 0, 10, 0, 0, 0, 0, 1, 0);
+	glLoadMatrixf(world.data);
+
+
+	glDisable(GL_LIGHTING);
+	*/
+
 	glBegin(GL_QUADS);
 	glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
-
 	glVertex3f(+10.0f, -10.f, 0.0f);
 	glVertex3f(+10.0f, +10.f, 0.0f);
 	glVertex3f(-10.0f, +10.f, 0.0f);
@@ -49,45 +66,45 @@ void gGame::render(){
 	glEnd();
 }
 
-gTickable::gTickable(bool autoAdd){
+gTickable::gTickable(bool autoAdd) {
 	enabled = true;
-	if (autoAdd){
+	if (autoAdd) {
 		gears.game->addTickable(this);
 	}
 }
 
-gTickable::~gTickable(){
+gTickable::~gTickable() {
 	enabled = true;
 	gears.game->removeTickable(this);
 }
 
-
-gUpdatable::gUpdatable(bool autoAdd, int priority){
+gUpdatable::gUpdatable(bool autoAdd, int priority) {
 	enabled = true;
-	if (autoAdd){
+	if (autoAdd) {
 		gears.game->addUpdatable(this, priority);
 	}
 }
 
-gUpdatable::~gUpdatable(){
+gUpdatable::~gUpdatable() {
 	enabled = true;
 	gears.game->removeUpdatable(this);
 }
 
-gRenderable::gRenderable(bool autoAdd, int priority){
+gRenderable::gRenderable(bool autoAdd, int priority) {
 	enabled = true;
-	if (autoAdd){
+	if (autoAdd) {
 		gears.game->addRenderable(this, priority);
 	}
 }
 
-gRenderable::~gRenderable(){
+gRenderable::~gRenderable() {
 	enabled = true;
 	gears.game->removeRenderable(this);
 }
 
-gGame::gGame(bool setTop){
-	if (setTop){
+gGame::gGame(bool setTop) {
+	if (setTop) {
 		gears.game = this;
 	}
+	shader.loadFromFile("default.vs", "default.ps");
 }

@@ -16,12 +16,15 @@
     <ClCompile Include="gGlobals.cpp" />
     <ClCompile Include="gInput.cpp" />
     <ClCompile Include="gMat.cpp" />
+    <ClCompile Include="gTools.cpp" />
+    <ClCompile Include="lodepng.cpp" />
     <ClCompile Include="Perlin.cpp" />
+    <ClCompile Include="PngExporter.cpp" />
     <ClCompile Include="Valhalla.cpp" />
     <ClCompile Include="gears.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Array2D.h" />
+    <ClInclude Include="Grid.h" />
     <ClInclude Include="FixedSizedArray.h" />
     <ClInclude Include="FixedSizedPriorityArray.h" />
     <ClInclude Include="gCamera.h" />
@@ -30,13 +33,23 @@
     <ClInclude Include="gGlobals.h" />
     <ClInclude Include="gInput.h" />
     <ClInclude Include="gMat.h" />
+    <ClInclude Include="gPrimitives.h" />
+    <ClInclude Include="gShader.h" />
     <ClInclude Include="gTime.h" />
     <ClInclude Include="gVec.h" />
+    <ClInclude Include="lodepng.h" />
+    <ClInclude Include="PerlinMap.h" />
+    <ClInclude Include="PngExporter.h" />
+    <ClInclude Include="WorldMap.h" />
     <ClInclude Include="__gVec_Imp.h" />
     <ClInclude Include="Perlin.h" />
     <ClInclude Include="gTools.h" />
     <ClInclude Include="PerlinShell.h" />
     <ClInclude Include="Valhalla.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="default.ps" />
+    <None Include="default.vs" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{10FAD270-4CE7-4934-8FDE-011145834F2F}</ProjectGuid>
@@ -100,7 +113,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>opengl32.lib;glu32.lib;glew32.lib;glfw3.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libpng.lib;opengl32.lib;glu32.lib;glew32.lib;glfw3.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
