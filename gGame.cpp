@@ -4,8 +4,8 @@
 #include <stdlib.h>
 
 void gGame::render() {
-	Mat4 projection = Mat4::perspective(100.0f, 2500.0f, degreeToRadian(90.0f), (float)gears.width, (float)gears.height);
-	Mat4 world = activeCamera->getLookAt();
+	Mat4 projection = Mat4::perspective(1.0f, 2500.0f, degreeToRadian(90.0f), (float)gears.width, (float)gears.height);
+	Mat4 view = activeCamera->getLookAt();
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -13,7 +13,7 @@ void gGame::render() {
 	glLoadMatrixf(projection.data);
 
 	glMatrixMode(GL_MODELVIEW);
-	glLoadMatrixf(world.data);
+	glLoadMatrixf(view.data);
 
 	Vec3 pos = activeCamera->getPos();
 	Vec3 focus = pos + activeCamera->getDir();
@@ -21,7 +21,8 @@ void gGame::render() {
 
 
 	shader.begin();
-	shader.setWorldViewMatrix(world);
+	shader.setWorldMatrix(Mat4::identity());
+	shader.setViewMatrix(view);
 	shader.setProjectionMatrix(projection);
 	/*
 	//

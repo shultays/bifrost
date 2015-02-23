@@ -26,6 +26,10 @@ public:
 	float getHeightAt(const Vec2& vec) {
 		return getHeightAt(vec, shells.size());
 	}
+	void clear() {
+		shells.clear();
+	}
+
 	float getHeightAt(const Vec2& vec, int maxShell) {
 		float t = 0.0f;
 		for (int i = 0; i < maxShell; i++) {

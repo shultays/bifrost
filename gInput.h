@@ -10,7 +10,7 @@ const int KEY_COUNT = GLFW_KEY_LAST + 1;
 const int MAX_KEY_MASK = 128;
 const int MAX_KEY_LISTENER = 128;
 
-enum{
+enum {
 	KEY_DOWN = 0x1,
 	KEY_UP = 0x2,
 	KEY_REPEAT = 0x4,
@@ -36,10 +36,10 @@ enum{
 	KEY_MASK_ALL = 0xFFFFFFFF,
 };
 
-class gInputListener{
+class gInputListener {
 	friend class gInput;
 private:
-	struct KeyMask{
+	struct KeyMask {
 		int key;
 		int mask;
 	};
@@ -57,7 +57,7 @@ public:
 	virtual void onKey(int key, int keyState) {}
 };
 
-class gInput{
+class gInput {
 	friend class gGears;
 
 private:
@@ -73,11 +73,11 @@ private:
 	void informListeners();
 	void clearOneTickStates();
 
-	int getKeyState(int key){
+	int getKeyState(int key) {
 		return keyState[key] | keyStateHeader;
 	}
 
-	int checkKeyState(int key, int state){
+	int checkKeyState(int key, int state) {
 		return (getKeyState(key) | state) != 0;
 	}
 
@@ -87,41 +87,35 @@ private:
 public:
 	gInput();
 
-	void addListener(gInputListener *listener){
+	void addListener(gInputListener *listener) {
 		listeners.insert(listener);
 	}
-	void removeListener(gInputListener *listener){
+	void removeListener(gInputListener *listener) {
 		listeners.remove(listener);
 	}
-	
+
 	//returns true if key is down
-	bool isKeyDown(int key)
-	{
-		return (keyState[key] & KEY_DOWN) != 0;
+	bool isKeyDown(int key) {
+		return (keyState[key] & KEY_DOWN) == KEY_DOWN;
 	}
 	//returns true if key is up
-	bool isKeyUp(int key)
-	{
-		return (keyState[key] & KEY_UP) != 0;
+	bool isKeyUp(int key) {
+		return (keyState[key] & KEY_UP) == KEY_UP;
 	}
 	//returns true if key is pressed in this fixed update
-	bool isKeyPressed(int key)
-	{
-		return (keyState[key] & KEY_PRESSED) != 0;
+	bool isKeyPressed(int key) {
+		return (keyState[key] & KEY_PRESSED) == KEY_PRESSED;
 	}
 	//returns true if key is released in this fixed update
-	bool isKeyReleased(int key)
-	{
-		return (keyState[key] & KEY_RELEASED) != 0;
+	bool isKeyReleased(int key) {
+		return (keyState[key] & KEY_RELEASED) == KEY_RELEASED;
 	}
 	//returns true if key is repeated in this fixed update
-	bool isKeyTyped(int key)
-	{
-		return (keyState[key] & KEY_TYPED) != 0;
+	bool isKeyTyped(int key) {
+		return (keyState[key] & KEY_TYPED) == KEY_TYPED;
 	}
 	//returns the time stamp of last key press/release
-	float getKeyTime(int key)
-	{
+	float getKeyTime(int key) {
 		return keyTime[key];
 	}
 };

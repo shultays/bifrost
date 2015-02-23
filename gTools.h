@@ -50,7 +50,24 @@ inline double radianToDegree(double rad) {
 	return rad * 180.0 / d_pi;
 }
 
-
 bool textFileRead(char *fileName, std::string &data);
+
+Vec3 lerpColor(const Vec3& c0, const Vec3& c1, float a);
+Vec2 lerpVec(const Vec2& v0, const Vec2& v1, float a);
+Vec3 lerpVec(const Vec3& v0, const Vec3& v1, float a);
+Vec4 lerpVec(const Vec4& v0, const Vec4& v1, float a);
+
+Vec3 rgbToHsv(const Vec3& color);
+Vec3 hsvToRgb(const Vec3& color);
+
+#define gmin(x, y) (x>y?y:x)
+#define gmin3(x, y, z) (x>y?gmin(z,y):gmin(x,y))
+#define gmin4(x, y, z, a) (x>y?gmin3(y, z, a):gmin3(x, z, a))
+
+#define gmax(x, y) (x<y?y:x)
+#define gmax3(x, y, z) (x<y?gmin(z,y):gmin(x,y))
+#define gmax4(x, y, z, a) (x<y?gmin3(y, z, a):gmin3(x, z, a))
+
+
 
 #endif

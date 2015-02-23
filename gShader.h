@@ -187,7 +187,8 @@ public:
 	}
 
 	void addDefaultUniforms() {
-		addUniform("uWorldViewMatrix", UniformTypeMat4);
+		addUniform("uWorldMatrix", UniformTypeMat4);
+		addUniform("uViewMatrix", UniformTypeMat4);
 		addUniform("uProjectionMatrix", UniformTypeMat4);
 		addUniform("uColor", UniformTypeVec4);
 	}
@@ -203,10 +204,13 @@ public:
 		return positionAttribute;
 	}
 
-	void setWorldViewMatrix(const Mat4& mat) {
-		setUniform("uWorldViewMatrix", mat);
+	void setWorldMatrix(const Mat4& mat) {
+		setUniform("uWorldMatrix", mat);
 	}
 
+	void setViewMatrix(const Mat4& mat) {
+		setUniform("uViewMatrix", mat);
+	}
 	void setProjectionMatrix(const Mat4& mat) {
 		setUniform("uProjectionMatrix", mat);
 	}

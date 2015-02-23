@@ -64,15 +64,14 @@ int PngExporter::writeGridToPng(const char* fileName, Grid<Vec3>& grid, int expo
 }
 
 
-int PngExporter::writeGridToPng(const char* fileName, Grid<float>& grid, int exportType) {
+int PngExporter::writeGridToPng(const char* fileName, Grid<float>& grid, const Vec3& minColor, const Vec3& maxColor) {
 	float min = FLT_MAX;
 	float max = FLT_MIN;
 	for (int i = 0; i < grid.w*grid.h; i++) {
 		float v = grid.data[i];
-		min = fminf(min, v);
-		max = fmaxf(max, v);
+		min = gmin(min, v);
+		max = gmax(max, v);
 	}
-	int t = 0;
 
 	byte* image = new byte[grid.w*grid.h * 4];
 	byte* c = image;
@@ -80,7 +79,12 @@ int PngExporter::writeGridToPng(const char* fileName, Grid<float>& grid, int exp
 		for (int j = 0; j < grid.h; j++) {
 			byte r, g, b, a;
 
-			r = g = b = (byte)(255 * ((grid[i][j] - min) / (max - min)));
+			float t = (grid[i][j] - min) / (max - min);
+			Vec3 color = lerpVec(minColor, maxColor, t);
+
+			r = (int)(color.r * 0xFF);
+			g = (int)(color.g * 0xFF);
+			b = (int)(color.b * 0xFF);
 			a = 0xFF;
 
 

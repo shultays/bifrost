@@ -14,7 +14,7 @@ enum {
 class PngExporter {
 public:
 	static int writeGridToPng(const char* fileName, Grid<Vec3>& grid, int exportType);
-	static int writeGridToPng(const char* fileName, Grid<float>& grid, int exportType);
+	static int writeGridToPng(const char* fileName, Grid<float>& grid, const Vec3& minColor = Vec3(0.0f), const Vec3& maxColor = Vec3(1.0f));
 
 };
 

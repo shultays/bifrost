@@ -14,7 +14,7 @@ void Valhalla::init() {
 	camera->distanceToFocus = 1000.0f;
 	camera->angle = 0.0f;
 
-	WorldMap *world = new WorldMap(2048, 128);
+	world = new WorldMap();
 	world->build();
 }
 
@@ -24,6 +24,13 @@ void Valhalla::tick(float dt) {
 }
 
 
+void Valhalla::update(float fixed_dt) {
+	if (input.isKeyPressed(GLFW_KEY_SPACE)) {
+		world->build();
+
+	}
+
+}
 
 void Valhalla::resize(int width, int height) {
 
