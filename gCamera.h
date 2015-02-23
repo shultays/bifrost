@@ -24,9 +24,17 @@ public:
 	Vec3 focusPoint;
 	float distanceToFocus;
 	float angle;
+	float elevation;
+
+	gFocusCamera() {
+		focusPoint = Vec3(0.0f, 0.0f, 0.0f);
+		distanceToFocus = 1000.0f;
+		angle = 0.0f;
+		elevation = pi_d2*0.5f;
+	}
 
 	Vec3 getDir() override {
-		return Vec3::normalize(Vec3(sin(angle), cos(angle), -0.9f));
+		return Vec3::normalize(Vec3(sin(angle)*cos(elevation), cos(angle)*cos(elevation), -sin(elevation)));
 	}
 	Vec3 getPos() override {
 		return focusPoint - (getDir()*distanceToFocus);

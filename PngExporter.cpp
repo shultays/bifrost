@@ -102,3 +102,50 @@ int PngExporter::writeGridToPng(const char* fileName, Grid<float>& grid, const V
 
 	return error;
 }
+
+int PngExporter::writeGridToPng(const char* fileName, PerlinMap perlin, int nodeCount, const Vec3& minColor, const Vec3& maxColor) {
+	float min = FLT_MAX;
+	float max = FLT_MIN;
+	for (int i = 0; i < nodeCount; i++) {
+		for (int j = 0; j < nodeCount; j++) {
+			float x = (i*perlin.getMapSize()) / nodeCount;
+			float y = (j*perlin.getMapSize()) / nodeCount;
+			float v = perlin.getHeightAt(x, y);
+			min = gmin(min, v);
+			max = gmax(max, v);
+		}
+	}
+
+	byte* image = new byte[nodeCount * nodeCount * 4];
+	byte* c = image;
+	for (int i = 0; i < nodeCount; i++) {
+		for (int j = 0; j < nodeCount; j++) {
+			float x = (i*perlin.getMapSize()) / nodeCount;
+			float y = (j*perlin.getMapSize()) / nodeCount;
+			float v = perlin.getHeightAt(x, y);
+			byte r, g, b, a;
+
+			float t = (v - min) / (max - min);
+			Vec3 color = lerpVec(minColor, maxColor, t);
+
+			r = (int)(color.r * 0xFF);
+			g = (int)(color.g * 0xFF);
+			b = (int)(color.b * 0xFF);
+			a = 0xFF;
+
+
+			*c++ = r;
+			*c++ = g;
+			*c++ = b;
+			*c++ = a;
+		}
+	}
+	unsigned error = lodepng_encode32_file(fileName, image, nodeCount, nodeCount);
+
+	delete image;
+	/*if there's an error, display it*/
+	if (error) printf("error %u: %s\n", error, lodepng_error_text(error));
+
+	return error;
+}
+

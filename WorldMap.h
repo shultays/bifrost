@@ -20,12 +20,17 @@ class WorldMap : public gRenderable {
 		Vec3 pos;
 		Vec3 normal;
 	}Vertex;
+
 	PerlinMap perlinMap;
+	PerlinMap earthMap;
+
 	float mapSize;
 	float gridSize;
 	int edgeCount;
+
 	Grid<float> heightMap;
 	Grid<Vec3> normalMap;
+
 	GLuint vertexBuffer;
 	GLuint indexBuffer;
 	GLuint waterBuffer;
@@ -34,7 +39,7 @@ public:
 
 	}
 
-	WorldMap(float mapSize, int edgeCount) :heightMap(edgeCount), perlinMap(mapSize), normalMap(edgeCount) {
+	WorldMap(float mapSize, int edgeCount) :heightMap(edgeCount), perlinMap(mapSize), normalMap(edgeCount), earthMap(mapSize) {
 		this->mapSize = mapSize;
 		this->edgeCount = edgeCount;
 		this->gridSize = mapSize / edgeCount;
@@ -48,21 +53,32 @@ public:
 
 	void build() {
 		perlinMap.clear();
+		earthMap.clear();
 
 
-		perlinMap.addPerlinShell(10, 0.0, 90.0f* 350.0f, 0.90f);
-		perlinMap.addPerlinShell(11, 0.0, 90.0f* 350.0f, 0.90f);
-		perlinMap.addPerlinShell(13, 0.0, 90.0f* 350.0f, 0.90f);
+		perlinMap.addPerlinShell(10, 0.0, 90.0f* 25.0f, 0.90f);
+		perlinMap.addPerlinShell(11, 0.0, 90.0f* 25.0f, 0.90f);
+		perlinMap.addPerlinShell(13, 0.0, 90.0f* 25.0f, 0.90f);
+
+		perlinMap.addPerlinShell(32, 0.0, 90.0f* 25.0f, 0.95f);
+		perlinMap.addPerlinShell(35, 0.0, 90.0f* 25.0f, 0.95f);
+		perlinMap.addPerlinShell(39, 0.0, 90.0f* 25.0f, 0.95f);
+
+		perlinMap.addPerlinShell(5, 0.0, 100.0f* 20.0f);
+		perlinMap.addPerlinShell(9, 0.0, 50.0f * 20.0f);
+		perlinMap.addPerlinShell(18, 0.0, 25.0f* 20.0f);
+		perlinMap.addPerlinShell(37, 0.0, 12.0f* 20.0f);
+		perlinMap.addPerlinShell(85, 0.0, 5.0f * 20.0f);
+		perlinMap.addPerlinShell(127, 0.0, 2.0f* 20.0f);
+		perlinMap.addPerlinShell(255, 0.0, 1.0f* 20.0f);
 
 
-		perlinMap.addPerlinShell(5, 0.0, 100.0f* 200.0f);
-		perlinMap.addPerlinShell(9, 0.0, 50.0f * 200.0f);
-		perlinMap.addPerlinShell(18, 0.0, 25.0f* 200.0f);
-		perlinMap.addPerlinShell(37, 0.0, 12.0f* 200.0f);
-		perlinMap.addPerlinShell(85, 0.0, 5.0f * 200.0f);
-		perlinMap.addPerlinShell(127, 0.0, 2.0f* 200.0f);
-		perlinMap.addPerlinShell(255, 0.0, 1.0f* 200.0f);
-
+		earthMap.addPerlinShell(3, 0.0, 0.2f, 0.70f);
+		earthMap.addPerlinShell(4, 0.0, 0.2f, 0.70f);
+		earthMap.addPerlinShell(6, 0.0, 0.2f, 0.70f);
+		earthMap.addPerlinShell(15, 0.0, 0.2f, 0.70f);
+		earthMap.addPerlinShell(37, 0.0, 0.1f, 0.70f);
+		earthMap.addPerlinShell(85, 0.0, 0.1f, 0.70f);
 
 		if (indexBuffer != -1) {
 			glDeleteBuffers(1, &indexBuffer);
@@ -76,6 +92,7 @@ public:
 
 		PngExporter::writeGridToPng("images/normalMap.png", normalMap, ExportTypeVec3AsNormal);
 		PngExporter::writeGridToPng("images/heightMap.png", heightMap);
+		PngExporter::writeGridToPng("images/earthMap.png", earthMap, edgeCount, Vec3(0.0f), Vec3(0.0f, 1.0f, 0.0));
 
 	}
 
@@ -94,15 +111,15 @@ public:
 
 		for (int i = 0; i < edgeCount; i++) {
 			for (int j = 0; j < edgeCount; j++) {
-				min = fminf(min, heightMap[i][j]);
-				max = fmaxf(max, heightMap[i][j]);
+				min = gmin(min, heightMap[i][j]);
+				max = gmax(max, heightMap[i][j]);
 			}
 		}
 
 		// level land around water
 		for (int i = 0; i < edgeCount; i++) {
 			for (int j = 0; j < edgeCount; j++) {
-				heightMap[i][j] -= min + 20000.0f;
+				heightMap[i][j] -= min + 2000.0f;
 				if (heightMap[i][j] < 20.0f) {
 					heightMap[i][j] = (heightMap[i][j] - 20.0f)*0.5f;
 				} else if (heightMap[i][j] < 80.0f) {
@@ -144,6 +161,18 @@ public:
 			}
 		}
 
+
+		min = FLT_MAX, max = FLT_MIN;
+
+
+		for (int i = 0; i < edgeCount; i++) {
+			for (int j = 0; j < edgeCount; j++) {
+				min = gmin(min, heightMap[i][j]);
+				max = gmax(max, heightMap[i][j]);
+			}
+		}
+		printf("%f %f\n", min, max);
+
 	}
 	void buildNormalMap() {
 		for (int i = 1; i < edgeCount - 1; i++) {
@@ -153,8 +182,11 @@ public:
 				float sy = perlinMap.getHeightAt(Vec2(i*gridSize, j*gridSize + dt)) - perlinMap.getHeightAt(Vec2(i*gridSize, j*gridSize - dt));
 
 
-				normalMap[i][j] = Vec3(-sx, sy, 2.0f*dt);
+				normalMap[i][j] = Vec3(-sx, sy, 0.5f*dt);
 				normalMap[i][j].normalize();
+
+
+
 			}
 		}
 		for (int i = 0; i < edgeCount; i++) {
