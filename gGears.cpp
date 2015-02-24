@@ -40,7 +40,7 @@ void gGears::tick() {
 }
 
 void gGears::key(int k, int s, int action, int mods) {
-	if (k < 0 || k > GLFW_KEY_LAST) {
+	if (k < 0 || k >= KEY_COUNT) {
 		return;
 	}
 	switch (action) {
@@ -56,4 +56,13 @@ void gGears::key(int k, int s, int action, int mods) {
 		default:
 			break;
 	}
+}
+
+
+void gGears::mouseMove(double x, double y) {
+	input.mouseMove(Vec2((float)x, (float)y));
+}
+void gGears::scroll(double x, double y) {
+	input.scroll(Vec2((float)x, (float)y));
+
 }

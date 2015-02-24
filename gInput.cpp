@@ -1,52 +1,54 @@
 #include "gInput.h"
 #include "gGlobals.h"
 
-gInputListener::~gInputListener(){
+gInputListener::~gInputListener() {
 	input.removeListener(this);
 }
 
-gInputListener::gInputListener(bool autoAdd){
+gInputListener::gInputListener(bool autoAdd) {
 	keyMaskCount = 0;
-	if (autoAdd){
+	if (autoAdd) {
 		input.addListener(this);
 	}
 }
 
-void gInputListener::addKeyMask(int key, int mask){
+void gInputListener::addKeyMask(int key, int mask) {
 	keyMasks[keyMaskCount].key = key;
 	keyMasks[keyMaskCount].mask = mask;
 	keyMaskCount++;
 }
 
-bool gInputListener::doesAcceptKey(int key, int keyState){
+bool gInputListener::doesAcceptKey(int key, int keyState) {
 	if (keyMaskCount == 0) return true;
-	for (int i = 0; i < keyMaskCount; i++){
-		if ((keyMasks[i].key == KEY_MASK_ALL || keyMasks[i].key == key) && (keyMasks[i].mask == KEY_MASK_ALL || (keyState & keyMasks[i].mask) == keyMasks[i].mask)){
+	for (int i = 0; i < keyMaskCount; i++) {
+		if ((keyMasks[i].key == KEY_MASK_ALL || keyMasks[i].key == key) && (keyMasks[i].mask == KEY_MASK_ALL || (keyState & keyMasks[i].mask) == keyMasks[i].mask)) {
 			return true;
 		}
 	}
 	return false;
 }
 
-void gInputListener::addKeyMask(int key){
+void gInputListener::addKeyMask(int key) {
 	addKeyMask(key, KEY_MASK_ALL);
 }
 
 
-void gInput::informListeners(){
-	for (int j = 0; j < stateChangedKeys.size(); j++){
+void gInput::informListeners() {
+	for (int j = 0; j < stateChangedKeys.size(); j++) {
 		int key = stateChangedKeys[j];
 		int keyState = getKeyState(key);
-		for (int i = 0; i < listeners.size(); i++){
-			if (listeners[i]->doesAcceptKey(key, keyState)){
+		for (int i = 0; i < listeners.size(); i++) {
+			if (listeners[i]->doesAcceptKey(key, keyState)) {
 				listeners[i]->onKey(key, keyState);
 			}
 		}
 	}
 }
 
-void gInput::clearOneTickStates(){
-	for (int i = 0; i < KEY_COUNT; i++){
+void gInput::clearOneTickStates() {
+	mousePosAtUpdate = mousePos;
+	scrollSinceUpdate = Vec2::zero();
+	for (int i = 0; i < KEY_COUNT; i++) {
 		keyState[i] &= ~KEY_ONE_TICK_STATE;
 	}
 	stateChangedKeys.clear();
@@ -54,11 +56,11 @@ void gInput::clearOneTickStates(){
 
 
 
-void gInput::keyPress(float t, int key){
+void gInput::keyPress(float t, int key) {
 	keyState[key] = KEY_PRESSED;
 	keyTime[key] = t;
 	stateChangedKeys.insert(key);
-	switch (key){
+	switch (key) {
 		case GLFW_KEY_LEFT_CONTROL:
 			keyStateHeader |= KEY_MASK_LEFT_CONTROL_DOWN;
 			break;
@@ -86,12 +88,16 @@ void gInput::keyPress(float t, int key){
 		default:
 			break;
 	}
+
+	if (key >= MOUSE_START && key < MOUSE_START + MOUSE_COUNT) {
+		mouseActionPos[key - MOUSE_START] = mousePos;
+	}
 }
-void gInput::keyRelease(float t, int key){
+void gInput::keyRelease(float t, int key) {
 	keyState[key] = KEY_RELEASED;
 	keyTime[key] = t;
 	stateChangedKeys.insert(key);
-	switch (key){
+	switch (key) {
 		case GLFW_KEY_LEFT_CONTROL:
 			keyStateHeader &= ~KEY_MASK_LEFT_CONTROL_DOWN;
 			break;
@@ -119,18 +125,43 @@ void gInput::keyRelease(float t, int key){
 		default:
 			break;
 	}
+
+	if (key >= MOUSE_START && key < MOUSE_START + MOUSE_COUNT) {
+		mouseActionPos[key - MOUSE_START] = mousePos;
+	}
 }
-void gInput::keyType(float t, int key){
+void gInput::keyType(float t, int key) {
 	keyState[key] = KEY_TYPED;
 	keyTime[key] = t;
 	stateChangedKeys.insert(key);
 }
 
-gInput::gInput(){
-	for (int i = 0; i < KEY_COUNT; i++){
-		keyState[i] = KEY_DOWN;
+gInput::gInput() {
+	for (int i = 0; i < KEY_COUNT; i++) {
+		keyState[i] = KEY_UP;
 		keyTime[i] = 0.0f;
 	}
+	mouseInited = false;
+	for (int i = 0; i < MOUSE_COUNT; i++) {
+		mousePos = Vec2::zero();
+	}
+	mousePos = Vec2::zero();
+	mousePosAtUpdate = Vec2::zero();
+	scrollSinceUpdate = Vec2::zero();
+
 	keyStateHeader = 0;
 	listeners.clear();
+}
+
+
+void gInput::mouseMove(const Vec2& pos) {
+	mousePos = pos;
+	if (!mouseInited) {
+		mouseInited = true;
+		for (int i = 0; i < MOUSE_COUNT; i++) {
+			mousePos = mousePos;
+		}
+		mousePos = mousePos;
+		mousePosAtUpdate = mousePos;
+	}
 }

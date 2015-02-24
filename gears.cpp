@@ -13,6 +13,21 @@ void key(GLFWwindow* window, int k, int s, int action, int mods) {
 }
 
 
+void mouse(GLFWwindow* window, int k, int action, int mods) {
+	gears.key(k + MOUSE_BUTTON_1 - GLFW_MOUSE_BUTTON_1, 0, action, mods);
+}
+
+void mouseMove(GLFWwindow* window, double x, double y) {
+	gears.mouseMove(x, y);
+
+}
+
+void scroll(GLFWwindow* window, double xoffset, double yoffset) {
+	gears.scroll(xoffset, yoffset);
+	printf("%lf %lf\n", xoffset, yoffset);
+}
+
+
 void reshape(GLFWwindow* window, int width, int height) {
 	gears.resize(width, height);
 }
@@ -37,6 +52,9 @@ int main(int argc, char *argv[]) {
 
 	glfwSetFramebufferSizeCallback(window, reshape);
 	glfwSetKeyCallback(window, key);
+	glfwSetMouseButtonCallback(window, mouse);
+	glfwSetCursorPosCallback(window, mouseMove);
+	glfwSetScrollCallback(window, scroll);
 
 	glfwMakeContextCurrent(window);
 	glfwSwapInterval(1);

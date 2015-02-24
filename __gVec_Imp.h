@@ -76,14 +76,14 @@ public:
 			data[i] = con;
 	}
 
-	bool isZero() {
+	bool isZero() const {
 		bool ret = true;
 		for (int i = 0; ret && i < GVEC_N; ++i)
 			ret &= (data[i] == 0.0f);
 		return ret;
 	}
 
-	inline bool isGVEC_NonZero() {
+	inline bool isNonZero() const {
 		return !isZero();
 	}
 

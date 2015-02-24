@@ -7,10 +7,10 @@
 #include "gTime.h"
 
 const float update_interval = 0.01f;
-const float draw_interval = 1.0f/60.0f;
+const float draw_interval = 1.0f / 60.0f;
 
 
-class gGears{
+class gGears {
 public:
 	GLFWwindow* window;
 	int width, height;
@@ -24,6 +24,8 @@ public:
 	void resize(int width, int height);
 	void tick();
 	void key(int k, int s, int action, int mods);
+	void mouseMove(double x, double y);
+	void scroll(double x, double y);
 };
 
 #endif

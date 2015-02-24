@@ -14,14 +14,6 @@
 
 #define E_PI 3.1415926535897932384626433832795028841971693993751058209749445923078164062
 
-#define SAFE_DELETE(x) do{if(x){delete x; x = NULL;}}while(0)
-#define swapt(x, y) do{auto t=x; x=y; y=t;}while(0) 
-#define vec3_to_3_float(vec) vec.x, vec.y, vec.z
-
-
-#define lerp(x, y, a) (x*(1-a)+y*a)
-
-
 typedef unsigned char byte;
 
 const float pi = (float)E_PI;
@@ -33,6 +25,28 @@ const double d_pi = E_PI;
 const double d_pi_2 = (E_PI * 2.0);
 const double d_pi_d2 = (E_PI * 0.5);
 const double d_pi_3d2 = (E_PI * 1.5);
+
+#define SAFE_DELETE(x) do{if(x){delete x; x = NULL;}}while(0)
+#define swapt(x, y) do{auto t=x; x=y; y=t;}while(0) 
+#define vec3_to_3_float(vec) vec.x, vec.y, vec.z
+
+
+#define lerp(x, y, a) ((x)*(1-(a))+(y)*(a))
+
+#define get_clamped(x, a, b) ((x)<(a)?(a):(x)>(b)?(b):(x))
+#define clamp(x, a, b) ((x)=get_clamped(x, a, b))
+
+#define fix_angle(x) do{while(x>pi)x-=pi_2; while(x<-pi)x+=pi_2;}while(0)
+
+#define gmin(x, y) ((x)>(y)?(y):(x))
+#define gmin3(x, y, z) ((x)>(y)?gmin((z),(y)):gmin((x),(y)))
+#define gmin4(x, y, z, o) ((x)>(y)?gmin3((y), (z), (o)):gmin3((x), (z), (o)))
+
+#define gmax(x, y) ((x)<(y)?(y):(x))
+#define gmax3(x, y, z) ((x)<(y)?gmin((z),(y)):gmin((x),(y)))
+#define gmax4(x, y, z, o) ((x)<(y)?gmin3((y), (z), (o)):gmin3((x), (z), (o)))
+
+
 
 inline float degreeToRadian(float deg) {
 	return deg * pi / 180.0f;
@@ -59,14 +73,6 @@ Vec4 lerpVec(const Vec4& v0, const Vec4& v1, float a);
 
 Vec3 rgbToHsv(const Vec3& color);
 Vec3 hsvToRgb(const Vec3& color);
-
-#define gmin(x, y) (x>y?y:x)
-#define gmin3(x, y, z) (x>y?gmin(z,y):gmin(x,y))
-#define gmin4(x, y, z, a) (x>y?gmin3(y, z, a):gmin3(x, z, a))
-
-#define gmax(x, y) (x<y?y:x)
-#define gmax3(x, y, z) (x<y?gmin(z,y):gmin(x,y))
-#define gmax4(x, y, z, a) (x<y?gmin3(y, z, a):gmin3(x, z, a))
 
 
 

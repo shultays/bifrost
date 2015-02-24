@@ -8,11 +8,7 @@
 #include <functional>
 
 void Valhalla::init() {
-	gFocusCamera* camera;
 	activeCamera = camera = new gFocusCamera();
-	camera->focusPoint = Vec3(0.0f, 0.0f, 0.0f);
-	camera->distanceToFocus = 1000.0f;
-	camera->angle = 0.0f;
 
 	world = new WorldMap();
 	world->build();
@@ -20,7 +16,7 @@ void Valhalla::init() {
 
 void Valhalla::tick(float dt) {
 
-	((gFocusCamera*)activeCamera)->angle += dt*0.3f;
+
 }
 
 
@@ -30,6 +26,29 @@ void Valhalla::update(float fixed_dt) {
 
 	}
 
+	if (input.isKeyDown(MOUSE_BUTTON_LEFT)) {
+		camera->angle += input.getMouseDelta().x * 0.003f;
+		fix_angle(camera->angle);
+		camera->elevation += input.getMouseDelta().y * 0.003f;
+		clamp(camera->elevation, 0, pi_d2*0.99f);
+	}
+
+	if (input.isKeyDown(MOUSE_BUTTON_RIGHT)) {
+		Vec3 dir = camera->getDir();
+		dir.z = 0.0f;
+		dir.normalize();
+		Vec3 side = dir.cross(camera->getUp());
+		camera->focusPoint += dir * (input.getMouseDelta().y * camera->distanceToFocus * 0.003f);
+		camera->focusPoint -= side * (input.getMouseDelta().x * camera->distanceToFocus * 0.003f);
+	}
+
+	if (input.isKeyDown(MOUSE_BUTTON_MID)) {
+		camera->distanceToFocus *= 1.0f + (input.getMouseDelta().y * 0.003f);
+	}
+
+	if (input.isScrolled()) {
+		camera->distanceToFocus *= 1.0f + (input.getScrollDelta().y * 0.03f);
+	}
 }
 
 void Valhalla::resize(int width, int height) {
