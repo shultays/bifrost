@@ -1,11 +1,20 @@
-attribute vec3 aVertexPosition;
+layout(location = 0) attribute vec3 aVertexPosition;
 attribute vec3 aVertexNormal;
+attribute vec2 aVertexUV;
+attribute vec4 aVertexColor;
+attribute vec4 aTextureWeights;
 
 
 uniform mat4 uWorldMatrix;
 uniform mat4 uViewMatrix;
 uniform mat4 uProjectionMatrix;
 uniform vec4 uColor;
+
+uniform sampler2D uTexture0;
+uniform sampler2D uTexture1;
+uniform sampler2D uTexture2;
+uniform sampler2D uTexture3;
+uniform int uTextureCount;
 
 varying vec4 vColor;
 
@@ -17,10 +26,19 @@ void main(void) {
 
     vec3 transformedNormal = (uWorldMatrix * vec4(aVertexNormal, 0.0f)).xyz;
 	transformedNormal = normalize(transformedNormal);
-    vec3 uLightingDirection = vec3(0.0, 0.0, 1.0);
+    vec3 uLightingDirection = vec3(0.0, 0.8, 0.6);
 
     float directionalLightWeighting = max(dot(transformedNormal, uLightingDirection), 0.0);
 
+	vec4 finalColor;
+
+	if(uTextureCount == 0){
+		finalColor = vec4(1.0);
+	} else if(uTextureCount == 1){
+		finalColor = texture2D(uTexture0, aVertexUV);
+	}
     
-    vColor = vec4((uColor.rgb*0.2 + uColor.rgb*directionalLightWeighting * 0.8), uColor.a);
+	finalColor *= aVertexColor*uColor;
+
+    vColor = vec4((finalColor.rgb*0.2 + finalColor.rgb*directionalLightWeighting * 0.8), finalColor.a);
 }

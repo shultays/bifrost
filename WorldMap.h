@@ -14,11 +14,14 @@
 
 #include <stdlib.h>
 
+#include "gTexture.h"
 
 class WorldMap : public gRenderable {
 	typedef struct {
 		Vec3 pos;
 		Vec3 normal;
+		Vec4 color;
+		Vec2 uv;
 	}Vertex;
 
 	PerlinMap perlinMap;
@@ -30,25 +33,26 @@ class WorldMap : public gRenderable {
 
 	Grid<float> heightMap;
 	Grid<Vec3> normalMap;
+	Grid<Vec3> colorMap;
 
 	GLuint vertexBuffer;
 	GLuint indexBuffer;
 	GLuint waterBuffer;
+
+	gTexture* texture;
 public:
 	WorldMap() : WorldMap(512 * 1024.0f, 128) {
 
 	}
 
-	WorldMap(float mapSize, int edgeCount) :heightMap(edgeCount), perlinMap(mapSize), normalMap(edgeCount), earthMap(mapSize) {
+	WorldMap(float mapSize, int edgeCount) :heightMap(edgeCount), perlinMap(mapSize), normalMap(edgeCount), earthMap(mapSize), colorMap(edgeCount) {
 		this->mapSize = mapSize;
 		this->edgeCount = edgeCount;
 		this->gridSize = mapSize / edgeCount;
 
 		indexBuffer = vertexBuffer = waterBuffer = -1;
 
-		//perlinMap.addPerlinShell(6, 0.0, 400.0f, 0.95f);
-
-
+		texture = new gTexture("images/lena.png");
 	}
 
 	void build() {
@@ -56,29 +60,38 @@ public:
 		earthMap.clear();
 
 
-		perlinMap.addPerlinShell(10, 0.0, 90.0f* 25.0f, 0.90f);
-		perlinMap.addPerlinShell(11, 0.0, 90.0f* 25.0f, 0.90f);
-		perlinMap.addPerlinShell(13, 0.0, 90.0f* 25.0f, 0.90f);
+		float maxHeight = 10000.0f;
 
-		perlinMap.addPerlinShell(32, 0.0, 90.0f* 25.0f, 0.95f);
-		perlinMap.addPerlinShell(35, 0.0, 90.0f* 25.0f, 0.95f);
-		perlinMap.addPerlinShell(39, 0.0, 90.0f* 25.0f, 0.95f);
+		perlinMap.addPerlinShell(10, 0.0f, 4 * maxHeight * 0.05f, 0.95f, 2.0f);
+		perlinMap.addPerlinShell(11, 0.0f, 4 * maxHeight * 0.05f, 0.95f, 2.0f);
+		perlinMap.addPerlinShell(13, 0.0f, 4 * maxHeight * 0.1f, 0.95f, 2.0f);
+		perlinMap.addPerlinShell(14, 0.0f, 4 * maxHeight * 0.2f, 0.85f, 2.0f);
+		perlinMap.addPerlinShell(15, 0.0f, 4 * maxHeight * 0.1f, 0.75f, 2.0f);
+		perlinMap.addPerlinShell(15, 0.0f, 4 * maxHeight * 0.1f, 0.75f, 2.0f);
+		//perlinMap.addPerlinShell(15, 0.0f, 4 * maxHeight * 0.1f, 0.75f, 2.0f);
 
-		perlinMap.addPerlinShell(5, 0.0, 100.0f* 20.0f);
-		perlinMap.addPerlinShell(9, 0.0, 50.0f * 20.0f);
-		perlinMap.addPerlinShell(18, 0.0, 25.0f* 20.0f);
-		perlinMap.addPerlinShell(37, 0.0, 12.0f* 20.0f);
-		perlinMap.addPerlinShell(85, 0.0, 5.0f * 20.0f);
-		perlinMap.addPerlinShell(127, 0.0, 2.0f* 20.0f);
-		perlinMap.addPerlinShell(255, 0.0, 1.0f* 20.0f);
+		perlinMap.addPerlinShell(20, -1000.0, 0.0f, 0.5f);
+
+		float remainingHeight = 0.4f * maxHeight;
+
+		int start = 5;
+		do {
+			float h = remainingHeight*0.5f;
+			perlinMap.addPerlinShell(start, 0.0f, h);
+			remainingHeight -= h;
+			start = (int)(start * 2.1f);
+		} while (start < edgeCount);
+
+		perlinMap.addPerlinShell(start, 0.0f, remainingHeight);
 
 
-		earthMap.addPerlinShell(3, 0.0, 0.2f, 0.70f);
-		earthMap.addPerlinShell(4, 0.0, 0.2f, 0.70f);
-		earthMap.addPerlinShell(6, 0.0, 0.2f, 0.70f);
-		earthMap.addPerlinShell(15, 0.0, 0.2f, 0.70f);
-		earthMap.addPerlinShell(37, 0.0, 0.1f, 0.70f);
-		earthMap.addPerlinShell(85, 0.0, 0.1f, 0.70f);
+		earthMap.addPerlinShell(03, 0.0, 0.30f, 0.90f);
+		earthMap.addPerlinShell(04, 0.0, 0.20f, 0.90f);
+		earthMap.addPerlinShell(06, 0.0, 0.15f, 0.90f);
+		earthMap.addPerlinShell(15, 0.0, 0.15f, 0.90f);
+		earthMap.addPerlinShell(37, 0.0, 0.15f, 0.60f);
+		earthMap.addPerlinShell(55, 0.0, 0.05f, 0.50f);
+		earthMap.addPerlinShell(85, 0.0, 0.05f, 0.50f);
 
 		if (indexBuffer != -1) {
 			glDeleteBuffers(1, &indexBuffer);
@@ -86,13 +99,17 @@ public:
 			glDeleteBuffers(1, &waterBuffer);
 		}
 		buildHeightMap();
-
 		buildNormalMap();
+		buildColorMap();
 		buildBuffer();
 
 		PngExporter::writeGridToPng("images/normalMap.png", normalMap, ExportTypeVec3AsNormal);
 		PngExporter::writeGridToPng("images/heightMap.png", heightMap);
 		PngExporter::writeGridToPng("images/earthMap.png", earthMap, edgeCount, Vec3(0.0f), Vec3(0.0f, 1.0f, 0.0));
+		PngExporter::writeGridToPng("images/color.png", colorMap, ExportTypeVec3AsColor);
+
+
+
 
 	}
 
@@ -119,7 +136,7 @@ public:
 		// level land around water
 		for (int i = 0; i < edgeCount; i++) {
 			for (int j = 0; j < edgeCount; j++) {
-				heightMap[i][j] -= min + 2000.0f;
+				heightMap[i][j] -= 1500.0f;
 				if (heightMap[i][j] < 20.0f) {
 					heightMap[i][j] = (heightMap[i][j] - 20.0f)*0.5f;
 				} else if (heightMap[i][j] < 80.0f) {
@@ -182,11 +199,8 @@ public:
 				float sy = perlinMap.getHeightAt(Vec2(i*gridSize, j*gridSize + dt)) - perlinMap.getHeightAt(Vec2(i*gridSize, j*gridSize - dt));
 
 
-				normalMap[i][j] = Vec3(-sx, sy, 0.5f*dt);
+				normalMap[i][j] = Vec3(-sx, sy, 2.0f*dt);
 				normalMap[i][j].normalize();
-
-
-
 			}
 		}
 		for (int i = 0; i < edgeCount; i++) {
@@ -197,7 +211,44 @@ public:
 			normalMap[0][i] = Vec3(0.0f, 0.0f, 1.0f);
 		}
 	}
+	void buildColorMap() {
+		for (int i = 0; i < edgeCount; i++) {
+			for (int j = 0; j < edgeCount; j++) {
+				float height = heightMap[i][j];
+				float beachW = (2.0f - height) / 200.0f;
+				saturate(beachW);
+				float snowW = (height - 5000.0f) / 1000.0f;
+				saturate(snowW);
 
+
+				float forestW = earthMap.getHeightAt(Vec2(i*gridSize, j*gridSize));
+				saturate(forestW);
+
+				Vec3 finalColor = Vec3::zero();
+
+
+
+				finalColor += lerpVec(Vec3(0.9f), Vec3(1.0f), forestW) * snowW;
+
+				finalColor += lerpVec(Vec3::fromColor(0xB7A888), Vec3::fromColor(0x80765F), forestW) * beachW;
+
+				float remainingWeight = 1.0f - snowW - beachW;
+
+
+				finalColor += lerpVec(Vec3::fromColor(0x477519), Vec3::fromColor(0x663300), forestW) * remainingWeight;
+				colorMap[i][j] = finalColor;
+				/*
+				if (height < 500) {
+				colorMap[i][j] = 0.0f;
+				} else {
+				int t = (int)((height - 500) / 500.0f);
+				colorMap[i][j] = Vec3(t / 5.0f);
+				}*/
+
+			}
+		}
+
+	}
 	void buildBuffer() {
 		Vertex* vertices = new Vertex[edgeCount*edgeCount];
 
@@ -205,6 +256,8 @@ public:
 			for (int j = 0; j < edgeCount; j++) {
 				vertices[i + j*edgeCount].pos = Vec3((i - edgeCount / 2.0f)*gridSize, (j - edgeCount / 2.0f)*gridSize, heightMap[i][j]);
 				vertices[i + j*edgeCount].normal = normalMap[i][j];
+				vertices[i + j*edgeCount].color = Vec4(colorMap[i][j], 1.0f);
+				vertices[i + j*edgeCount].uv = Vec2(((float)i) / edgeCount, ((float)j) / edgeCount);
 			}
 		}
 
@@ -237,15 +290,15 @@ public:
 
 
 		Vertex water[6];
-		water[2].pos.x = -mapSize / 2;
-		water[2].pos.y = -mapSize / 2;
-		water[2].pos.z = 0.0f;
+		water[0].pos.x = -mapSize / 2;
+		water[0].pos.y = -mapSize / 2;
+		water[0].pos.z = 0.0f;
 		water[1].pos.x = +mapSize / 2;
 		water[1].pos.y = -mapSize / 2;
 		water[1].pos.z = 0.0f;
-		water[0].pos.x = -mapSize / 2;
-		water[0].pos.y = +mapSize / 2;
-		water[0].pos.z = 0.0f;
+		water[2].pos.x = -mapSize / 2;
+		water[2].pos.y = +mapSize / 2;
+		water[2].pos.z = 0.0f;
 
 		water[3].pos.x = +mapSize / 2;
 		water[3].pos.y = -mapSize / 2;
@@ -256,8 +309,12 @@ public:
 		water[5].pos.x = -mapSize / 2;
 		water[5].pos.y = +mapSize / 2;
 		water[5].pos.z = 0.0f;
+
 		water[0].normal = water[1].normal = water[2].normal
 			= water[3].normal = water[4].normal = water[5].normal = Vec3(0.0f, 0.0f, 1.0f);
+
+		water[0].color = water[1].color = water[2].color
+			= water[3].color = water[4].color = water[5].color = Vec4(0.0f, 0.0f, 1.0f, 0.5f);
 
 		glGenBuffers(1, &waterBuffer);
 		glBindBuffer(GL_ARRAY_BUFFER, waterBuffer);
@@ -268,15 +325,29 @@ public:
 
 
 	virtual void render() override {
-		gears.game->shader.setWorldMatrix(Mat4::scale(0.003f));;
+		gears.game->shader.setWorldMatrix(Mat4::scale(Vec3(0.003f, 0.003f, 0.003f)));;
 
 		gears.game->shader.setColor(Vec4(1.0, 1.0f, 1.0f, 1.0f));
 		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-		glVertexAttribPointer(gears.game->shader.getPositionAttrib(), 3, GL_FLOAT, false, sizeof(Vertex), 0);
-		glVertexAttribPointer(gears.game->shader.getNormalAttrib(), 3, GL_FLOAT, true, sizeof(Vertex), (void*)sizeof(Vec3));
+
+
+		gears.game->shader.bindPosition(sizeof(Vertex), 0);
+		gears.game->shader.bindNormal(sizeof(Vertex), sizeof(Vec3));
+		gears.game->shader.bindColor(sizeof(Vertex), sizeof(Vec3)+sizeof(Vec3));
+		gears.game->shader.bindUV(sizeof(Vertex), sizeof(Vec3)+sizeof(Vec3)+sizeof(Vec4));
+
+		glActiveTexture(GL_TEXTURE0 + 0);
+		glBindTexture(GL_TEXTURE_2D, texture->textureID);
+
+		gears.game->shader.setUniform("uTexture0", 0);
+		gears.game->shader.setUniform("uTextureCount", 1);
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		if (input.isKeyDown(GLFW_KEY_A)) {
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		} else {
+			glPolygonMode(GL_FRONT, GL_FILL);
+		}
 		glDrawElements(
 			GL_TRIANGLES,
 			(edgeCount - 1)*(edgeCount - 1) * 6,
@@ -286,10 +357,11 @@ public:
 
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-		gears.game->shader.setColor(Vec4(0.0, 0.0f, 1.0f, 0.8f));
 		glBindBuffer(GL_ARRAY_BUFFER, waterBuffer);
-		glVertexAttribPointer(gears.game->shader.getPositionAttrib(), 3, GL_FLOAT, false, sizeof(Vertex), 0);
-		glVertexAttribPointer(gears.game->shader.getNormalAttrib(), 3, GL_FLOAT, true, sizeof(Vertex), (void*)sizeof(Vec3));
+		gears.game->shader.bindPosition(sizeof(Vertex), 0);
+		gears.game->shader.bindNormal(sizeof(Vertex), sizeof(Vec3));
+		//gears.game->shader.bindColor(sizeof(Vertex), sizeof(Vec3)+sizeof(Vec3));
+		gears.game->shader.setAttributeConstant("aVertexColor", Vec4(1.0f, 0.0f, 1.0f, 1.0f));
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 
 		/*

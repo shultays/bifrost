@@ -18,8 +18,8 @@ public:
 		this->mapSize = mapSize;
 	}
 
-	void addPerlinShell(int nodeCount, float min_height, float max_height, float percentage = 0.5f, int seed = -1) {
-		shells.push_back(PerlinShell(mapSize, nodeCount, min_height, max_height, percentage, seed));
+	void addPerlinShell(int nodeCount, float min_height, float max_height, float percentage = 0.5f, float pow_val = 1.0f, int seed = -1) {
+		shells.push_back(PerlinShell(mapSize, nodeCount, min_height, max_height, percentage, pow_val, seed));
 	}
 
 	float getHeightAt(const Vec2& vec) {

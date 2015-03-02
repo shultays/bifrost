@@ -55,7 +55,7 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="lodepng.cpp">
-      <Filter>Resource Files</Filter>
+      <Filter>engine</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -122,8 +122,11 @@
     <ClInclude Include="PngExporter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="gTexture.h">
+      <Filter>engine</Filter>
+    </ClInclude>
     <ClInclude Include="lodepng.h">
-      <Filter>Header Files</Filter>
+      <Filter>engine</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

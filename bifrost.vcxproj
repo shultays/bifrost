@@ -35,6 +35,7 @@
     <ClInclude Include="gMat.h" />
     <ClInclude Include="gPrimitives.h" />
     <ClInclude Include="gShader.h" />
+    <ClInclude Include="gTexture.h" />
     <ClInclude Include="gTime.h" />
     <ClInclude Include="gVec.h" />
     <ClInclude Include="lodepng.h" />

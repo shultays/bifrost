@@ -41,6 +41,12 @@ int PngExporter::writeGridToPng(const char* fileName, Grid<Vec3>& grid, int expo
 				case ExportTypeVec3ZOnly:
 					r = g = b = (byte)(255 * ((grid[i][j].z - minZ) / (maxZ - minZ)));
 					break;
+				case ExportTypeVec3AsColor:
+
+					r = (byte)(255 * grid[i][j].x);
+					g = (byte)(255 * grid[i][j].y);
+					b = (byte)(255 * grid[i][j].z);
+					break;
 				default:
 					r = (byte)(255 * ((grid[i][j].x - minX) / (maxX - minX)));
 					g = (byte)(255 * ((grid[i][j].y - minY) / (maxY - minY)));

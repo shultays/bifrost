@@ -10,17 +10,17 @@
 
 
 enum {
-	UniformTypeFloat,
-	UniformTypeVec2,
-	UniformTypeVec3,
-	UniformTypeVec4,
-	UniformTypeMat2,
-	UniformTypeMat3,
-	UniformTypeMat4,
-	UniformTypeInt,
-	UniformTypeIntVec2,
-	UniformTypeIntVec3,
-	UniformTypeIntVec4,
+	TypeFloat,
+	TypeVec2,
+	TypeVec3,
+	TypeVec4,
+	TypeMat2,
+	TypeMat3,
+	TypeMat4,
+	TypeInt,
+	TypeIntVec2,
+	TypeIntVec3,
+	TypeIntVec4,
 };
 
 class gShader {
@@ -36,37 +36,37 @@ class gShader {
 
 		void setData(void * data) {
 			switch (uniformType) {
-				case UniformTypeFloat:
+				case TypeFloat:
 					glUniform1fv(location, 1, (GLfloat*)data);
 					break;
-				case UniformTypeVec2:
+				case TypeVec2:
 					glUniform2fv(location, 1, (GLfloat*)data);
 					break;
-				case UniformTypeVec3:
+				case TypeVec3:
 					glUniform3fv(location, 1, (GLfloat*)data);
 					break;
-				case UniformTypeVec4:
+				case TypeVec4:
 					glUniform4fv(location, 1, (GLfloat*)data);
 					break;
-				case UniformTypeMat2:
+				case TypeMat2:
 					glUniformMatrix2fv(location, 1, false, (GLfloat*)data);
 					break;
-				case UniformTypeMat3:
+				case TypeMat3:
 					glUniformMatrix3fv(location, 1, false, (GLfloat*)data);
 					break;
-				case UniformTypeMat4:
+				case TypeMat4:
 					glUniformMatrix4fv(location, 1, false, (GLfloat*)data);
 					break;
-				case UniformTypeInt:
+				case TypeInt:
 					glUniform1iv(location, 1, (GLint*)data);
 					break;
-				case UniformTypeIntVec2:
+				case TypeIntVec2:
 					glUniform2iv(location, 1, (GLint*)data);
 					break;
-				case UniformTypeIntVec3:
+				case TypeIntVec3:
 					glUniform3iv(location, 1, (GLint*)data);
 					break;
-				case UniformTypeIntVec4:
+				case TypeIntVec4:
 					glUniform4iv(location, 1, (GLint*)data);
 					break;
 				default:
@@ -74,15 +74,93 @@ class gShader {
 			}
 		}
 	};
+	class Attribute {
+	public:
+		int attributeType;
+		bool normalized;
+		GLint location;
+		Attribute(int attributeType, bool normalized = false) {
+			this->attributeType = attributeType;
+			this->normalized = normalized;
+		}
+		Attribute() {}
+		bool isNormalized() {
+			return normalized;
+		}
+		GLsizei getCount() {
+			switch (attributeType) {
+				case TypeInt:
+				case TypeFloat:
+					return 1;
+				case TypeVec2:
+				case TypeIntVec2:
+					return 2;
+				case TypeVec3:
+				case TypeIntVec3:
+					return 3;
+					break;
+				case TypeVec4:
+				case TypeIntVec4:
+					return 4;
+				default:
+					assert(0);
+					return 0;
+			}
+		}
 
-	std::unordered_map<std::string, Uniform> uniforms;
+		GLenum getType() {
+			switch (attributeType) {
+				case TypeFloat:
+				case TypeVec2:
+				case TypeVec3:
+				case TypeVec4:
+					return GL_FLOAT;
+				case TypeInt:
+				case TypeIntVec2:
+				case TypeIntVec3:
+				case TypeIntVec4:
+					return GL_INT;
+				default:
+					assert(0);
+					return 0;
+			}
+		}
+		void setData(void * data) {
+			switch (attributeType) {
+				case TypeFloat:
+					glVertexAttrib1fv(location, (GLfloat*)data);
+					break;
+				case TypeVec2:
+					glVertexAttrib2fv(location, (GLfloat*)data);
+					break;
+				case TypeVec3:
+					glVertexAttrib3fv(location, (GLfloat*)data);
+					break;
+				case TypeVec4:
+					glVertexAttrib4fv(location, (GLfloat*)data);
+					break;
+				case TypeInt:
+					glVertexAttribI1iv(location, (GLint*)data);
+					break;
+				case TypeIntVec2:
+					glVertexAttribI2iv(location, (GLint*)data);
+					break;
+				case TypeIntVec3:
+					glVertexAttribI3iv(location, (GLint*)data);
+					break;
+				case TypeIntVec4:
+					glVertexAttribI4iv(location, (GLint*)data);
+					break;
+				default:
+					assert(0);
+					break;
+			}
+		}
+	};
 
 	GLuint vertexShader;
 	GLuint pixelShader;
-	GLuint shaderProgram;
 
-	GLint positionAttribute;
-	GLint normalAttribute;
 
 	int printShaderInfoLog(GLuint obj) {
 		int infologLength = 0;
@@ -142,6 +220,10 @@ class gShader {
 		return buildShader(shaderSource, shaderType);
 	}
 public:
+	GLuint shaderProgram;
+
+	std::unordered_map<std::string, Uniform> uniforms;
+	std::unordered_map<std::string, Attribute> attributes;
 
 	gShader() {
 
@@ -179,30 +261,62 @@ public:
 	void begin() {
 		glUseProgram(shaderProgram);
 	}
+
+
 	void addDefaultAttribs() {
-		positionAttribute = glGetAttribLocation(shaderProgram, "aVertexPosition");
-		glEnableVertexAttribArray(positionAttribute);
-		normalAttribute = glGetAttribLocation(shaderProgram, "aVertexNormal");
-		glEnableVertexAttribArray(normalAttribute);
+		addAttribute("aVertexPosition", TypeVec3);
+		addAttribute("aVertexNormal", TypeVec3, true);
+		addAttribute("aVertexColor", TypeVec4);
+		addAttribute("aVertexUV", TypeVec2);
+		addAttribute("aTextureWeights", TypeVec4);
+	}
+
+
+	void bindPosition(int stride, int pointer) {
+		bindAttribute("aVertexPosition", stride, pointer);
+	}
+	void bindNormal(int stride, int pointer) {
+		bindAttribute("aVertexNormal", stride, pointer);
+	}
+	void bindColor(int stride, int pointer) {
+		bindAttribute("aVertexColor", stride, pointer);
+	}
+	void bindUV(int stride, int pointer) {
+		bindAttribute("aVertexUV", stride, pointer);
+	}
+	void bindTextureWeights(int stride, int pointer) {
+		bindAttribute("aTextureWeights", stride, pointer);
+	}
+
+	void bindAttribute(char* name, int stride, int pointer) {
+		Attribute& attribute = attributes.at(name);
+		glEnableVertexAttribArray(attribute.location);
+		glVertexAttribPointer(attribute.location, attribute.getCount(), attribute.getType(), attribute.isNormalized(), stride, (void*)pointer);
+	}
+
+	void addAttribute(char* name, int attributeType, bool normalized = false) {
+		Attribute& attribute = attributes[name] = Attribute(attributeType, normalized);
+		attribute.location = glGetAttribLocation(shaderProgram, name);
 	}
 
 	void addDefaultUniforms() {
-		addUniform("uWorldMatrix", UniformTypeMat4);
-		addUniform("uViewMatrix", UniformTypeMat4);
-		addUniform("uProjectionMatrix", UniformTypeMat4);
-		addUniform("uColor", UniformTypeVec4);
+		addUniform("uWorldMatrix", TypeMat4);
+		addUniform("uViewMatrix", TypeMat4);
+		addUniform("uProjectionMatrix", TypeMat4);
+		addUniform("uColor", TypeVec4);
+		addUniform("uTexture0", TypeInt);
+		addUniform("uTexture1", TypeInt);
+		addUniform("uTexture2", TypeInt);
+		addUniform("uTexture3", TypeInt);
+		addUniform("uTextureCount", TypeInt);
+
 	}
 	void addUniform(char* name, int uniformType) {
 		Uniform& uniform = uniforms[name] = Uniform(uniformType);
 		uniform.location = glGetUniformLocation(shaderProgram, name);
 	}
 
-	GLuint getNormalAttrib() {
-		return normalAttribute;
-	}
-	GLuint getPositionAttrib() {
-		return positionAttribute;
-	}
+
 
 	void setWorldMatrix(const Mat4& mat) {
 		setUniform("uWorldMatrix", mat);
@@ -255,6 +369,46 @@ public:
 	}
 	void setUniform(char* name, const IntVec4& data) {
 		uniforms[name].setData((void*)&data);
+	}
+
+
+
+	void setAttributeConstant(char* name, void* data) {
+		glDisableVertexAttribArray(attributes.at(name).location);
+		attributes.at(name).setData(data);
+	}
+
+	void setAttributeConstant(char* name, float data) {
+		glDisableVertexAttribArray(attributes.at(name).location);
+		attributes.at(name).setData((void*)&data);
+	}
+	void setAttributeConstant(char* name, const Vec2& data) {
+		glDisableVertexAttribArray(attributes.at(name).location);
+		attributes.at(name).setData((void*)&data);
+	}
+	void setAttributeConstant(char* name, const Vec3& data) {
+		glDisableVertexAttribArray(attributes.at(name).location);
+		attributes.at(name).setData((void*)&data);
+	}
+	void setAttributeConstant(char* name, const Vec4& data) {
+		glDisableVertexAttribArray(attributes.at(name).location);
+		attributes.at(name).setData((void*)&data);
+	}
+	void setAttributeConstant(char* name, int data) {
+		glDisableVertexAttribArray(attributes.at(name).location);
+		attributes.at(name).setData((void*)&data);
+	}
+	void setAttributeConstant(char* name, const IntVec2& data) {
+		glDisableVertexAttribArray(attributes.at(name).location);
+		attributes.at(name).setData((void*)&data);
+	}
+	void setAttributeConstant(char* name, const IntVec3& data) {
+		glDisableVertexAttribArray(attributes.at(name).location);
+		attributes.at(name).setData((void*)&data);
+	}
+	void setAttributeConstant(char* name, const IntVec4& data) {
+		glDisableVertexAttribArray(attributes.at(name).location);
+		attributes.at(name).setData((void*)&data);
 	}
 };
 

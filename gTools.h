@@ -26,15 +26,22 @@ const double d_pi_2 = (E_PI * 2.0);
 const double d_pi_d2 = (E_PI * 0.5);
 const double d_pi_3d2 = (E_PI * 1.5);
 
+const float epsilon = 0.000001f;
+
+
 #define SAFE_DELETE(x) do{if(x){delete x; x = NULL;}}while(0)
 #define swapt(x, y) do{auto t=x; x=y; y=t;}while(0) 
 #define vec3_to_3_float(vec) vec.x, vec.y, vec.z
 
+#define almost_equal(x, y) ((x > y - epsilon) && ( x < y + epsilon))
 
 #define lerp(x, y, a) ((x)*(1-(a))+(y)*(a))
 
 #define get_clamped(x, a, b) ((x)<(a)?(a):(x)>(b)?(b):(x))
-#define clamp(x, a, b) ((x)=get_clamped(x, a, b))
+#define clamp(x, a, b) ((x) = get_clamped(x, a, b))
+
+#define saturate(x) ((x) = get_saturated(x))
+#define get_saturated(x) (get_clamped(x, 0, 1))
 
 #define fix_angle(x) do{while(x>pi)x-=pi_2; while(x<-pi)x+=pi_2;}while(0)
 

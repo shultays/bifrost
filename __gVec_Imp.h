@@ -336,6 +336,23 @@ public:
 #endif
 
 #if GVEC_N == 3
+
+	static G_VEC_IMP_NAME fromColor(unsigned int color) {
+		G_VEC_IMP_NAME ret;
+
+#ifdef G_IS_TYPE_FLOATING
+		G_VEC_TYPE d = (G_VEC_TYPE)255;
+		ret.r = ((color >> 16) & 255) / d;
+		ret.g = ((color >> 8) & 255) / d;
+		ret.b = ((color >> 0) & 255) / d;
+#else
+		ret.r = ((color >> 16) & 255);
+		ret.g = ((color >> 8) & 255);
+		ret.b = ((color >> 0) & 255);
+#endif
+		return ret;
+	}
+
 	G_VEC_IMP_NAME(G_VEC_TYPE x, G_VEC_TYPE y, G_VEC_TYPE z) {
 		data[0] = x;
 		data[1] = y;
@@ -359,6 +376,23 @@ public:
 #endif
 
 #if GVEC_N == 4
+	static G_VEC_IMP_NAME fromColor(unsigned int color) {
+		G_VEC_IMP_NAME ret;
+
+#ifdef G_IS_TYPE_FLOATING
+		G_VEC_TYPE d = (G_VEC_TYPE)255;
+		ret.r = ((color >> 16) & 255) / d;
+		ret.g = ((color >> 8) & 255) / d;
+		ret.b = ((color >> 0) & 255) / d;
+		ret.a = ((color >> 24) & 255) / d;
+#else
+		ret.r = ((color >> 16) & 255);
+		ret.g = ((color >> 8) & 255);
+		ret.b = ((color >> 0) & 255);
+		ret.a = ((color >> 24) & 255);
+#endif
+		return ret;
+	}
 	G_VEC_IMP_NAME(G_VEC_PREV_1_CLASS vec, G_VEC_TYPE con) {
 		data[0] = vec.x;
 		data[1] = vec.y;

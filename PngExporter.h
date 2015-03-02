@@ -10,6 +10,7 @@ enum {
 	ExportTypeVec3XOnly,
 	ExportTypeVec3YOnly,
 	ExportTypeVec3AsNormal,
+	ExportTypeVec3AsColor,
 };
 
 class PngExporter {
