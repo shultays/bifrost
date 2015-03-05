@@ -5,6 +5,7 @@
 #include "FixedSizedArray.h"
 #include "gCamera.h"
 #include "gShader.h"
+#include "gMat.h"
 
 //Tickable objects will be ticked before each render
 class gTickable {
@@ -39,6 +40,11 @@ class gGame {
 	FixedSizedArray<gTickable*, 2048> tickList;
 	FixedSizedPriorityArray<gUpdatable*, 2048> updateList;
 	FixedSizedPriorityArray<gRenderable*, 2048> renderList;
+
+	FixedSizedArray<Mat4, 32> worldMatrixStack;
+	bool worldMatDirty;
+
+	int currentStack;
 
 	void render();
 
@@ -83,6 +89,59 @@ public:
 		renderList.remove(renderable);
 	}
 
+	void resetWorldStack() {
+		worldMatDirty = true;
+		currentStack = 0;
+		worldMatrixStack[currentStack].makeIdentity();
+	}
+
+	void pushMatrix() {
+		currentStack++;
+		worldMatrixStack[currentStack] = worldMatrixStack[currentStack - 1];
+	}
+
+	void popMatrix() {
+		if (currentStack > 0)
+			currentStack--;
+	}
+
+	void translate(const Vec3& pos) {
+		worldMatDirty = true;
+		worldMatrixStack[currentStack].translateBy(pos);
+	}
+	void translate(float x, float y, float z) {
+		worldMatDirty = true;
+		worldMatrixStack[currentStack].translateBy(Vec3(x, y, z));
+	}
+	void rotate(float angle, const Vec3& dir) {
+		worldMatDirty = true;
+		worldMatrixStack[currentStack].rotateBy(angle, dir);
+	}
+	void updateShaderUniforms() {
+		if (worldMatDirty) {
+			shader.setWorldMatrix(worldMatrixStack[currentStack]);
+		}
+	}
+	void rotateX(float angle) {
+		worldMatDirty = true;
+		worldMatrixStack[currentStack].rotateByX(angle);
+	}
+	void rotateY(float angle) {
+		worldMatDirty = true;
+		worldMatrixStack[currentStack].rotateByY(angle);
+	}
+	void rotateZ(float angle) {
+		worldMatDirty = true;
+		worldMatrixStack[currentStack].rotateByZ(angle);
+	}
+	void scale(float s) {
+		worldMatDirty = true;
+		worldMatrixStack[currentStack].scaleBy(Vec3(s));
+	}
+	void scale(const Vec3& s) {
+		worldMatDirty = true;
+		worldMatrixStack[currentStack].scaleBy(s);
+	}
 };
 
 

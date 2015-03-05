@@ -107,5 +107,6 @@ gGame::gGame(bool setTop) {
 	if (setTop) {
 		gears.game = this;
 	}
+	currentStack = 0;
 	shader.loadFromFile("default.vs", "default.ps");
 }

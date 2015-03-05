@@ -16,6 +16,9 @@
     <ClCompile Include="gGlobals.cpp" />
     <ClCompile Include="gInput.cpp" />
     <ClCompile Include="gMat.cpp" />
+    <ClCompile Include="gStaticBufferedDrawables.cpp" />
+    <ClCompile Include="gStaticIndexBuffer.cpp" />
+    <ClCompile Include="gStaticVertexBuffer.cpp" />
     <ClCompile Include="gTools.cpp" />
     <ClCompile Include="lodepng.cpp" />
     <ClCompile Include="Perlin.cpp" />
@@ -35,6 +38,9 @@
     <ClInclude Include="gMat.h" />
     <ClInclude Include="gPrimitives.h" />
     <ClInclude Include="gShader.h" />
+    <ClInclude Include="gStaticBufferedDrawables.h" />
+    <ClInclude Include="gStaticIndexBuffer.h" />
+    <ClInclude Include="gStaticVertexBuffer.h" />
     <ClInclude Include="gTexture.h" />
     <ClInclude Include="gTime.h" />
     <ClInclude Include="gVec.h" />

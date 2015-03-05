@@ -57,6 +57,15 @@
     <ClCompile Include="lodepng.cpp">
       <Filter>engine</Filter>
     </ClCompile>
+    <ClCompile Include="gStaticVertexBuffer.cpp">
+      <Filter>engine\drawables</Filter>
+    </ClCompile>
+    <ClCompile Include="gStaticIndexBuffer.cpp">
+      <Filter>engine\drawables</Filter>
+    </ClCompile>
+    <ClCompile Include="gStaticBufferedDrawables.cpp">
+      <Filter>engine\drawables</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Valhalla.h">
@@ -127,6 +136,15 @@
     </ClInclude>
     <ClInclude Include="lodepng.h">
       <Filter>engine</Filter>
+    </ClInclude>
+    <ClInclude Include="gStaticVertexBuffer.h">
+      <Filter>engine\drawables</Filter>
+    </ClInclude>
+    <ClInclude Include="gStaticIndexBuffer.h">
+      <Filter>engine\drawables</Filter>
+    </ClInclude>
+    <ClInclude Include="gStaticBufferedDrawables.h">
+      <Filter>engine\drawables</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

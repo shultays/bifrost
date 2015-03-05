@@ -278,15 +278,26 @@ public:
 	void bindNormal(int stride, int pointer) {
 		bindAttribute("aVertexNormal", stride, pointer);
 	}
+	void setAttributeNormal(const Vec3& normal) {
+		setAttributeConstant("aVertexNormal", normal);
+	}
 	void bindColor(int stride, int pointer) {
 		bindAttribute("aVertexColor", stride, pointer);
 	}
+	void setAttributeColor(const Vec4& color) {
+		setAttributeConstant("aVertexColor", color);
+	}
+
 	void bindUV(int stride, int pointer) {
 		bindAttribute("aVertexUV", stride, pointer);
 	}
 	void bindTextureWeights(int stride, int pointer) {
 		bindAttribute("aTextureWeights", stride, pointer);
 	}
+	void setAttributeTextureWeights(const Vec4& weights) {
+		setAttributeConstant("aTextureWeights", weights);
+	}
+
 
 	void bindAttribute(char* name, int stride, int pointer) {
 		Attribute& attribute = attributes.at(name);
@@ -309,14 +320,12 @@ public:
 		addUniform("uTexture2", TypeInt);
 		addUniform("uTexture3", TypeInt);
 		addUniform("uTextureCount", TypeInt);
-
 	}
+
 	void addUniform(char* name, int uniformType) {
 		Uniform& uniform = uniforms[name] = Uniform(uniformType);
 		uniform.location = glGetUniformLocation(shaderProgram, name);
 	}
-
-
 
 	void setWorldMatrix(const Mat4& mat) {
 		setUniform("uWorldMatrix", mat);

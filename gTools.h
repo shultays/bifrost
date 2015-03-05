@@ -30,6 +30,7 @@ const float epsilon = 0.000001f;
 
 
 #define SAFE_DELETE(x) do{if(x){delete x; x = NULL;}}while(0)
+#define SAFE_DELETE_ARR(x) do{if(x){delete[] x; x = NULL;}}while(0)
 #define swapt(x, y) do{auto t=x; x=y; y=t;}while(0) 
 #define vec3_to_3_float(vec) vec.x, vec.y, vec.z
 

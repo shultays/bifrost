@@ -16,13 +16,9 @@
 
 #include "gTexture.h"
 
+#include "gStaticBufferedDrawables.h"
+
 class WorldMap : public gRenderable {
-	typedef struct {
-		Vec3 pos;
-		Vec3 normal;
-		Vec4 color;
-		Vec2 uv;
-	}Vertex;
 
 	PerlinMap perlinMap;
 	PerlinMap earthMap;
@@ -35,11 +31,11 @@ class WorldMap : public gRenderable {
 	Grid<Vec3> normalMap;
 	Grid<Vec3> colorMap;
 
-	GLuint vertexBuffer;
-	GLuint indexBuffer;
-	GLuint waterBuffer;
-
 	gTexture* texture;
+
+	gStaticIndexBufferedDrawable *terrainDrawable;
+	gStaticTriangleVertexBufferDrawable *waterDrawable;
+
 public:
 	WorldMap() : WorldMap(512 * 1024.0f, 128) {
 
@@ -49,10 +45,14 @@ public:
 		this->mapSize = mapSize;
 		this->edgeCount = edgeCount;
 		this->gridSize = mapSize / edgeCount;
-
-		indexBuffer = vertexBuffer = waterBuffer = -1;
-
+		waterDrawable = NULL;
+		terrainDrawable = NULL;
 		texture = new gTexture("images/lena.png");
+	}
+
+	~WorldMap() {
+		waterDrawable = NULL;
+		terrainDrawable = NULL;
 	}
 
 	void build() {
@@ -93,12 +93,13 @@ public:
 		earthMap.addPerlinShell(55, 0.0, 0.05f, 0.50f);
 		earthMap.addPerlinShell(85, 0.0, 0.05f, 0.50f);
 
-		if (indexBuffer != -1) {
-			glDeleteBuffers(1, &indexBuffer);
-			glDeleteBuffers(1, &vertexBuffer);
-			glDeleteBuffers(1, &waterBuffer);
-		}
+		SAFE_DELETE(terrainDrawable);
+		SAFE_DELETE(waterDrawable);
+
+		terrainDrawable = new gStaticIndexBufferedDrawable(VERTEX_PROP_COLOR | VERTEX_PROP_NORMAL | VERTEX_PROP_POSITION | VERTEX_PROP_UV, edgeCount*edgeCount, (edgeCount - 1)*(edgeCount - 1) * 6, false);
+		waterDrawable = new gStaticTriangleVertexBufferDrawable(VERTEX_PROP_POSITION, 6, false);
 		buildHeightMap();
+
 		buildNormalMap();
 		buildColorMap();
 		buildBuffer();
@@ -250,119 +251,67 @@ public:
 
 	}
 	void buildBuffer() {
-		Vertex* vertices = new Vertex[edgeCount*edgeCount];
 
+
+		*waterDrawable->getVertexPointerAt(0).position = Vec3(-mapSize / 2, -mapSize / 2, 0.0f);
+		*waterDrawable->getVertexPointerAt(1).position = Vec3(+mapSize / 2, -mapSize / 2, 0.0f);
+		*waterDrawable->getVertexPointerAt(2).position = Vec3(-mapSize / 2, +mapSize / 2, 0.0f);
+		*waterDrawable->getVertexPointerAt(3).position = Vec3(+mapSize / 2, -mapSize / 2, 0.0f);
+		*waterDrawable->getVertexPointerAt(4).position = Vec3(+mapSize / 2, +mapSize / 2, 0.0f);
+		*waterDrawable->getVertexPointerAt(5).position = Vec3(-mapSize / 2, +mapSize / 2, 0.0f);
+
+		waterDrawable->build();
+
+		waterDrawable->setConstantNormal(Vec3(0.0f, 0.0f, 1.0f));
+		waterDrawable->setConstantColor(Vec4(0.0f, 0.0f, 0.5f, 0.8f));
+
+		int k = 0;
 		for (int i = 0; i < edgeCount; i++) {
 			for (int j = 0; j < edgeCount; j++) {
-				vertices[i + j*edgeCount].pos = Vec3((i - edgeCount / 2.0f)*gridSize, (j - edgeCount / 2.0f)*gridSize, heightMap[i][j]);
-				vertices[i + j*edgeCount].normal = normalMap[i][j];
-				vertices[i + j*edgeCount].color = Vec4(colorMap[i][j], 1.0f);
-				vertices[i + j*edgeCount].uv = Vec2(((float)i) / edgeCount, ((float)j) / edgeCount);
+				VertexPointer pointer = terrainDrawable->getVertexPointerAt(k++);
+				*pointer.position = Vec3((i - edgeCount / 2.0f)*gridSize, (j - edgeCount / 2.0f)*gridSize, heightMap[i][j]);
+				*pointer.normal = normalMap[i][j];
+				*pointer.color = Vec4(colorMap[i][j], 1.0f);
+				*pointer.uv = Vec2(((float)i) / edgeCount, ((float)j) / edgeCount);
 			}
 		}
-
-		glGenBuffers(1, &vertexBuffer);
-		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-		glBufferData(GL_ARRAY_BUFFER, edgeCount*edgeCount*sizeof(Vertex), vertices, GL_STATIC_DRAW);
-		unsigned int *indices = new unsigned int[(edgeCount - 1)*(edgeCount - 1) * 6];
-
-
+		k = 0;
 		for (int i = 0; i < (edgeCount - 1); i++) {
 			for (int j = 0; j < (edgeCount - 1); j++) {
-
-				indices[6 * (i + j*(edgeCount - 1)) + 0] = i + j*edgeCount;
-				indices[6 * (i + j*(edgeCount - 1)) + 1] = (i + 1) + j*edgeCount;
-				indices[6 * (i + j*(edgeCount - 1)) + 2] = i + (j + 1)*edgeCount;
-
-				indices[6 * (i + j*(edgeCount - 1)) + 3] = (i + 1) + j*edgeCount;
-				indices[6 * (i + j*(edgeCount - 1)) + 4] = (i + 1) + (j + 1)*edgeCount;
-				indices[6 * (i + j*(edgeCount - 1)) + 5] = i + (j + 1)*edgeCount;
+				terrainDrawable->setIndexAt(k++, i + j*edgeCount);
+				terrainDrawable->setIndexAt(k++, (i + 1) + j*edgeCount);
+				terrainDrawable->setIndexAt(k++, i + (j + 1)*edgeCount);
+				terrainDrawable->setIndexAt(k++, (i + 1) + j*edgeCount);
+				terrainDrawable->setIndexAt(k++, (i + 1) + (j + 1)*edgeCount);
+				terrainDrawable->setIndexAt(k++, i + (j + 1)*edgeCount);
 			}
 		}
 
-
-		glGenBuffers(1, &indexBuffer);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, (edgeCount - 1)*(edgeCount - 1) * 6 * sizeof(unsigned int), indices, GL_STATIC_DRAW);
-
-		delete indices;
-		delete vertices;
-
-
-		Vertex water[6];
-		water[0].pos.x = -mapSize / 2;
-		water[0].pos.y = -mapSize / 2;
-		water[0].pos.z = 0.0f;
-		water[1].pos.x = +mapSize / 2;
-		water[1].pos.y = -mapSize / 2;
-		water[1].pos.z = 0.0f;
-		water[2].pos.x = -mapSize / 2;
-		water[2].pos.y = +mapSize / 2;
-		water[2].pos.z = 0.0f;
-
-		water[3].pos.x = +mapSize / 2;
-		water[3].pos.y = -mapSize / 2;
-		water[3].pos.z = 0.0f;
-		water[4].pos.x = +mapSize / 2;
-		water[4].pos.y = +mapSize / 2;
-		water[4].pos.z = 0.0f;
-		water[5].pos.x = -mapSize / 2;
-		water[5].pos.y = +mapSize / 2;
-		water[5].pos.z = 0.0f;
-
-		water[0].normal = water[1].normal = water[2].normal
-			= water[3].normal = water[4].normal = water[5].normal = Vec3(0.0f, 0.0f, 1.0f);
-
-		water[0].color = water[1].color = water[2].color
-			= water[3].color = water[4].color = water[5].color = Vec4(0.0f, 0.0f, 1.0f, 0.5f);
-
-		glGenBuffers(1, &waterBuffer);
-		glBindBuffer(GL_ARRAY_BUFFER, waterBuffer);
-		glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(Vertex), water, GL_STATIC_DRAW);
-
+		terrainDrawable->build();
 
 	}
 
 
 	virtual void render() override {
-		gears.game->shader.setWorldMatrix(Mat4::scale(Vec3(0.003f, 0.003f, 0.003f)));;
-
+		gears.game->shader.setWorldMatrix(Mat4::scale(Vec3(0.003f, 0.003f, 0.003f)));
 		gears.game->shader.setColor(Vec4(1.0, 1.0f, 1.0f, 1.0f));
-		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-
-
-		gears.game->shader.bindPosition(sizeof(Vertex), 0);
-		gears.game->shader.bindNormal(sizeof(Vertex), sizeof(Vec3));
-		gears.game->shader.bindColor(sizeof(Vertex), sizeof(Vec3)+sizeof(Vec3));
-		gears.game->shader.bindUV(sizeof(Vertex), sizeof(Vec3)+sizeof(Vec3)+sizeof(Vec4));
+		/*
 
 		glActiveTexture(GL_TEXTURE0 + 0);
 		glBindTexture(GL_TEXTURE_2D, texture->textureID);
 
 		gears.game->shader.setUniform("uTexture0", 0);
 		gears.game->shader.setUniform("uTextureCount", 1);
-
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+		*/
 		if (input.isKeyDown(GLFW_KEY_A)) {
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		} else {
 			glPolygonMode(GL_FRONT, GL_FILL);
 		}
-		glDrawElements(
-			GL_TRIANGLES,
-			(edgeCount - 1)*(edgeCount - 1) * 6,
-			GL_UNSIGNED_INT,
-			(void*)0
-			);
 
+		terrainDrawable->render();
 
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-		glBindBuffer(GL_ARRAY_BUFFER, waterBuffer);
-		gears.game->shader.bindPosition(sizeof(Vertex), 0);
-		gears.game->shader.bindNormal(sizeof(Vertex), sizeof(Vec3));
-		//gears.game->shader.bindColor(sizeof(Vertex), sizeof(Vec3)+sizeof(Vec3));
-		gears.game->shader.setAttributeConstant("aVertexColor", Vec4(1.0f, 0.0f, 1.0f, 1.0f));
-		glDrawArrays(GL_TRIANGLES, 0, 6);
+		waterDrawable->render();
 
 		/*
 		Mat4 projection = Mat4::perspective(100.0f, 2500.0f, degreeToRadian(90.0f), (float)gears.width, (float)gears.height);
