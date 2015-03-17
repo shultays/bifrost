@@ -12,11 +12,17 @@ void Valhalla::init() {
 
 	world = new WorldMap();
 	world->build();
+
+	camera->focusPoint = Vec3(world->getMapSize() / 2, world->getMapSize() / 2, 0);
+	camera->distanceToFocus = 10000.0f;
 }
 
 void Valhalla::tick(float dt) {
-
-
+	if (input.isKeyDown(GLFW_KEY_A)) {
+		glPolygonMode(GL_FRONT, GL_LINE);
+	} else {
+		glPolygonMode(GL_FRONT, GL_FILL);
+	}
 }
 
 
@@ -41,6 +47,8 @@ void Valhalla::update(float fixed_dt) {
 		camera->focusPoint += dir * (input.getMouseDelta().y * camera->distanceToFocus * 0.003f);
 		camera->focusPoint -= side * (input.getMouseDelta().x * camera->distanceToFocus * 0.003f);
 	}
+
+	camera->focusPoint.z = world->getHeightAt(camera->focusPoint.vec2);
 
 	if (input.isKeyDown(MOUSE_BUTTON_MID)) {
 		camera->distanceToFocus *= 1.0f + (input.getMouseDelta().y * 0.003f);

@@ -12,8 +12,6 @@ void gGame::render() {
 	glMatrixMode(GL_PROJECTION);
 	glLoadMatrixf(projection.data);
 
-	glMatrixMode(GL_MODELVIEW);
-	glLoadMatrixf(view.data);
 
 	Vec3 pos = activeCamera->getPos();
 	Vec3 focus = pos + activeCamera->getDir();

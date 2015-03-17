@@ -35,6 +35,9 @@ public:
 		this->h = h;
 		data = new T[w*h];
 	}
+	void init(int s) {
+		init(s, s);
+	}
 	void setAll(T a) {
 		T* p = data + w*h;
 		while (p-- > data) *p = a;

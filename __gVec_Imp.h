@@ -353,6 +353,13 @@ public:
 		return ret;
 	}
 
+	G_VEC_IMP_NAME(G_VEC_PREV_1_CLASS xy, G_VEC_TYPE z) {
+		data[0] = xy.x;
+		data[1] = xy.y;
+		data[2] = z;
+	}
+
+
 	G_VEC_IMP_NAME(G_VEC_TYPE x, G_VEC_TYPE y, G_VEC_TYPE z) {
 		data[0] = x;
 		data[1] = y;
@@ -393,11 +400,11 @@ public:
 #endif
 		return ret;
 	}
-	G_VEC_IMP_NAME(G_VEC_PREV_1_CLASS vec, G_VEC_TYPE con) {
-		data[0] = vec.x;
-		data[1] = vec.y;
-		data[2] = vec.z;
-		data[3] = con;
+	G_VEC_IMP_NAME(G_VEC_PREV_1_CLASS xyz, G_VEC_TYPE o) {
+		data[0] = xyz.x;
+		data[1] = xyz.y;
+		data[2] = xyz.z;
+		data[3] = o;
 	}
 	G_VEC_IMP_NAME(G_VEC_TYPE x, G_VEC_TYPE y, G_VEC_TYPE z) {
 		data[0] = x;

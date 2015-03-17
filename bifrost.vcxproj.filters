@@ -66,6 +66,12 @@
     <ClCompile Include="gStaticBufferedDrawables.cpp">
       <Filter>engine\drawables</Filter>
     </ClCompile>
+    <ClCompile Include="WorldMap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TerrainNode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Valhalla.h">
@@ -145,6 +151,9 @@
     </ClInclude>
     <ClInclude Include="gStaticBufferedDrawables.h">
       <Filter>engine\drawables</Filter>
+    </ClInclude>
+    <ClInclude Include="TerrainNode.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

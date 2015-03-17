@@ -14,8 +14,18 @@ class PerlinMap {
 	std::vector<PerlinShell> shells;
 	float mapSize;
 public:
-	PerlinMap(float mapSize) {
+
+
+	PerlinMap(float mapSize = 128.0f) {
+		setMapSize(mapSize);
+	}
+
+	void setMapSize(float mapSize) {
 		this->mapSize = mapSize;
+	}
+
+	int getShellCount() {
+		return shells.size();
 	}
 
 	void addPerlinShell(int nodeCount, float min_height, float max_height, float percentage = 0.5f, float pow_val = 1.0f, int seed = -1) {
