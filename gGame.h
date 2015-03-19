@@ -27,7 +27,12 @@ public:
 
 
 class gRenderable {
+	friend class gGame;
+private:
+	void gRender();
+
 public:
+	Mat4 frame;
 	int enabled;
 	gRenderable(bool autoAdd = true, int priority = max_priority);
 	virtual ~gRenderable();
@@ -138,9 +143,17 @@ public:
 		worldMatDirty = true;
 		worldMatrixStack[currentStack].scaleBy(Vec3(s));
 	}
+	void scale(float x, float y, float z) {
+		worldMatDirty = true;
+		worldMatrixStack[currentStack].scaleBy(Vec3(x, y, z));
+	}
 	void scale(const Vec3& s) {
 		worldMatDirty = true;
 		worldMatrixStack[currentStack].scaleBy(s);
+	}
+	void multiply(const Mat4& m) {
+		worldMatDirty = true;
+		worldMatrixStack[currentStack] *= m;
 	}
 };
 

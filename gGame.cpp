@@ -4,7 +4,7 @@
 #include <stdlib.h>
 
 void gGame::render() {
-	Mat4 projection = Mat4::perspective(1.0f, 2500.0f, degreeToRadian(90.0f), (float)gears.width, (float)gears.height);
+	Mat4 projection = Mat4::perspective(activeCamera->nearPlane, activeCamera->farPlane, degreeToRadian(90.0f), (float)gears.width, (float)gears.height);
 	Mat4 view = activeCamera->getLookAt();
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -17,9 +17,9 @@ void gGame::render() {
 	Vec3 focus = pos + activeCamera->getDir();
 	Vec3 up = activeCamera->getUp();
 
-
+	resetWorldStack();
 	shader.begin();
-	shader.setWorldMatrix(Mat4::identity());
+	shader.setColor(Vec4(1.0, 1.0f, 1.0f, 1.0f));
 	shader.setViewMatrix(view);
 	shader.setProjectionMatrix(projection);
 	/*
@@ -38,7 +38,7 @@ void gGame::render() {
 
 	glShadeModel(GL_SMOOTH);*/
 	for (int i = renderList.size() - 1; i >= 0; i--) {
-		if (renderList[i]->enabled) renderList[i]->render();
+		if (renderList[i]->enabled) renderList[i]->gRender();
 	}
 	/*
 	glUseProgram(0);
@@ -60,7 +60,6 @@ void gGame::render() {
 	glVertex3f(+10.0f, +10.f, 0.0f);
 	glVertex3f(-10.0f, +10.f, 0.0f);
 	glVertex3f(-10.0f, -10.f, 0.0f);
-
 
 	glEnd();
 }
@@ -91,8 +90,22 @@ gUpdatable::~gUpdatable() {
 
 gRenderable::gRenderable(bool autoAdd, int priority) {
 	enabled = true;
+	frame.makeIdentity();
 	if (autoAdd) {
 		gears.game->addRenderable(this, priority);
+	}
+}
+
+void gRenderable::gRender() {
+	bool identity = frame.isIdentity();
+	if (!identity) {
+		gears.game->pushMatrix();
+		gears.game->multiply(frame);
+	}
+	gears.game->updateShaderUniforms();
+	render();
+	if (!identity) {
+		gears.game->popMatrix();
 	}
 }
 

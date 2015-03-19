@@ -269,18 +269,18 @@ float WorldMap::getHeightAt(Vec2& pos) {
 		r = p4 * (1.0f - dx - dy) + dx * p2 + dy * p1;
 	}
 	float t = detailMap.getHeightAt(pos);
-	return r * 3 + t;
+	return r;
 }
 
 void WorldMap::buildBuffer() {
 
 
-	*waterDrawable->getVertexPointerAt(0).position = Vec3(0.0f, 0.0f, 0.0f);
-	*waterDrawable->getVertexPointerAt(1).position = Vec3(+mapSize, 0.0f, 0.0f);
-	*waterDrawable->getVertexPointerAt(2).position = Vec3(0.0f, +mapSize, 0.0f);
-	*waterDrawable->getVertexPointerAt(3).position = Vec3(+mapSize, 0.0f, 0.0f);
-	*waterDrawable->getVertexPointerAt(4).position = Vec3(+mapSize, +mapSize, 0.0f);
-	*waterDrawable->getVertexPointerAt(5).position = Vec3(0.0f, +mapSize, 0.0f);
+	*waterDrawable->getVertexPointerAt(0).position = Vec3(0.0f, 0.0f, 0.0f) * WORLD_MAP_SCALE;
+	*waterDrawable->getVertexPointerAt(1).position = Vec3(+mapSize, 0.0f, 0.0f) * WORLD_MAP_SCALE;
+	*waterDrawable->getVertexPointerAt(2).position = Vec3(0.0f, +mapSize, 0.0f) * WORLD_MAP_SCALE;
+	*waterDrawable->getVertexPointerAt(3).position = Vec3(+mapSize, 0.0f, 0.0f) * WORLD_MAP_SCALE;
+	*waterDrawable->getVertexPointerAt(4).position = Vec3(+mapSize, +mapSize, 0.0f) * WORLD_MAP_SCALE;
+	*waterDrawable->getVertexPointerAt(5).position = Vec3(0.0f, +mapSize, 0.0f) * WORLD_MAP_SCALE;
 
 	waterDrawable->build();
 
@@ -291,7 +291,7 @@ void WorldMap::buildBuffer() {
 	for (int i = 0; i < edgeCount; i++) {
 		for (int j = 0; j < edgeCount; j++) {
 			VertexPointer pointer = terrainDrawable->getVertexPointerAt(k++);
-			*pointer.position = Vec3(i*gridSize, j*gridSize, heightMap[i][j] * 3);
+			*pointer.position = Vec3(i*gridSize, j*gridSize, heightMap[i][j])*WORLD_MAP_SCALE;
 			*pointer.normal = normalMap[i][j];
 			*pointer.color = Vec4(colorMap[i][j], 1.0f);
 			*pointer.uv = Vec2(((float)i) / edgeCount, ((float)j) / edgeCount);
@@ -316,20 +316,6 @@ void WorldMap::buildBuffer() {
 
 
 void WorldMap::render() {
-	Mat4 projection = Mat4::perspective(1500.0f, 1000000.0f, degreeToRadian(90.0f), (float)gears.width, (float)gears.height);
-	Mat4 oldProjection = Mat4::perspective(1.0f, 2500.0f, degreeToRadian(90.0f), (float)gears.width, (float)gears.height);
-
-
-	gears.game->shader.setProjectionMatrix(projection);
-	glLoadMatrixf(projection.data);
-
-	gears.game->shader.setColor(Vec4(1.0, 1.0f, 1.0f, 1.0f));
-
 	terrainDrawable->render();
 	waterDrawable->render();
-
-
-	gears.game->shader.setProjectionMatrix(oldProjection);
-	glLoadMatrixf(oldProjection.data);
-
 }

@@ -3,8 +3,6 @@
 
 
 void gStaticIndexBufferedDrawable::render() {
-	gears.game->updateShaderUniforms();
-
 	gStaticVertexBuffer::bind();
 	gStaticIndexBuffer::bind();
 
@@ -12,9 +10,6 @@ void gStaticIndexBufferedDrawable::render() {
 }
 
 void gStaticTriangleVertexBufferDrawable::render() {
-	gears.game->updateShaderUniforms();
-
 	bind();
-
 	glDrawArrays(GL_TRIANGLES, 0, this->vertexCount);
 }

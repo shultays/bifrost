@@ -6,9 +6,9 @@
 const int max_priority = 10000;
 
 template <class T, int N>
-class FixedSizedPriorityArray{
+class FixedSizedPriorityArray {
 
-	struct Element{
+	struct Element {
 		int p;
 		T item;
 	};
@@ -16,8 +16,8 @@ class FixedSizedPriorityArray{
 	Element data[N];
 	int count;
 
-	void fixInsert(int i){
-		while (true){
+	void fixInsert(int i) {
+		while (true) {
 			if (i == 0) break;
 			if (data[i].p > data[i - 1].p) break;
 			int j = i - 1;
@@ -30,9 +30,9 @@ class FixedSizedPriorityArray{
 		}
 	}
 
-	void fixRemove(int i){
-		while (true){
-			if (i == count-1) break;
+	void fixRemove(int i) {
+		while (true) {
+			if (i == count - 1) break;
 			if (data[i].p < data[i + 1].p) break;
 			int j = i + 1;
 			int p = data[j].p;
@@ -44,63 +44,63 @@ class FixedSizedPriorityArray{
 		}
 	}
 
-	int fix(int i){
+	int fix(int i) {
 		if (i > 0 && data[i].p < data[i - 1].p) fixInsert(i);
-		if (i < count -1 && data[i].p < data[i + 1].p) fixRemove(i);
+		if (i < count - 1 && data[i].p < data[i + 1].p) fixRemove(i);
 	}
 
 public:
-	FixedSizedPriorityArray(){
+	FixedSizedPriorityArray() {
 		count = 0;
 	}
 
-	void clear(){
+	void clear() {
 		count = 0;
 	}
 
-	void insert(T item, int priority){
+	void insert(T item, int priority) {
 		assert(count < N);
 		data[count].item = item;
 		data[count].p = priority;
 		count++;
-		fixInsert(count-1);
+		fixInsert(count - 1);
 	}
 
-	void insert(T item){
+	void insert(T item) {
 		insert(item, max_priority);
 	}
 
-	void remove(T item){
-		for (int i = 0; i < count; i++){
-			if (data[i].item == item){
+	void remove(T item) {
+		for (int i = 0; i < count; i++) {
+			if (data[i].item == item) {
 				removeAtIndex(i);
 				return;
 			}
 		}
 	}
-	void removeAtIndex(int i){
+	void removeAtIndex(int i) {
 		data[i].p = max_priority + 1;
 		fixRemove(i);
 		count--;
 	}
 
-	void changePriority(T item, int newPriority){
-		for (int i = 0; i < count; i++){
-			if (data[i].item == item){
+	void changePriority(T item, int newPriority) {
+		for (int i = 0; i < count; i++) {
+			if (data[i].item == item) {
 				changePriorityAtIndex(i, newPriority);
 				return;
 			}
 		}
 	}
-	int changePriorityAtIndex(int i, int newPriority){
+	int changePriorityAtIndex(int i, int newPriority) {
 		data[i].p = newPriority;
 		fix(i);
 	}
-	inline T operator[](int i){
+	inline T& operator[](int i) {
 		return data[i].item;
 	}
 
-	int size(){
+	int size() {
 		return count;
 	}
 };

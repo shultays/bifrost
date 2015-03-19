@@ -33,7 +33,7 @@ void TerrainNode::build(Vec2 min, Vec2 max, int edgeCount) {
 			p.y += diff.y * (float)j / (edgeCount - 1);
 
 			VertexPointer pointer = drawable->getVertexPointerAt(k++);
-			*pointer.position = Vec3(p, heightMap[i][j] * 3);
+			*pointer.position = Vec3(p, heightMap[i][j]);
 
 			printf("%f %f %f\n", pointer.position->x, pointer.position->y, pointer.position->z);
 		}
@@ -59,6 +59,5 @@ void TerrainNode::build(Vec2 min, Vec2 max, int edgeCount) {
 
 void TerrainNode::render() {
 
-	gears.game->shader.setColor(Vec4(1.0, 1.0f, 1.0f, 1.0f));
 	drawable->render();
 }

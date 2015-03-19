@@ -2,24 +2,24 @@
 #define FIXED_SIZED_ARRAY_H__
 #include "gTools.h"
 template <class T, int N>
-class FixedSizedArray{
+class FixedSizedArray {
 	T data[N];
 	int count;
 public:
-	
-	FixedSizedArray(){
+
+	FixedSizedArray() {
 		count = 0;
 	}
-	void clear(){
+	void clear() {
 		count = 0;
 	}
-	void insert(T item){
+	void insert(T item) {
 		assert(count < N);
 		data[count++] = item;
 	}
-	void remove(T item){
-		for (int i = 0; i < count; i++){
-			if (data[i] == item){
+	void remove(T item) {
+		for (int i = 0; i < count; i++) {
+			if (data[i] == item) {
 				data[i] = data[count - 1];
 				count--;
 				return;
@@ -27,15 +27,15 @@ public:
 		}
 	}
 
-	void removeAtIndex(int i){
+	void removeAtIndex(int i) {
 		data[i] = data[count - 1];
 		count--;
 	}
-	inline T operator[](int i){
+	inline T& operator[](int i) {
 		return data[i];
 	}
 
-	int size(){
+	int size() {
 		return count;
 	}
 };

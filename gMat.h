@@ -80,6 +80,25 @@ public:
 		_33 = 1.0f;
 	}
 
+	bool isIdentity() {
+		return
+			_00 == 1.0f &&
+			_01 == 0.0f &&
+			_02 == 0.0f &&
+			_03 == 0.0f &&
+			_10 == 0.0f &&
+			_11 == 1.0f &&
+			_12 == 0.0f &&
+			_13 == 0.0f &&
+			_20 == 0.0f &&
+			_21 == 0.0f &&
+			_22 == 1.0f &&
+			_23 == 0.0f &&
+			_30 == 0.0f &&
+			_31 == 0.0f &&
+			_32 == 0.0f &&
+			_33 == 1.0f;
+	}
 
 	static Mat4 rotation(float angle, const Vec3& axis) {
 		float s = sin(angle);
@@ -225,42 +244,12 @@ public:
 
 
 	Mat4& scaleBy(const Vec3& vec) {
-		_00 *= vec[0];
-		_01 *= vec[1];
-		_02 *= vec[2];
-
-		_10 *= vec[0];
-		_11 *= vec[1];
-		_12 *= vec[2];
-
-		_20 *= vec[0];
-		_21 *= vec[1];
-		_22 *= vec[2];
-
-		_30 *= vec[0];
-		_31 *= vec[1];
-		_32 *= vec[2];
-
+		*this = *this*Mat4::scale(vec);
 		return *this;
 	}
 
 	Mat4& scaleBy(float con) {
-		_00 *= con;
-		_01 *= con;
-		_02 *= con;
-
-		_10 *= con;
-		_11 *= con;
-		_12 *= con;
-
-		_20 *= con;
-		_21 *= con;
-		_22 *= con;
-
-		_30 *= con;
-		_31 *= con;
-		_32 *= con;
-
+		*this = *this*Mat4::scale(con);
 		return *this;
 	}
 

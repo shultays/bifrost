@@ -9,6 +9,10 @@ class gFocusCamera;
 class Valhalla : public gGame, public gTickable, public gUpdatable {
 	WorldMap *world;
 	gFocusCamera* camera;
+	gFPSCamera* fpsCamera;
+
+	bool isFPS;
+
 	void init() override;
 	void tick(float dt) override;
 	void update(float fixed_dt) override;

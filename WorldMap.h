@@ -8,10 +8,11 @@
 #include "Grid.h"
 
 #include <vector>
-
 #include <stdlib.h>
-
 #include "TerrainNode.h"
+
+#define WORLD_MAP_SCALE 0.001f
+
 
 class gStaticIndexBufferedDrawable;
 class gTexture;
@@ -38,9 +39,7 @@ class WorldMap : public gRenderable {
 	TerrainNode node;
 
 public:
-	WorldMap() : WorldMap(512 * 1024.0f, 128) {
-
-	}
+	WorldMap() : WorldMap(512 * 1024.0f, 128) {}
 
 	WorldMap(float mapSize, int edgeCount);
 
