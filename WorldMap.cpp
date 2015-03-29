@@ -9,16 +9,17 @@
 WorldMap::WorldMap(float mapSize, int edgeCount) {
 	this->mapSize = mapSize;
 	this->edgeCount = edgeCount;
-	this->gridSize = mapSize / edgeCount;
+	this->nodeSize = mapSize / edgeCount;
 	waterDrawable = NULL;
 	terrainDrawable = NULL;
 
 	heightMap.init(edgeCount);
 	normalMap.init(edgeCount);
 	colorMap.init(edgeCount);
-	earthMap.setMapSize(mapSize);
-	perlinMap.setMapSize(mapSize);
-	detailMap.setMapSize(mapSize);
+
+	earthMap.setWorldMap(this);
+	perlinMap.setWorldMap(this);
+	detailMap.setWorldMap(this);
 
 	texture = new gTexture("images/lena.png");
 }
@@ -28,7 +29,6 @@ WorldMap::WorldMap(float mapSize, int edgeCount) {
 void WorldMap::build() {
 	perlinMap.clear();
 	earthMap.clear();
-
 
 	float maxHeight = 10000.0f;
 
@@ -55,7 +55,6 @@ void WorldMap::build() {
 	} while (start < edgeCount);
 
 	perlinMap.addPerlinShell(start, 0.0f, remainingHeight);
-
 
 	int t = 1;
 	while (mapSize / start > 0.05f) {
@@ -88,7 +87,7 @@ void WorldMap::build() {
 
 
 	node.setWorldMap(this);
-	node.build(Vec2(edgeCount*gridSize / 2.0f, edgeCount*gridSize / 2.0f), Vec2(edgeCount*gridSize / 2.0f + gridSize, edgeCount*gridSize / 2.0f + gridSize), 16);
+	node.build(Vec2(edgeCount*nodeSize / 2.0f, edgeCount*nodeSize / 2.0f), Vec2(edgeCount*nodeSize / 2.0f + nodeSize, edgeCount*nodeSize / 2.0f + nodeSize), 16);
 
 	PngExporter::writeGridToPng("images/normalMap.png", normalMap, ExportTypeVec3AsNormal);
 	PngExporter::writeGridToPng("images/heightMap.png", heightMap);
@@ -99,18 +98,20 @@ float WorldMap::getMapSize() {
 	return mapSize;
 }
 
+float WorldMap::getNodeSize() {
+	return nodeSize;
+}
+
 void WorldMap::buildHeightMap() {
 	heightMap.setAll(0.0f);
 
 	for (int i = 0; i < edgeCount; i++) {
 		for (int j = 0; j < edgeCount; j++) {
-			heightMap[i][j] = perlinMap.getHeightAt(Vec2(i*gridSize, j*gridSize));
+			heightMap[i][j] = perlinMap.getHeightAt(WorldCoor(i, j, 0.5f, 0.5f));
 		}
 	}
 
-
 	float min = FLT_MAX, max = FLT_MIN;
-
 
 	for (int i = 0; i < edgeCount; i++) {
 		for (int j = 0; j < edgeCount; j++) {
@@ -174,15 +175,13 @@ void WorldMap::buildHeightMap() {
 			max = gmax(max, heightMap[i][j]);
 		}
 	}
-	printf("%f %f\n", min, max);
-
 }
 void WorldMap::buildNormalMap() {
 	for (int i = 1; i < edgeCount - 1; i++) {
 		for (int j = 1; j < edgeCount - 1; j++) {
-			float dt = 1.0f*gridSize;
-			float sx = perlinMap.getHeightAt(Vec2(i*gridSize + dt, j*gridSize)) - perlinMap.getHeightAt(Vec2(i*gridSize - dt, j*gridSize));
-			float sy = perlinMap.getHeightAt(Vec2(i*gridSize, j*gridSize + dt)) - perlinMap.getHeightAt(Vec2(i*gridSize, j*gridSize - dt));
+			float dt = 1.0f*nodeSize;
+			float sx = perlinMap.getHeightAt(WorldCoor(i + 1, j)) - perlinMap.getHeightAt(WorldCoor(i - 1, j));
+			float sy = perlinMap.getHeightAt(WorldCoor(i, j + 1)) - perlinMap.getHeightAt(WorldCoor(i, j - 1));
 
 
 			normalMap[i][j] = Vec3(-sx, sy, 2.0f*dt);
@@ -207,7 +206,7 @@ void WorldMap::buildColorMap() {
 			saturate(snowW);
 
 
-			float forestW = earthMap.getHeightAt(Vec2(i*gridSize, j*gridSize));
+			float forestW = earthMap.getHeightAt(WorldCoor(i, j));
 			saturate(forestW);
 
 			Vec3 finalColor = Vec3::zero();
@@ -235,13 +234,13 @@ void WorldMap::buildColorMap() {
 	}
 }
 
-float WorldMap::getHeightAt(Vec2& pos) {
+float WorldMap::getHeightAt(WorldCoor &coor) {
 	int i, j;
 	float dx, dy;
-	float tx = pos.x / gridSize;
-	float ty = pos.y / gridSize;
-	i = (int)floor(tx);
-	j = (int)floor(ty);
+	float tx = coor.pos.x / nodeSize;
+	float ty = coor.pos.y / nodeSize;
+	i = (int)floor(tx) + coor.index.x;
+	j = (int)floor(ty) + coor.index.y;
 	dx = tx - i;
 	dy = ty - j;
 
@@ -268,7 +267,7 @@ float WorldMap::getHeightAt(Vec2& pos) {
 
 		r = p4 * (1.0f - dx - dy) + dx * p2 + dy * p1;
 	}
-	float t = detailMap.getHeightAt(pos);
+	//float t = detailMap.getHeightAt(pos);
 	return r;
 }
 
@@ -291,7 +290,7 @@ void WorldMap::buildBuffer() {
 	for (int i = 0; i < edgeCount; i++) {
 		for (int j = 0; j < edgeCount; j++) {
 			VertexPointer pointer = terrainDrawable->getVertexPointerAt(k++);
-			*pointer.position = Vec3(i*gridSize, j*gridSize, heightMap[i][j])*WORLD_MAP_SCALE;
+			*pointer.position = Vec3(i*nodeSize, j*nodeSize, heightMap[i][j] * 3.0f)*WORLD_MAP_SCALE;
 			*pointer.normal = normalMap[i][j];
 			*pointer.color = Vec4(colorMap[i][j], 1.0f);
 			*pointer.uv = Vec2(((float)i) / edgeCount, ((float)j) / edgeCount);

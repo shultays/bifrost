@@ -18,8 +18,8 @@ void TerrainNode::build(Vec2 min, Vec2 max, int edgeCount) {
 			Vec2 p = min;
 			p.x += diff.x * (float)i / (edgeCount - 1);
 			p.y += diff.y * (float)j / (edgeCount - 1);
-			float h = world->getHeightAt(p);
-			heightMap[i][j] = h;
+			//float h = world->getHeightAt(p);
+			//heightMap[i][j] = h;
 		}
 	}
 
@@ -34,8 +34,6 @@ void TerrainNode::build(Vec2 min, Vec2 max, int edgeCount) {
 
 			VertexPointer pointer = drawable->getVertexPointerAt(k++);
 			*pointer.position = Vec3(p, heightMap[i][j]);
-
-			printf("%f %f %f\n", pointer.position->x, pointer.position->y, pointer.position->z);
 		}
 	}
 	k = 0;

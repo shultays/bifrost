@@ -75,9 +75,9 @@ void Valhalla::update(float fixed_dt) {
 		fpsCamera->elevation += input.getMouseDelta().y * 0.003f;
 		clamp(fpsCamera->elevation, -pi_d2*0.99f, pi_d2*0.99f);
 
-		float h = world->getHeightAt(camera->focusPoint.vec2 / WORLD_MAP_SCALE + fpsCamera->pos.vec2);
+		//float h = world->getHeightAt(camera->focusPoint.vec2 / WORLD_MAP_SCALE + fpsCamera->pos.vec2);
 
-		fpsCamera->pos.z = h + 2.0f;
+		//fpsCamera->pos.z = h + 2.0f;
 
 	} else {
 		if (input.isKeyDown(MOUSE_BUTTON_LEFT)) {

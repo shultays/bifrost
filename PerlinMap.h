@@ -5,6 +5,7 @@
 
 #include "gVec.h"
 #include "PerlinShell.h"
+#include "Tools.h"
 
 #include <vector>
 #include <stdlib.h>
@@ -12,16 +13,12 @@
 
 class PerlinMap {
 	std::vector<PerlinShell> shells;
-	float mapSize;
+	WorldMap *world;
 public:
+	PerlinMap() {}
 
-
-	PerlinMap(float mapSize = 128.0f) {
-		setMapSize(mapSize);
-	}
-
-	void setMapSize(float mapSize) {
-		this->mapSize = mapSize;
+	void setWorldMap(WorldMap *world) {
+		this->world = world;
 	}
 
 	int getShellCount() {
@@ -29,29 +26,27 @@ public:
 	}
 
 	void addPerlinShell(int nodeCount, float min_height, float max_height, float percentage = 0.5f, float pow_val = 1.0f, int seed = -1) {
-		shells.push_back(PerlinShell(mapSize, nodeCount, min_height, max_height, percentage, pow_val, seed));
+		shells.push_back(PerlinShell(world, nodeCount, min_height, max_height, percentage, pow_val, seed));
 	}
 
-	float getHeightAt(const Vec2& vec) {
-		return getHeightAt(vec, shells.size());
-	}
-	float getHeightAt(float x, float y) {
-		return getHeightAt(Vec2(x, y), shells.size());
-	}
-	void clear() {
-		shells.clear();
+	float getHeightAt(const WorldCoor& coor) {
+		return getHeightAt(coor, shells.size());
 	}
 
-	float getHeightAt(const Vec2& vec, int maxShell) {
+	float getHeightAt(const WorldCoor& coor, int maxShell) {
 		float t = 0.0f;
 		for (int i = 0; i < maxShell; i++) {
-			t += shells[i].getHeightAt(vec);
+			t += shells[i].getHeightAt(coor);
 		}
 		return t;
 	}
 
-	float getMapSize() {
-		return mapSize;
+	void clear() {
+		shells.clear();
+	}
+
+	WorldMap* getWorldMap() {
+		return world;
 	}
 
 };

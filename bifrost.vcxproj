@@ -22,6 +22,7 @@
     <ClCompile Include="gTools.cpp" />
     <ClCompile Include="lodepng.cpp" />
     <ClCompile Include="Perlin.cpp" />
+    <ClCompile Include="PerlinShell.cpp" />
     <ClCompile Include="PngExporter.cpp" />
     <ClCompile Include="TerrainNode.cpp" />
     <ClCompile Include="Valhalla.cpp" />
@@ -50,6 +51,7 @@
     <ClInclude Include="PerlinMap.h" />
     <ClInclude Include="PngExporter.h" />
     <ClInclude Include="TerrainNode.h" />
+    <ClInclude Include="Tools.h" />
     <ClInclude Include="WorldMap.h" />
     <ClInclude Include="__gVec_Imp.h" />
     <ClInclude Include="Perlin.h" />

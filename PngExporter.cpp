@@ -114,9 +114,7 @@ int PngExporter::writeGridToPng(const char* fileName, PerlinMap perlin, int node
 	float max = FLT_MIN;
 	for (int i = 0; i < nodeCount; i++) {
 		for (int j = 0; j < nodeCount; j++) {
-			float x = (i*perlin.getMapSize()) / nodeCount;
-			float y = (j*perlin.getMapSize()) / nodeCount;
-			float v = perlin.getHeightAt(x, y);
+			float v = perlin.getHeightAt(WorldCoor(i, j));
 			min = gmin(min, v);
 			max = gmax(max, v);
 		}
@@ -126,9 +124,7 @@ int PngExporter::writeGridToPng(const char* fileName, PerlinMap perlin, int node
 	byte* c = image;
 	for (int i = 0; i < nodeCount; i++) {
 		for (int j = 0; j < nodeCount; j++) {
-			float x = (i*perlin.getMapSize()) / nodeCount;
-			float y = (j*perlin.getMapSize()) / nodeCount;
-			float v = perlin.getHeightAt(x, y);
+			float v = perlin.getHeightAt(WorldCoor(i, j));
 			byte r, g, b, a;
 
 			float t = (v - min) / (max - min);

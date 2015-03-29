@@ -10,6 +10,7 @@
 #include <vector>
 #include <stdlib.h>
 #include "TerrainNode.h"
+#include "Tools.h"
 
 #define WORLD_MAP_SCALE 0.001f
 
@@ -18,14 +19,14 @@ class gStaticIndexBufferedDrawable;
 class gTexture;
 class gStaticTriangleVertexBufferDrawable;
 
-class WorldMap : public gRenderable {
 
+class WorldMap : public gRenderable {
 	PerlinMap perlinMap;
 	PerlinMap detailMap;
 	PerlinMap earthMap;
 
 	float mapSize;
-	float gridSize;
+	float nodeSize;
 	int edgeCount;
 
 	Grid<float> heightMap;
@@ -52,13 +53,12 @@ public:
 
 	void build();
 	float getMapSize();
+	float getNodeSize();
 	void buildHeightMap();
 	void buildNormalMap();
 	void buildColorMap();
-	float getHeightAt(Vec2& pos);
-
+	float getHeightAt(WorldCoor &coor);
 	void buildBuffer();
-
 	virtual void render() override;
 };
 

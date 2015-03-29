@@ -66,6 +66,11 @@ public:
 		return G_VEC_IMP_NAME(0);
 	}
 
+	void setZero() {
+		for (int i = 0; i < GVEC_N; ++i)
+			data[i] = 0;
+	}
+
 	G_VEC_IMP_NAME() {
 		/*for (int i = 0; i < GVEC_N; ++i)
 			data[i] = 0;*/

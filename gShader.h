@@ -162,36 +162,34 @@ class gShader {
 	GLuint pixelShader;
 
 
-	int printShaderInfoLog(GLuint obj) {
+	void printShaderInfoLog(GLuint obj) {
 		int infologLength = 0;
 		int charsWritten = 0;
 		char *infoLog;
 
 		glGetShaderiv(obj, GL_INFO_LOG_LENGTH, &infologLength);
 
-		if (infologLength > 0) {
+		if (infologLength > 1) {
 			infoLog = (char *)malloc(infologLength);
 			glGetShaderInfoLog(obj, infologLength, &charsWritten, infoLog);
 			printf("%s\n", infoLog);
 			free(infoLog);
 		}
-		return infologLength;
 	}
 
-	int printProgramInfoLog(GLuint obj) {
+	void printProgramInfoLog(GLuint obj) {
 		int infologLength = 0;
 		int charsWritten = 0;
 		char *infoLog;
 
 		glGetProgramiv(obj, GL_INFO_LOG_LENGTH, &infologLength);
 
-		if (infologLength > 0) {
+		if (infologLength > 1) {
 			infoLog = (char *)malloc(infologLength);
 			glGetProgramInfoLog(obj, infologLength, &charsWritten, infoLog);
 			printf("%s\n", infoLog);
 			free(infoLog);
 		}
-		return infologLength;
 	}
 
 
@@ -204,10 +202,13 @@ class gShader {
 		glShaderSource(shader, 1, &cSource, NULL);
 
 		glCompileShader(shader);
-		int infoSize = printShaderInfoLog(shader);
-		if (infoSize) {
+		int compileStatus;
+
+		glGetShaderiv(shader, GL_COMPILE_STATUS, &compileStatus);
+
+		if (!compileStatus)
 			return 0;
-		}
+
 		return shader;
 	}
 
@@ -247,10 +248,13 @@ public:
 		glAttachShader(shaderProgram, pixelShader);
 
 		glLinkProgram(shaderProgram);
-		int infoSize = printProgramInfoLog(shaderProgram);
-		if (infoSize) {
+
+		int linkStatus;
+		glGetShaderiv(shaderProgram, GL_LINK_STATUS, &linkStatus);
+
+		if (!linkStatus)
 			return false;
-		}
+
 		glUseProgram(shaderProgram);
 		addDefaultUniforms();
 		addDefaultAttribs();
