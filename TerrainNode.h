@@ -25,7 +25,7 @@ public:
 		this->world = world;
 	}
 
-	void build(Vec2 min, Vec2 max, int edgeCount);
+	void build(IntVec2 index, int edgeCount);
 
 	void render();
 

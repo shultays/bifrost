@@ -43,7 +43,7 @@ public:
 		while (p-- > data) *p = a;
 	}
 
-	inline T* operator[](int i) {
+	inline T* operator[](int i) const {
 		return data + i*h;
 	}
 

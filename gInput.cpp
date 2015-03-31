@@ -149,6 +149,7 @@ gInput::gInput() {
 	mousePosAtUpdate = Vec2::zero();
 	scrollSinceUpdate = Vec2::zero();
 
+
 	keyStateHeader = 0;
 	listeners.clear();
 }

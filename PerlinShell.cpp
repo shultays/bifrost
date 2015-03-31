@@ -7,7 +7,7 @@
 
 #include <functional>
 
-float PerlinShell::getNodeHeight(int i, int j) {
+float PerlinShell::getNodeHeight(int i, int j) const {
 	return (((unsigned int)(hasher(i + edgeCount*j)) ^ seed) > acceptHash) ? 1.0f : 0.0f;
 }
 
@@ -41,7 +41,7 @@ PerlinShell::PerlinShell(WorldMap* world, int edgeCount, float minHeight, float 
 	rotate.rotateBy(pi_2*(rand() % 1000) / 1000.0f);
 	add = Vec2(((rand() % 1000) / 1000.0f), ((rand() % 1000) / 1000.0f));
 }
-float PerlinShell::getHeightAt(const WorldCoor& coor) {
+float PerlinShell::getHeightAt(const WorldCoor& coor) const {
 	Vec2 p;
 	p.x = (float)coor.index.x;
 	p.y = (float)coor.index.y;

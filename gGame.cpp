@@ -4,14 +4,10 @@
 #include <stdlib.h>
 
 void gGame::render() {
-	Mat4 projection = Mat4::perspective(activeCamera->nearPlane, activeCamera->farPlane, degreeToRadian(90.0f), (float)gears.width, (float)gears.height);
-	Mat4 view = activeCamera->getLookAt();
+	updateProjectionMatrix();
+	updateViewMatrix();
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	glMatrixMode(GL_PROJECTION);
-	glLoadMatrixf(projection.data);
-
 
 	Vec3 pos = activeCamera->getPos();
 	Vec3 focus = pos + activeCamera->getDir();
@@ -20,8 +16,6 @@ void gGame::render() {
 	resetWorldStack();
 	shader.begin();
 	shader.setColor(Vec4(1.0, 1.0f, 1.0f, 1.0f));
-	shader.setViewMatrix(view);
-	shader.setProjectionMatrix(projection);
 	/*
 	//
 	glMatrixMode(GL_PROJECTION);
@@ -53,7 +47,7 @@ void gGame::render() {
 
 	glDisable(GL_LIGHTING);
 	*/
-
+	/*
 	glBegin(GL_QUADS);
 	glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
 	glVertex3f(+10.0f, -10.f, 0.0f);
@@ -61,7 +55,16 @@ void gGame::render() {
 	glVertex3f(-10.0f, +10.f, 0.0f);
 	glVertex3f(-10.0f, -10.f, 0.0f);
 
-	glEnd();
+	glEnd();*/
+}
+
+void gGame::updateProjectionMatrix() {
+	Mat4 projection = Mat4::perspective(activeCamera->nearPlane, activeCamera->farPlane, degreeToRadian(90.0f), (float)gears.width, (float)gears.height);
+	shader.setProjectionMatrix(projection);
+}
+void gGame::updateViewMatrix() {
+	Mat4 view = activeCamera->getLookAt();
+	shader.setViewMatrix(view);
 }
 
 gTickable::gTickable(bool autoAdd) {

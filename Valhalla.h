@@ -2,6 +2,7 @@
 #define VALHALLA_H__
 
 #include "gGame.h"
+#include "Tools.h"
 
 class WorldMap;
 class gFocusCamera;
@@ -10,6 +11,8 @@ class Valhalla : public gGame, public gTickable, public gUpdatable {
 	WorldMap *world;
 	gFocusCamera* camera;
 	gFPSCamera* fpsCamera;
+
+	WorldCoor playerCoor;
 
 	bool isFPS;
 

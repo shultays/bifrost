@@ -13,10 +13,11 @@ void Valhalla::init() {
 	world = new WorldMap();
 	world->build();
 
-	camera->focusPoint = Vec3(world->getMapSize() * WORLD_MAP_SCALE / 2, world->getMapSize() * WORLD_MAP_SCALE / 2, 0);
-	camera->distanceToFocus = 100.0f;
+	playerCoor.index = IntVec2(world->getEdgeCount() / 2, world->getEdgeCount() / 2);
+	playerCoor.pos.setZero();
 
 	isFPS = false;
+	camera->distanceToFocus = 100.0f;
 
 	fpsCamera = new gFPSCamera();
 }
@@ -31,14 +32,18 @@ void Valhalla::tick(float dt) {
 
 
 void Valhalla::update(float fixed_dt) {
-
 	if (input.isKeyPressed(GLFW_KEY_C)) {
 		isFPS = !isFPS;
+		world->setIsScaled(isFPS);
 		if (isFPS) {
-			world->frame.translateBy(Vec3(-camera->focusPoint.x, -camera->focusPoint.y, 0.0f));
-			world->frame.scaleBy(1.0f / WORLD_MAP_SCALE);
+			world->setAnchorPos(playerCoor.index);
 
-			fpsCamera->pos = Vec3::zero();
+			world->frame.translateBy(Vec3((float)-playerCoor.index.x, (float)-playerCoor.index.y, 0.0f));
+			world->frame.scaleBy(Vec3(world->getNodeSize(), world->getNodeSize(), world->getNodeSize() / 3.0f));
+
+			Vec4 v(0.0f, 0.0f, 0.0f, 1.0f);
+			v *= world->frame;
+
 			activeCamera = fpsCamera;
 		} else {
 			world->frame.makeIdentity();
@@ -53,51 +58,44 @@ void Valhalla::update(float fixed_dt) {
 
 	if (isFPS) {
 
-		Vec3 dir = camera->getDir();
-		dir.z = 0.0f;
+		if (input.isKeyDown(MOUSE_BUTTON_LEFT)) {
+			fpsCamera->angle += input.getMouseDelta().x * 0.003f;
+			fix_angle(camera->angle);
+			fpsCamera->elevation += input.getMouseDelta().y * 0.003f;
+			clamp(fpsCamera->elevation, -pi_d2*0.99f, pi_d2*0.99f);
+		}
+
+		Vec2 dir = fpsCamera->getDir().vec2;
 		dir.normalize();
-		Vec3 side = Vec3::cross(dir, Vec3(0.0f, 0.0f, 1.0f));
+		Vec2 side = dir * Mat2::rotation(pi_d2);
 
 		if (input.isKeyDown(GLFW_KEY_W)) {
-			fpsCamera->pos += dir * fixed_dt;
+			playerCoor.pos += dir * fixed_dt * 1000.0f;
 		} else if (input.isKeyDown(GLFW_KEY_S)) {
-			fpsCamera->pos -= dir * fixed_dt;
+			playerCoor.pos -= dir * fixed_dt * 1000.0f;
 		}
 
 		if (input.isKeyDown(GLFW_KEY_A)) {
-			fpsCamera->pos -= side * fixed_dt;
+			playerCoor.pos -= side * fixed_dt * 1000.0f;
 		} else if (input.isKeyDown(GLFW_KEY_D)) {
-			fpsCamera->pos += side * fixed_dt;
+			playerCoor.pos += side * fixed_dt * 1000.0f;
 		}
 
-		fpsCamera->angle += input.getMouseDelta().x * 0.003f;
-		fix_angle(camera->angle);
-		fpsCamera->elevation += input.getMouseDelta().y * 0.003f;
-		clamp(fpsCamera->elevation, -pi_d2*0.99f, pi_d2*0.99f);
+		playerCoor.fix(world->getNodeSize());
 
-		//float h = world->getHeightAt(camera->focusPoint.vec2 / WORLD_MAP_SCALE + fpsCamera->pos.vec2);
 
-		//fpsCamera->pos.z = h + 2.0f;
+		Vec2 shift = (playerCoor.index - world->getAnchorPos()).toVec()*world->getNodeSize();
+
+		fpsCamera->pos.vec2 = shift + playerCoor.pos;
+		fpsCamera->pos.z = world->getHeightAt(playerCoor) + 20.0f;
 
 	} else {
 		if (input.isKeyDown(MOUSE_BUTTON_LEFT)) {
-
 			camera->angle += input.getMouseDelta().x * 0.003f;
 			fix_angle(camera->angle);
 			camera->elevation += input.getMouseDelta().y * 0.003f;
 			clamp(camera->elevation, 0, pi_d2*0.99f);
 		}
-
-		if (input.isKeyDown(MOUSE_BUTTON_RIGHT)) {
-			Vec3 dir = camera->getDir();
-			dir.z = 0.0f;
-			dir.normalize();
-			Vec3 side = dir.cross(camera->getUp());
-			camera->focusPoint += dir * (input.getMouseDelta().y * camera->distanceToFocus * 0.003f);
-			camera->focusPoint -= side * (input.getMouseDelta().x * camera->distanceToFocus * 0.003f);
-		}
-
-		//camera->focusPoint.z = world->getHeightAt(camera->focusPoint.vec2);
 
 		if (input.isKeyDown(MOUSE_BUTTON_MID)) {
 			camera->distanceToFocus *= 1.0f + (input.getMouseDelta().y * 0.003f);
@@ -106,6 +104,23 @@ void Valhalla::update(float fixed_dt) {
 		if (input.isScrolled()) {
 			camera->distanceToFocus *= 1.0f + (input.getScrollDelta().y * 0.03f);
 		}
+
+		if (input.isKeyDown(MOUSE_BUTTON_RIGHT)) {
+			Vec2 dir = camera->getDir().vec2;
+			dir.normalize();
+			Vec2 side = dir * Mat2::rotation(pi_d2);
+
+			playerCoor.pos += dir * (input.getMouseDelta().y * camera->distanceToFocus * 10.0f);
+			playerCoor.pos -= side * (input.getMouseDelta().x * camera->distanceToFocus * 10.0f);
+		}
+
+
+		playerCoor.fix(world->getNodeSize());
+
+
+
+		camera->focusPoint = Vec3(playerCoor.index.x + playerCoor.pos.x / world->getNodeSize(), playerCoor.index.y + playerCoor.pos.y / world->getNodeSize(), 0.0f);
+
 	}
 
 }

@@ -32,11 +32,11 @@ class PerlinShell {
 		pow_n = -2,
 	};
 
-	float getNodeHeight(int i, int j);
+	float getNodeHeight(int i, int j) const;
 
 public:
 	PerlinShell(WorldMap* world, int edgeCount, float minHeight, float maxHeight, float percentage = 0.5f, float pow_val = 1.0f, unsigned int seed = -1);
-	float getHeightAt(const WorldCoor& coor);
+	float getHeightAt(const WorldCoor& coor) const;
 };
 
 #endif

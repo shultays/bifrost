@@ -20,7 +20,7 @@ WorldMap::WorldMap(float mapSize, int edgeCount) {
 	earthMap.setWorldMap(this);
 	perlinMap.setWorldMap(this);
 	detailMap.setWorldMap(this);
-
+	isScaled = false;
 	texture = new gTexture("images/lena.png");
 }
 
@@ -87,20 +87,13 @@ void WorldMap::build() {
 
 
 	node.setWorldMap(this);
-	node.build(Vec2(edgeCount*nodeSize / 2.0f, edgeCount*nodeSize / 2.0f), Vec2(edgeCount*nodeSize / 2.0f + nodeSize, edgeCount*nodeSize / 2.0f + nodeSize), 16);
+	node.build(IntVec2(64, 64), 16);
 
 	PngExporter::writeGridToPng("images/normalMap.png", normalMap, ExportTypeVec3AsNormal);
 	PngExporter::writeGridToPng("images/heightMap.png", heightMap);
 	PngExporter::writeGridToPng("images/earthMap.png", earthMap, edgeCount, Vec3(0.0f), Vec3(0.0f, 1.0f, 0.0));
 }
 
-float WorldMap::getMapSize() {
-	return mapSize;
-}
-
-float WorldMap::getNodeSize() {
-	return nodeSize;
-}
 
 void WorldMap::buildHeightMap() {
 	heightMap.setAll(0.0f);
@@ -234,15 +227,12 @@ void WorldMap::buildColorMap() {
 	}
 }
 
-float WorldMap::getHeightAt(WorldCoor &coor) {
+float WorldMap::getHeightAt(WorldCoor &coor) const {
 	int i, j;
-	float dx, dy;
-	float tx = coor.pos.x / nodeSize;
-	float ty = coor.pos.y / nodeSize;
-	i = (int)floor(tx) + coor.index.x;
-	j = (int)floor(ty) + coor.index.y;
-	dx = tx - i;
-	dy = ty - j;
+	i = coor.index.x;
+	j = coor.index.y;
+	float dx = coor.pos.x / nodeSize;
+	float dy = coor.pos.y / nodeSize;
 
 	// p2 -- p4
 	// |  \  |
@@ -267,19 +257,17 @@ float WorldMap::getHeightAt(WorldCoor &coor) {
 
 		r = p4 * (1.0f - dx - dy) + dx * p2 + dy * p1;
 	}
-	//float t = detailMap.getHeightAt(pos);
-	return r;
+	float t = detailMap.getHeightAt(coor);
+	return r + t;
 }
 
 void WorldMap::buildBuffer() {
-
-
-	*waterDrawable->getVertexPointerAt(0).position = Vec3(0.0f, 0.0f, 0.0f) * WORLD_MAP_SCALE;
-	*waterDrawable->getVertexPointerAt(1).position = Vec3(+mapSize, 0.0f, 0.0f) * WORLD_MAP_SCALE;
-	*waterDrawable->getVertexPointerAt(2).position = Vec3(0.0f, +mapSize, 0.0f) * WORLD_MAP_SCALE;
-	*waterDrawable->getVertexPointerAt(3).position = Vec3(+mapSize, 0.0f, 0.0f) * WORLD_MAP_SCALE;
-	*waterDrawable->getVertexPointerAt(4).position = Vec3(+mapSize, +mapSize, 0.0f) * WORLD_MAP_SCALE;
-	*waterDrawable->getVertexPointerAt(5).position = Vec3(0.0f, +mapSize, 0.0f) * WORLD_MAP_SCALE;
+	*waterDrawable->getVertexPointerAt(0).position = Vec3(0.0f, 0.0f, 0.0f);
+	*waterDrawable->getVertexPointerAt(1).position = Vec3((float)edgeCount, 0.0f, 0.0f);
+	*waterDrawable->getVertexPointerAt(2).position = Vec3(0.0f, (float)edgeCount, 0.0f);
+	*waterDrawable->getVertexPointerAt(3).position = Vec3((float)edgeCount, 0.0f, 0.0f);
+	*waterDrawable->getVertexPointerAt(4).position = Vec3((float)edgeCount, (float)edgeCount, 0.0f);
+	*waterDrawable->getVertexPointerAt(5).position = Vec3(0.0f, (float)edgeCount, 0.0f);
 
 	waterDrawable->build();
 
@@ -290,7 +278,7 @@ void WorldMap::buildBuffer() {
 	for (int i = 0; i < edgeCount; i++) {
 		for (int j = 0; j < edgeCount; j++) {
 			VertexPointer pointer = terrainDrawable->getVertexPointerAt(k++);
-			*pointer.position = Vec3(i*nodeSize, j*nodeSize, heightMap[i][j] * 3.0f)*WORLD_MAP_SCALE;
+			*pointer.position = Vec3((float)i, (float)j, heightMap[i][j] * 3.0f / nodeSize);
 			*pointer.normal = normalMap[i][j];
 			*pointer.color = Vec4(colorMap[i][j], 1.0f);
 			*pointer.uv = Vec2(((float)i) / edgeCount, ((float)j) / edgeCount);
@@ -313,8 +301,24 @@ void WorldMap::buildBuffer() {
 	terrainDrawable->build();
 }
 
-
 void WorldMap::render() {
+	float oldFar, oldNear;
+	if (isScaled) {
+		oldFar = gears.game->activeCamera->farPlane;
+		oldNear = gears.game->activeCamera->nearPlane;
+		gears.game->activeCamera->farPlane = 1000000.0f;
+		gears.game->activeCamera->nearPlane = 1000.0f;
+		gears.game->updateProjectionMatrix();
+	}
+
+
 	terrainDrawable->render();
 	waterDrawable->render();
+
+	if (isScaled) {
+		gears.game->activeCamera->farPlane = oldFar;
+		gears.game->activeCamera->nearPlane = oldNear;
+		gears.game->updateProjectionMatrix();
+	}
+
 }

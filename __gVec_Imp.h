@@ -387,6 +387,17 @@ public:
 	}
 #endif
 
+#ifndef G_IS_TYPE_FLOATING
+	G_VEC_FLOATING_IMP_NAME toVec() {
+		G_VEC_FLOATING_IMP_NAME v;
+
+		for (int i = 0; i < GVEC_N; ++i)
+			v.data[i] = (G_VEC_FLOATING_TYPE)data[i];
+
+		return v;
+	}
+#endif
+
 #if GVEC_N == 4
 	static G_VEC_IMP_NAME fromColor(unsigned int color) {
 		G_VEC_IMP_NAME ret;

@@ -109,6 +109,9 @@ public:
 		if (currentStack > 0)
 			currentStack--;
 	}
+	void updateViewMatrix();
+	void updateProjectionMatrix();
+
 
 	void translate(const Vec3& pos) {
 		worldMatDirty = true;

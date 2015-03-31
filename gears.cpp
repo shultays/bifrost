@@ -18,6 +18,7 @@ void mouse(GLFWwindow* window, int k, int action, int mods) {
 }
 
 void mouseMove(GLFWwindow* window, double x, double y) {
+	//glfwSetCursorPos(window, gears.width / 2, gears.height / 2);
 	gears.mouseMove(x, y);
 
 }

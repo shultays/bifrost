@@ -29,14 +29,14 @@ public:
 		shells.push_back(PerlinShell(world, nodeCount, min_height, max_height, percentage, pow_val, seed));
 	}
 
-	float getHeightAt(const WorldCoor& coor) {
+	float getHeightAt(const WorldCoor& coor) const {
 		return getHeightAt(coor, shells.size());
 	}
 
-	float getHeightAt(const WorldCoor& coor, int maxShell) {
+	float getHeightAt(const WorldCoor& coor, int maxShell) const {
 		float t = 0.0f;
 		for (int i = 0; i < maxShell; i++) {
-			t += shells[i].getHeightAt(coor);
+			t += shells.at(i).getHeightAt(coor);
 		}
 		return t;
 	}

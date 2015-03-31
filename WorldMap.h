@@ -12,9 +12,6 @@
 #include "TerrainNode.h"
 #include "Tools.h"
 
-#define WORLD_MAP_SCALE 0.001f
-
-
 class gStaticIndexBufferedDrawable;
 class gTexture;
 class gStaticTriangleVertexBufferDrawable;
@@ -39,6 +36,9 @@ class WorldMap : public gRenderable {
 	gStaticTriangleVertexBufferDrawable *waterDrawable;
 	TerrainNode node;
 
+	IntVec2 anchorPos;
+	bool isScaled;
+
 public:
 	WorldMap() : WorldMap(512 * 1024.0f, 128) {}
 
@@ -52,12 +52,31 @@ public:
 	}
 
 	void build();
-	float getMapSize();
-	float getNodeSize();
+
+	float getMapSize() const {
+		return mapSize;
+	}
+	int getEdgeCount() const {
+		return edgeCount;
+	}
+	float getNodeSize() const {
+		return nodeSize;
+	}
+
+	const IntVec2& getAnchorPos() const {
+		return anchorPos;
+	}
+
+	void setAnchorPos(const IntVec2& anchorPos) {
+		this->anchorPos = anchorPos;
+	}
+	void setIsScaled(bool isScaled) {
+		this->isScaled = isScaled;
+	}
 	void buildHeightMap();
 	void buildNormalMap();
 	void buildColorMap();
-	float getHeightAt(WorldCoor &coor);
+	float getHeightAt(WorldCoor &coor) const;
 	void buildBuffer();
 	virtual void render() override;
 };

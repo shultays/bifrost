@@ -5,21 +5,19 @@
 #include "gGlobals.h"
 
 
-void TerrainNode::build(Vec2 min, Vec2 max, int edgeCount) {
+void TerrainNode::build(IntVec2 index, int edgeCount) {
 	SAFE_DELETE(drawable);
 
 	drawable = new gStaticIndexBufferedDrawable(VERTEX_PROP_POSITION, edgeCount*edgeCount, (edgeCount - 1)*(edgeCount - 1) * 6, false);
 
 
 	heightMap.init(edgeCount);
-	Vec2 diff = max - min;
 	for (int i = 0; i < edgeCount; i++) {
 		for (int j = 0; j < edgeCount; j++) {
-			Vec2 p = min;
-			p.x += diff.x * (float)i / (edgeCount - 1);
-			p.y += diff.y * (float)j / (edgeCount - 1);
-			//float h = world->getHeightAt(p);
-			//heightMap[i][j] = h;
+			Vec2 pos(world->getNodeSize() * (float)i / (edgeCount - 1), world->getNodeSize() * (float)j / (edgeCount - 1));
+			WorldCoor coor(index, pos);
+			float h = world->getHeightAt(coor);
+			heightMap[i][j] = h;
 		}
 	}
 
@@ -27,13 +25,9 @@ void TerrainNode::build(Vec2 min, Vec2 max, int edgeCount) {
 	int k = 0;
 	for (int i = 0; i < edgeCount; i++) {
 		for (int j = 0; j < edgeCount; j++) {
-			Vec2 p = min;
-
-			p.x += diff.x * (float)i / (edgeCount - 1);
-			p.y += diff.y * (float)j / (edgeCount - 1);
-
+			Vec2 pos(world->getNodeSize() * (float)i / (edgeCount - 1), world->getNodeSize() * (float)j / (edgeCount - 1));
 			VertexPointer pointer = drawable->getVertexPointerAt(k++);
-			*pointer.position = Vec3(p, heightMap[i][j]);
+			*pointer.position = Vec3(pos, heightMap[i][j]);
 		}
 	}
 	k = 0;
@@ -51,6 +45,11 @@ void TerrainNode::build(Vec2 min, Vec2 max, int edgeCount) {
 
 	drawable->setConstantNormal(Vec3(0.0f, 0.0f, 1.0f));
 	drawable->setConstantColor(Vec4(1.0f, 1.0f, 1.0f, 1.0f));
+
+	frame.makeIdentity();
+	frame.translateBy(Vec3(0.0f, 0.0f, 0.1f));
+
+	//frame.translateBy(Vec3(index.x * world->getNodeSize(), index.y * world->getNodeSize(), 0.0f));
 
 	drawable->build();
 }
