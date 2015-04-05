@@ -30,6 +30,30 @@ public:
 		this->pos = pos;
 	}
 
+	WorldCoor(const WorldCoor& coor, int i, int j, float x, float y) {
+		*this = coor;
+		index.x += i;
+		index.y += j;
+		pos.x += x;
+		pos.y += y;
+	}
+
+	WorldCoor operator-(const WorldCoor &other) const {
+		WorldCoor r = *this;
+		r.index -= other.index;
+		r.pos -= other.pos;
+		return r;
+	}
+
+
+	bool operator==(const WorldCoor &other) const {
+		return index == other.index && pos.almostEquals(other.pos);
+	}
+
+	bool operator!=(const WorldCoor &other) const {
+		return !(*this == other);
+	}
+
 	IntVec2 index;
 	Vec2 pos;
 	float h;

@@ -11,6 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="DetailedMapController.cpp" />
     <ClCompile Include="gGame.cpp" />
     <ClCompile Include="gGears.cpp" />
     <ClCompile Include="gGlobals.cpp" />
@@ -30,6 +31,7 @@
     <ClCompile Include="WorldMap.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DetailedMapController.h" />
     <ClInclude Include="Grid.h" />
     <ClInclude Include="FixedSizedArray.h" />
     <ClInclude Include="FixedSizedPriorityArray.h" />

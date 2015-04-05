@@ -18,6 +18,8 @@ class gStaticTriangleVertexBufferDrawable;
 
 
 class WorldMap : public gRenderable {
+	friend class TerrainNode;
+protected:
 	PerlinMap perlinMap;
 	PerlinMap detailMap;
 	PerlinMap earthMap;
@@ -34,10 +36,18 @@ class WorldMap : public gRenderable {
 
 	gStaticIndexBufferedDrawable *terrainDrawable;
 	gStaticTriangleVertexBufferDrawable *waterDrawable;
-	TerrainNode node;
 
 	IntVec2 anchorPos;
 	bool isScaled;
+
+	const int heightCacheSize = 16;
+	struct HeightCache {
+		WorldCoor coor;
+		float height;
+	};
+
+	HeightCache heightCaches[16];
+	int heightCacheIndex;
 
 public:
 	WorldMap() : WorldMap(512 * 1024.0f, 128) {}
@@ -76,7 +86,7 @@ public:
 	void buildHeightMap();
 	void buildNormalMap();
 	void buildColorMap();
-	float getHeightAt(WorldCoor &coor) const;
+	float getHeightAt(WorldCoor &coor);
 	void buildBuffer();
 	virtual void render() override;
 };

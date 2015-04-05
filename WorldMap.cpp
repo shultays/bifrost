@@ -6,7 +6,7 @@
 #include "gGlobals.h"
 
 
-WorldMap::WorldMap(float mapSize, int edgeCount) {
+WorldMap::WorldMap(float mapSize, int edgeCount) : gRenderable(true, 1) {
 	this->mapSize = mapSize;
 	this->edgeCount = edgeCount;
 	this->nodeSize = mapSize / edgeCount;
@@ -22,6 +22,7 @@ WorldMap::WorldMap(float mapSize, int edgeCount) {
 	detailMap.setWorldMap(this);
 	isScaled = false;
 	texture = new gTexture("images/lena.png");
+
 }
 
 
@@ -30,21 +31,21 @@ void WorldMap::build() {
 	perlinMap.clear();
 	earthMap.clear();
 
-	float maxHeight = 10000.0f;
+	float maxHeight = 30000.0f;
 
-	perlinMap.addPerlinShell(10, 0.0f, 4 * maxHeight * 0.05f, 0.95f, 2.0f);
-	perlinMap.addPerlinShell(11, 0.0f, 4 * maxHeight * 0.05f, 0.95f, 2.0f);
-	perlinMap.addPerlinShell(13, 0.0f, 4 * maxHeight * 0.1f, 0.95f, 2.0f);
-	perlinMap.addPerlinShell(14, 0.0f, 4 * maxHeight * 0.2f, 0.85f, 2.0f);
-	perlinMap.addPerlinShell(15, 0.0f, 4 * maxHeight * 0.1f, 0.75f, 2.0f);
-	perlinMap.addPerlinShell(15, 0.0f, 4 * maxHeight * 0.1f, 0.75f, 2.0f);
+	perlinMap.addPerlinShell(10, 0.0f, maxHeight * 0.05f, 0.95f, 2.0f);
+	perlinMap.addPerlinShell(11, 0.0f, maxHeight * 0.05f, 0.95f, 2.0f);
+	perlinMap.addPerlinShell(13, 0.0f, maxHeight * 0.1f, 0.95f, 2.0f);
+	perlinMap.addPerlinShell(14, 0.0f, maxHeight * 0.2f, 0.85f, 2.0f);
+	perlinMap.addPerlinShell(15, 0.0f, maxHeight * 0.1f, 0.75f, 2.0f);
+	perlinMap.addPerlinShell(15, 0.0f, maxHeight * 0.1f, 0.75f, 2.0f);
 	//perlinMap.addPerlinShell(15, 0.0f, 4 * maxHeight * 0.1f, 0.75f, 2.0f);
 
 	perlinMap.addPerlinShell(20, -1000.0, 0.0f, 0.5f);
 
 
 
-	float remainingHeight = 0.4f * maxHeight;
+	float remainingHeight = 0.2f * maxHeight;
 
 	int start = 5;
 	do {
@@ -57,14 +58,17 @@ void WorldMap::build() {
 	perlinMap.addPerlinShell(start, 0.0f, remainingHeight);
 
 	int t = 1;
-	while (mapSize / start > 0.05f) {
-		float h = 10.0f / t;
+	float totalH = 0.0f;
+	while (mapSize / start > 0.1f) {
+		float d = mapSize / start;
+		float h = 100.0f * d / 1000.0f;
 		t++;
 		detailMap.addPerlinShell(start, 0.0f, h);
 		start = (int)(start * 2.1f);
+		printf("%f %f\n", d, h);
+		totalH += h;
 	}
-
-
+	printf("%f\n", totalH);
 
 	earthMap.addPerlinShell(03, 0.0, 0.30f, 0.90f);
 	earthMap.addPerlinShell(04, 0.0, 0.20f, 0.90f);
@@ -80,14 +84,22 @@ void WorldMap::build() {
 	terrainDrawable = new gStaticIndexBufferedDrawable(VERTEX_PROP_COLOR | VERTEX_PROP_NORMAL | VERTEX_PROP_POSITION | VERTEX_PROP_UV, edgeCount*edgeCount, (edgeCount - 1)*(edgeCount - 1) * 6, false);
 	waterDrawable = new gStaticTriangleVertexBufferDrawable(VERTEX_PROP_POSITION, 6, false);
 
+
+	const int heightCacheSize = 16;
+	struct HeightCache {
+		WorldCoor coor;
+		float height;
+	};
+
+	heightCacheIndex = 0;
+	for (int i = 0; i < heightCacheSize; i++) {
+		heightCaches[i].coor.index = -1;
+	}
+
 	buildHeightMap();
 	buildNormalMap();
 	buildColorMap();
 	buildBuffer();
-
-
-	node.setWorldMap(this);
-	node.build(IntVec2(64, 64), 16);
 
 	PngExporter::writeGridToPng("images/normalMap.png", normalMap, ExportTypeVec3AsNormal);
 	PngExporter::writeGridToPng("images/heightMap.png", heightMap);
@@ -204,10 +216,7 @@ void WorldMap::buildColorMap() {
 
 			Vec3 finalColor = Vec3::zero();
 
-
-
 			finalColor += lerpVec(Vec3(0.9f), Vec3(1.0f), forestW) * snowW;
-
 			finalColor += lerpVec(Vec3::fromColor(0xB7A888), Vec3::fromColor(0x80765F), forestW) * beachW;
 
 			float remainingWeight = 1.0f - snowW - beachW;
@@ -227,7 +236,17 @@ void WorldMap::buildColorMap() {
 	}
 }
 
-float WorldMap::getHeightAt(WorldCoor &coor) const {
+float WorldMap::getHeightAt(WorldCoor &coor) {
+	coor.fix(nodeSize);
+
+
+	for (int i = 0; i < heightCacheSize; i++) {
+		if (heightCaches[i].coor == coor) {
+			return heightCaches[i].height;
+		}
+	}
+
+
 	int i, j;
 	i = coor.index.x;
 	j = coor.index.y;
@@ -258,6 +277,12 @@ float WorldMap::getHeightAt(WorldCoor &coor) const {
 		r = p4 * (1.0f - dx - dy) + dx * p2 + dy * p1;
 	}
 	float t = detailMap.getHeightAt(coor);
+
+
+	heightCaches[heightCacheIndex].coor = coor;
+	heightCaches[heightCacheIndex].height = r + t;
+	heightCacheIndex++;
+	if (heightCacheIndex >= heightCacheSize) heightCacheIndex = 0;
 	return r + t;
 }
 
@@ -307,7 +332,7 @@ void WorldMap::render() {
 		oldFar = gears.game->activeCamera->farPlane;
 		oldNear = gears.game->activeCamera->nearPlane;
 		gears.game->activeCamera->farPlane = 1000000.0f;
-		gears.game->activeCamera->nearPlane = 1000.0f;
+		gears.game->activeCamera->nearPlane = 100.0f;
 		gears.game->updateProjectionMatrix();
 	}
 
@@ -321,4 +346,5 @@ void WorldMap::render() {
 		gears.game->updateProjectionMatrix();
 	}
 
+	glClear(GL_DEPTH_BUFFER_BIT);
 }

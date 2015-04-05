@@ -75,6 +75,9 @@
     <ClCompile Include="PerlinShell.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="DetailedMapController.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Valhalla.h">
@@ -159,6 +162,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Tools.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DetailedMapController.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

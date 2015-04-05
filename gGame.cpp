@@ -31,7 +31,7 @@ void gGame::render() {
 
 
 	glShadeModel(GL_SMOOTH);*/
-	for (int i = renderList.size() - 1; i >= 0; i--) {
+	for (int i = 0; i < renderList.size(); i++) {
 		if (renderList[i]->enabled) renderList[i]->gRender();
 	}
 	/*

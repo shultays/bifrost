@@ -4,6 +4,7 @@
 #include "gGlobals.h"
 #include "gTools.h"
 #include "WorldMap.h"
+#include "DetailedMapController.h"
 
 #include <functional>
 
@@ -20,10 +21,12 @@ void Valhalla::init() {
 	camera->distanceToFocus = 100.0f;
 
 	fpsCamera = new gFPSCamera();
+
+	detailedMapController = new DetailedMapController(world);
 }
 
 void Valhalla::tick(float dt) {
-	if (input.isKeyDown(GLFW_KEY_V)) {
+	if (input.isKeyDown(GLFW_KEY_Z)) {
 		glPolygonMode(GL_FRONT, GL_LINE);
 	} else {
 		glPolygonMode(GL_FRONT, GL_FILL);
@@ -45,6 +48,8 @@ void Valhalla::update(float fixed_dt) {
 			v *= world->frame;
 
 			activeCamera = fpsCamera;
+
+			detailedMapController->initMap(playerCoor);
 		} else {
 			world->frame.makeIdentity();
 			activeCamera = camera;
@@ -70,15 +75,15 @@ void Valhalla::update(float fixed_dt) {
 		Vec2 side = dir * Mat2::rotation(pi_d2);
 
 		if (input.isKeyDown(GLFW_KEY_W)) {
-			playerCoor.pos += dir * fixed_dt * 1000.0f;
+			playerCoor.pos += dir * fixed_dt * 20.0f;
 		} else if (input.isKeyDown(GLFW_KEY_S)) {
-			playerCoor.pos -= dir * fixed_dt * 1000.0f;
+			playerCoor.pos -= dir * fixed_dt * 20.0f;
 		}
 
 		if (input.isKeyDown(GLFW_KEY_A)) {
-			playerCoor.pos -= side * fixed_dt * 1000.0f;
+			playerCoor.pos -= side * fixed_dt * 20.0f;
 		} else if (input.isKeyDown(GLFW_KEY_D)) {
-			playerCoor.pos += side * fixed_dt * 1000.0f;
+			playerCoor.pos += side * fixed_dt * 20.0f;
 		}
 
 		playerCoor.fix(world->getNodeSize());
@@ -87,8 +92,9 @@ void Valhalla::update(float fixed_dt) {
 		Vec2 shift = (playerCoor.index - world->getAnchorPos()).toVec()*world->getNodeSize();
 
 		fpsCamera->pos.vec2 = shift + playerCoor.pos;
-		fpsCamera->pos.z = world->getHeightAt(playerCoor) + 20.0f;
+		fpsCamera->pos.z = world->getHeightAt(playerCoor) + 1.8f;
 
+		detailedMapController->updateMap(playerCoor);
 	} else {
 		if (input.isKeyDown(MOUSE_BUTTON_LEFT)) {
 			camera->angle += input.getMouseDelta().x * 0.003f;

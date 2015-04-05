@@ -331,6 +331,13 @@ public:
 	G_VEC_IMP_NAME normalized() {
 		return G_VEC_IMP_NAME::normalize(*this);
 	}
+	bool almostEquals(const G_VEC_IMP_NAME& other) const {
+		for (int i = 0; i < GVEC_N; ++i) {
+			if (abs(data[i] - other.data[i]) > 0.000001f) return false;
+		}
+		return true;
+	}
+
 #endif
 
 #if GVEC_N == 2

@@ -6,11 +6,14 @@
 
 class WorldMap;
 class gFocusCamera;
+class DetailedMapController;
 
 class Valhalla : public gGame, public gTickable, public gUpdatable {
 	WorldMap *world;
 	gFocusCamera* camera;
 	gFPSCamera* fpsCamera;
+	DetailedMapController* detailedMapController;
+
 
 	WorldCoor playerCoor;
 
