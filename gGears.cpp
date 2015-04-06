@@ -6,6 +6,7 @@ void gGears::init(int argc, char *argv[]) {
 	//glEnable(GL_CULL_FACE);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	slaveController.startSlaves(3);
 	game->init();
 }
 
@@ -37,8 +38,17 @@ void gGears::tick() {
 		lastDrawTime = t;
 		glfwSwapBuffers(window);
 	}
+	slaveController.update();
+	t = time.getTime();
+	float timeToSleep = gmin(update_interval - (t - lastUpdateTime), draw_interval - (t - lastDrawTime));
+	if (timeToSleep > 10) {
+		sleepMS((int)(timeToSleep * 1000));
+	}
 }
 
+void gGears::addSlaveWork(gSlaveWork* slaveWork) {
+	slaveController.addWork(slaveWork);
+}
 void gGears::key(int k, int s, int action, int mods) {
 	if (k < 0 || k >= KEY_COUNT) {
 		return;

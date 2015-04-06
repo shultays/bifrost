@@ -4,6 +4,11 @@
 #include <fstream>
 #include <streambuf>
 
+#ifdef WINDOWS
+#undef APIENTRY
+#include "windows.h"
+#endif
+
 bool textFileRead(char *fileName, std::string &data) {
 	std::ifstream t(fileName);
 	if (!t.good()) {
@@ -125,4 +130,11 @@ Vec3 lerpColor(const Vec3& c0, const Vec3& c1, float a) {
 	Vec3 v = lerpVec(h0, h1, a);
 
 	return hsvToRgb(v);
+}
+
+
+void sleepMS(int ms) {
+#ifdef WINDOWS
+	Sleep(ms);
+#endif
 }

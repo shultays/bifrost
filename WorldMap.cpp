@@ -65,10 +65,8 @@ void WorldMap::build() {
 		t++;
 		detailMap.addPerlinShell(start, 0.0f, h);
 		start = (int)(start * 2.1f);
-		printf("%f %f\n", d, h);
 		totalH += h;
 	}
-	printf("%f\n", totalH);
 
 	earthMap.addPerlinShell(03, 0.0, 0.30f, 0.90f);
 	earthMap.addPerlinShell(04, 0.0, 0.20f, 0.90f);

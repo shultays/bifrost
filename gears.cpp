@@ -25,7 +25,6 @@ void mouseMove(GLFWwindow* window, double x, double y) {
 
 void scroll(GLFWwindow* window, double xoffset, double yoffset) {
 	gears.scroll(xoffset, yoffset);
-	printf("%lf %lf\n", xoffset, yoffset);
 }
 
 

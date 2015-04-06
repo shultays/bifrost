@@ -17,6 +17,8 @@
     <ClCompile Include="gGlobals.cpp" />
     <ClCompile Include="gInput.cpp" />
     <ClCompile Include="gMat.cpp" />
+    <ClCompile Include="gSlave.cpp" />
+    <ClCompile Include="gSlave_windows.cpp" />
     <ClCompile Include="gStaticBufferedDrawables.cpp" />
     <ClCompile Include="gStaticIndexBuffer.cpp" />
     <ClCompile Include="gStaticVertexBuffer.cpp" />
@@ -43,6 +45,7 @@
     <ClInclude Include="gMat.h" />
     <ClInclude Include="gPrimitives.h" />
     <ClInclude Include="gShader.h" />
+    <ClInclude Include="gSlave.h" />
     <ClInclude Include="gStaticBufferedDrawables.h" />
     <ClInclude Include="gStaticIndexBuffer.h" />
     <ClInclude Include="gStaticVertexBuffer.h" />

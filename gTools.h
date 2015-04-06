@@ -14,6 +14,13 @@
 
 #define E_PI 3.1415926535897932384626433832795028841971693993751058209749445923078164062
 
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
+#define WINDOWS
+#else
+static const std::string slash = "/";
+#endif
+
+
 typedef unsigned char byte;
 
 const float pi = (float)E_PI;
@@ -82,6 +89,6 @@ Vec4 lerpVec(const Vec4& v0, const Vec4& v1, float a);
 Vec3 rgbToHsv(const Vec3& color);
 Vec3 hsvToRgb(const Vec3& color);
 
-
+void sleepMS(int ms);
 
 #endif
