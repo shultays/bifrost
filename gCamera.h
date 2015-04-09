@@ -59,8 +59,8 @@ public:
 		pos = Vec3(0.0f, 0.0f, 0.0f);
 		angle = 0.0f;
 		elevation = 0.0f;
-		farPlane = 500.0f;
-		nearPlane = 0.001f;
+		farPlane = 10000.0f;
+		nearPlane = 0.1f;
 	}
 
 	Vec3 getDir() override {

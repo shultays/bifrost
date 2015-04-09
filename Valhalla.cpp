@@ -23,7 +23,9 @@ void Valhalla::init() {
 
 	fpsCamera = new gFPSCamera();
 
-	detailedMapController = new DetailedMapController(world);
+	detailedMapController = new DetailedMapController(world, 3, 1, 16);
+	detailedMapController2 = detailedMapController;
+	detailedMapController2 = new DetailedMapController(world, 15, 128, 4);
 }
 
 void Valhalla::tick(float dt) {
@@ -77,6 +79,7 @@ void Valhalla::update(float fixed_dt) {
 			activeCamera = fpsCamera;
 
 			detailedMapController->initMap(playerCoor);
+			detailedMapController2->initMap(playerCoor);
 		} else {
 			world->frame.makeIdentity();
 			activeCamera = camera;
@@ -122,6 +125,7 @@ void Valhalla::update(float fixed_dt) {
 		fpsCamera->pos.z = world->getHeightAt(playerCoor) + 1.8f;
 
 		detailedMapController->updateMap(playerCoor);
+		detailedMapController2->updateMap(playerCoor);
 	} else {
 		if (input.isKeyDown(MOUSE_BUTTON_LEFT)) {
 			camera->angle += input.getMouseDelta().x * 0.003f;

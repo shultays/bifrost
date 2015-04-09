@@ -16,14 +16,15 @@ void NodeBuilder::runOnMain() {
 
 }
 
-DetailedMapController::DetailedMapController(WorldMap* world) {
+DetailedMapController::DetailedMapController(WorldMap* world, int squareCount, int cellPerNode, int edgePerCell) {
 	this->world = world;
 
+	this->squareCount = squareCount;
+	this->cellPerNode = cellPerNode;
+	this->edgePerCell = edgePerCell;
+
 	waitingJobs = 0;
-	squareCount = 15;
-	cellPerNode = 128;
 	cellSize = world->getNodeSize() / cellPerNode;
-	edgePerCell = 4;
 	cellDetail = cellSize / edgePerCell;
 
 	nodes.init(squareCount*squareCount + 1, squareCount*squareCount + 1, nullptr);
@@ -210,7 +211,7 @@ void DetailedMapController::initMap(WorldCoor& coor) {
 
 	oldCoor = baseCoor;
 	oldIndex = coorToIndex(oldCoor);
-
+	waitingJobs = 0;
 	for (int a = -squareCount; a <= squareCount; a++) {
 		for (int b = -squareCount; b <= squareCount; b++) {
 			int i = a + squareCount;
@@ -220,8 +221,12 @@ void DetailedMapController::initMap(WorldCoor& coor) {
 			cellCoor.pos.y += b*cellSize;
 			cellCoor.fix(world->getNodeSize());
 			nodes[i][j] = new TerrainNode(world);
-			nodes[i][j]->build(cellCoor, Vec2(cellSize), edgePerCell);
-			nodes[i][j]->buildMesh();
+
+			//nodes[i][j]->build(cellCoor, Vec2(cellSize), edgePerCell);
+			//nodes[i][j]->buildMesh();
+
+			gears.addSlaveWork(new NodeBuilder(this, nodes[i][j], cellCoor, cellSize, edgePerCell));
+			waitingJobs++;
 		}
 	}
 

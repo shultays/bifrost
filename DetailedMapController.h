@@ -30,7 +30,7 @@ class DetailedMapController {
 	IntVec2 coorToIndex(WorldCoor& coor);
 	int waitingJobs;
 public:
-	DetailedMapController(WorldMap* world);
+	DetailedMapController(WorldMap* world, int squareCount, int cellPerNode, int edgePerCell);
 
 
 	void updateMap(WorldCoor& coor);

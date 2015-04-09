@@ -12,7 +12,9 @@ class Valhalla : public gGame, public gTickable, public gUpdatable {
 	WorldMap *world;
 	gFocusCamera* camera;
 	gFPSCamera* fpsCamera;
+
 	DetailedMapController* detailedMapController;
+	DetailedMapController* detailedMapController2;
 
 
 	WorldCoor playerCoor;
