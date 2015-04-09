@@ -84,6 +84,9 @@
     <ClCompile Include="gSlave_windows.cpp">
       <Filter>engine</Filter>
     </ClCompile>
+    <ClCompile Include="gMutex_windows.cpp">
+      <Filter>engine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Valhalla.h">
@@ -174,6 +177,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="gSlave.h">
+      <Filter>engine</Filter>
+    </ClInclude>
+    <ClInclude Include="gMutex.h">
       <Filter>engine</Filter>
     </ClInclude>
   </ItemGroup>

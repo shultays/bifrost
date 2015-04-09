@@ -240,7 +240,7 @@ float WorldMap::getHeightAt(WorldCoor &coor) {
 
 	for (int i = 0; i < heightCacheSize; i++) {
 		if (heightCaches[i].coor == coor) {
-			return heightCaches[i].height;
+			//return heightCaches[i].height;
 		}
 	}
 

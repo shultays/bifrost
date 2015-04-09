@@ -1,15 +1,29 @@
 #include "DetailedMapController.h"
 #include "TerrainNode.h"
 #include "WorldMap.h"
+#include "gSlave.h"
+#include "gGlobals.h"
+
+
+void NodeBuilder::runOnSlave() {
+
+	node->build(cellCoor, Vec2(cellSize), edgePerCell);
+}
+void NodeBuilder::runOnMain() {
+	node->buildMesh();
+	mapController->waitingJobs--;
+	delete this;
+
+}
 
 DetailedMapController::DetailedMapController(WorldMap* world) {
 	this->world = world;
 
-
-	squareCount = 16;
-	cellPerNode = 1024;
+	waitingJobs = 0;
+	squareCount = 15;
+	cellPerNode = 128;
 	cellSize = world->getNodeSize() / cellPerNode;
-	edgePerCell = 2;
+	edgePerCell = 4;
 	cellDetail = cellSize / edgePerCell;
 
 	nodes.init(squareCount*squareCount + 1, squareCount*squareCount + 1, nullptr);
@@ -23,8 +37,9 @@ IntVec2 DetailedMapController::coorToIndex(WorldCoor& coor) {
 }
 
 void DetailedMapController::updateMap(WorldCoor& coor) {
-
-
+	if (waitingJobs > 0) {
+		return;
+	}
 	WorldCoor baseCoor = coor;
 	baseCoor.pos.x = ((int)(baseCoor.pos.x / cellSize)) * cellSize;
 	baseCoor.pos.y = ((int)(baseCoor.pos.y / cellSize)) * cellSize;
@@ -43,10 +58,8 @@ void DetailedMapController::updateMap(WorldCoor& coor) {
 					SAFE_DELETE(nodes[i][j]);
 				}
 				if (a <= squareCount - 2) {
-
 					nodes[i][j] = nodes[i + 2][j];
 				}
-
 			}
 		}
 
@@ -61,7 +74,8 @@ void DetailedMapController::updateMap(WorldCoor& coor) {
 					cellCoor.pos.y += b*cellSize;
 					cellCoor.fix(world->getNodeSize());
 					nodes[i][j] = new TerrainNode(world);
-					nodes[i][j]->build(cellCoor, Vec2(cellSize), edgePerCell);
+					gears.addSlaveWork(new NodeBuilder(this, nodes[i][j], cellCoor, cellSize, edgePerCell));
+					waitingJobs++;
 				}
 			}
 		}
@@ -80,10 +94,8 @@ void DetailedMapController::updateMap(WorldCoor& coor) {
 					SAFE_DELETE(nodes[i][j]);
 				}
 				if (a >= -squareCount + 2) {
-
 					nodes[i][j] = nodes[i - 2][j];
 				}
-
 			}
 		}
 
@@ -98,7 +110,8 @@ void DetailedMapController::updateMap(WorldCoor& coor) {
 					cellCoor.pos.y += b*cellSize;
 					cellCoor.fix(world->getNodeSize());
 					nodes[i][j] = new TerrainNode(world);
-					nodes[i][j]->build(cellCoor, Vec2(cellSize), edgePerCell);
+					gears.addSlaveWork(new NodeBuilder(this, nodes[i][j], cellCoor, cellSize, edgePerCell));
+					waitingJobs++;
 				}
 			}
 		}
@@ -118,10 +131,8 @@ void DetailedMapController::updateMap(WorldCoor& coor) {
 					SAFE_DELETE(nodes[i][j]);
 				}
 				if (b <= squareCount - 2) {
-
 					nodes[i][j] = nodes[i][j + 2];
 				}
-
 			}
 		}
 
@@ -136,7 +147,8 @@ void DetailedMapController::updateMap(WorldCoor& coor) {
 					cellCoor.pos.y += b*cellSize;
 					cellCoor.fix(world->getNodeSize());
 					nodes[i][j] = new TerrainNode(world);
-					nodes[i][j]->build(cellCoor, Vec2(cellSize), edgePerCell);
+					gears.addSlaveWork(new NodeBuilder(this, nodes[i][j], cellCoor, cellSize, edgePerCell));
+					waitingJobs++;
 				}
 			}
 		}
@@ -155,10 +167,8 @@ void DetailedMapController::updateMap(WorldCoor& coor) {
 					SAFE_DELETE(nodes[i][j]);
 				}
 				if (b >= -squareCount + 2) {
-
 					nodes[i][j] = nodes[i][j - 2];
 				}
-
 			}
 		}
 
@@ -173,7 +183,8 @@ void DetailedMapController::updateMap(WorldCoor& coor) {
 					cellCoor.pos.y += b*cellSize;
 					cellCoor.fix(world->getNodeSize());
 					nodes[i][j] = new TerrainNode(world);
-					nodes[i][j]->build(cellCoor, Vec2(cellSize), edgePerCell);
+					gears.addSlaveWork(new NodeBuilder(this, nodes[i][j], cellCoor, cellSize, edgePerCell));
+					waitingJobs++;
 				}
 			}
 		}
@@ -210,6 +221,7 @@ void DetailedMapController::initMap(WorldCoor& coor) {
 			cellCoor.fix(world->getNodeSize());
 			nodes[i][j] = new TerrainNode(world);
 			nodes[i][j]->build(cellCoor, Vec2(cellSize), edgePerCell);
+			nodes[i][j]->buildMesh();
 		}
 	}
 

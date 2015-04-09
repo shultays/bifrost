@@ -41,7 +41,7 @@ void gGears::tick() {
 	slaveController.update();
 	t = time.getTime();
 	float timeToSleep = gmin(update_interval - (t - lastUpdateTime), draw_interval - (t - lastDrawTime));
-	if (timeToSleep > 10) {
+	if (timeToSleep > 0.0f) {
 		sleepMS((int)(timeToSleep * 1000));
 	}
 }

@@ -2,14 +2,15 @@
 
 int slaveIndex = 0;
 
-void gSlave::startSlaveThread() {
+void gSlave::startSlaveThread(gSlaveController* controller) {
 	assert(!sharedData);
 	ThreadData* data = new ThreadData;
-	data->gSlave = this;
+	data->slave = this;
 	data->slaveIndex = ++slaveIndex;
 	data->freed = false;
 	data->workToDo = nullptr;
-	data->slaveWorkDone = false;
+	data->controller = controller;
+	this->controller = controller;
 	sharedData = data;
 
 	startSlaveThreadNative();
@@ -21,7 +22,7 @@ void gSlaveController::startSlaves(int slaveCount) {
 	this->slaveCount = slaveCount;
 	slaves = new gSlave[slaveCount];
 	for (int i = 0; i < slaveCount; i++) {
-		slaves[i].startSlaveThread();
+		slaves[i].startSlaveThread(this);
 	}
 }
 
@@ -34,35 +35,33 @@ void gSlaveController::freeSlaves() {
 }
 
 void gSlaveController::update() {
-	for (int i = 0; i < slaveCount; i++) {
-		slaves[i].update();
+	std::vector<gSlaveWork*> works;
+	controllerMutex.waitAndGetMutex();
+	while (workForMainQueue.size() > 0) {
+		gSlaveWork* work = workForMainQueue.front();
+		workForMainQueue.pop();
+		works.push_back(work);
 	}
+	controllerMutex.releaseMutex();
 
-	while (workQueue.size() > 0) {
-		bool hasFree = false;
-		for (int i = 0; i < slaveCount; i++) {
-			if (slaves[i].isWorking() == false) {
-				gSlaveWork* work = workQueue.front();
-				workQueue.pop();
-				slaves[i].startWork(work);
-				hasFree = true;
-				break;
-			}
-		}
-
-		if (hasFree == false) {
-			break;
-		}
+	for (unsigned i = 0; i < works.size(); i++) {
+		works[i]->runOnMain();
 	}
 }
 
+gSlaveWork* gSlave::getNextJobForSlave() {
+	return controller->getNextJobForSlave();
+}
+
+void gSlave::slaveWorkDone(gSlaveWork* work) {
+	return controller->addMainWork(work);
+}
+
+
+void slaveWorkDone(gSlaveWork* work);
 
 void gSlaveController::addWork(gSlaveWork* work) {
-	for (int i = 0; i < slaveCount; i++) {
-		if (slaves[i].isWorking() == false) {
-			slaves[i].startWork(work);
-			return;
-		}
-	}
-	workQueue.push(work);
+	controllerMutex.waitAndGetMutex();
+	workForSlavesQueue.push(work);
+	controllerMutex.releaseMutex();
 }

@@ -9,9 +9,14 @@ DWORD WINAPI SlaveThreadFunc(LPVOID lpParam) {
 	ThreadData* data = (ThreadData*)lpParam;
 	printf("slave started %d\n", data->slaveIndex);
 	while (data->freed == false) {
-		if (data->workToDo && data->slaveWorkDone == false) {
+		if (!data->workToDo) {
+			data->workToDo = data->slave->getNextJobForSlave();
+		}
+
+		if (data->workToDo) {
 			data->workToDo->runOnSlave();
-			data->slaveWorkDone = true;
+			data->slave->slaveWorkDone(data->workToDo);
+			data->workToDo = nullptr;
 		}
 
 		sleepMS(10);

@@ -4,9 +4,11 @@
 #define G_SLAVE_H__
 
 #include "gTools.h"
+#include "gMutex.h"
 #include <queue>
 
 class gSlave;
+class gSlaveController;
 
 class gSlaveWork {
 	bool done;
@@ -26,23 +28,24 @@ public:
 
 
 struct ThreadData {
-	gSlave* gSlave;
+	gSlave* slave;
 	int slaveIndex;
 	bool freed;
 	gSlaveWork* workToDo;
-	bool slaveWorkDone;
+	gSlaveController* controller;
 };
 
 class gSlave {
 	ThreadData* sharedData;
 	void startSlaveThreadNative();
-
+	gSlaveController* controller;
 public:
 	gSlave() {
 		sharedData = nullptr;
+		this->controller = nullptr;
 	}
 
-	void startSlaveThread();
+	void startSlaveThread(gSlaveController* controller);
 
 	void freeSlaveThread() {
 		assert(sharedData);
@@ -54,35 +57,50 @@ public:
 		return sharedData && sharedData->workToDo != nullptr;
 	}
 
-	void update() {
-		if (sharedData) {
-			if (sharedData->workToDo && sharedData->slaveWorkDone) {
-				sharedData->workToDo->runOnMain();
-				sharedData->workToDo->setIsDone(true);
-				sharedData->workToDo = nullptr;
-				sharedData->slaveWorkDone = false;
-			}
-		}
-	}
+	void slaveWorkDone(gSlaveWork* work);
 
-	void startWork(gSlaveWork* work) {
-		assert(!isWorking());
-		sharedData->slaveWorkDone = false;
-		sharedData->workToDo = work;
-	}
-
+	gSlaveWork* getNextJobForSlave();
 };
 
 class gSlaveController {
 	int slaveCount;
 	gSlave* slaves;
-	std::queue<gSlaveWork*> workQueue;
+	std::queue<gSlaveWork*> workForSlavesQueue;
+	std::queue<gSlaveWork*> workForMainQueue;
+	gMutex controllerMutex;
+	friend class gSlave;
+
+	gSlaveWork* getNextJobForSlave() {
+		if (workForSlavesQueue.size()) {
+			gSlaveWork* work = nullptr;
+			controllerMutex.waitAndGetMutex();
+			if (workForSlavesQueue.size()) {
+				work = workForSlavesQueue.front();
+				workForSlavesQueue.pop();
+			}
+			controllerMutex.releaseMutex();
+			return work;
+		}
+		return nullptr;
+	}
+
+
+	void addMainWork(gSlaveWork* work) {
+		controllerMutex.waitAndGetMutex();
+		workForMainQueue.push(work);
+		controllerMutex.releaseMutex();
+	}
 public:
 
 	void startSlaves(int slaveCount);
 	void freeSlaves();
 	void addWork(gSlaveWork* work);
 	void update();
+
+
+	bool hasJobForSlaves() {
+		return workForSlavesQueue.size() > 0;
+	}
 };
 
 

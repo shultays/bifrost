@@ -86,10 +86,16 @@ void TerrainNode::build(WorldCoor start, Vec2 size, int edgeCount) {
 	frame.translateBy(Vec3(0.0f, 0.0f, 0.1f));
 
 	//frame.translateBy(Vec3(index.x * world->getNodeSize(), index.y * world->getNodeSize(), 0.0f));
+	isBuilt = false;
+}
 
+void TerrainNode::buildMesh() {
+	isBuilt = true;
 	drawable->build();
 }
 
 void TerrainNode::render() {
-	drawable->render();
+	if (isBuilt) {
+		drawable->render();
+	}
 }

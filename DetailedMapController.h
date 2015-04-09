@@ -6,12 +6,14 @@
 #include "gGame.h"
 #include "Tools.h"
 #include "Grid.h"
-
+#include "gSlave.h"
 class WorldMap;
 class TerrainNode;
 
+class NodeBuilder;
 
 class DetailedMapController {
+	friend class NodeBuilder;
 	WorldMap* world;
 
 	Grid<TerrainNode*> nodes;
@@ -26,6 +28,7 @@ class DetailedMapController {
 	IntVec2 oldIndex;
 
 	IntVec2 coorToIndex(WorldCoor& coor);
+	int waitingJobs;
 public:
 	DetailedMapController(WorldMap* world);
 
@@ -34,5 +37,24 @@ public:
 	void initMap(WorldCoor& coor);
 };
 
+
+class NodeBuilder : public gSlaveWork {
+public:
+	DetailedMapController* mapController;
+	TerrainNode* node;
+	WorldCoor cellCoor;
+	float cellSize;
+	int edgePerCell;
+
+	NodeBuilder(DetailedMapController* mapController, TerrainNode* node, WorldCoor cellCoor, float cellSize, int edgePerCell) {
+		this->mapController = mapController;
+		this->node = node;
+		this->cellCoor = cellCoor;
+		this->cellSize = cellSize;
+		this->edgePerCell = edgePerCell;
+	}
+	virtual void runOnSlave();
+	virtual void runOnMain();
+};
 
 #endif

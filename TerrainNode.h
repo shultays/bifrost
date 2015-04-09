@@ -12,10 +12,12 @@ class TerrainNode : public gRenderable {
 	gStaticIndexBufferedDrawable *drawable;
 
 	WorldMap *world;
+	bool isBuilt;
 public:
 	TerrainNode(WorldMap *world) {
 		drawable = NULL;
 		this->world = world;
+		isBuilt = false;
 	}
 
 	~TerrainNode() {
@@ -24,6 +26,7 @@ public:
 
 
 	void build(WorldCoor start, Vec2 size, int edgeCount);
+	void buildMesh();
 
 	void render();
 
