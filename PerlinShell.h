@@ -18,7 +18,7 @@ class PerlinShell {
 	float minHeight, maxHeight, diffHeight;
 	Mat2 rotate;
 	Vec2 add;
-	const unsigned int maxHash = std::numeric_limits<size_t>::max();
+	unsigned int maxHash;
 	unsigned int acceptHash;
 	WorldMap *world;
 	float pow_val;

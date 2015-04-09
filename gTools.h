@@ -61,6 +61,7 @@ const float epsilon = 0.000001f;
 #define gmax3(x, y, z) ((x)<(y)?gmin((z),(y)):gmin((x),(y)))
 #define gmax4(x, y, z, o) ((x)<(y)?gmin3((y), (z), (o)):gmin3((x), (z), (o)))
 
+#define round(x) (((x)>((int)x + 0.5f))?((int)x)+1:(int)x)
 
 
 inline float degreeToRadian(float deg) {

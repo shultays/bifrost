@@ -21,7 +21,7 @@ WorldMap::WorldMap(float mapSize, int edgeCount) : gRenderable(true, 1) {
 	perlinMap.setWorldMap(this);
 	detailMap.setWorldMap(this);
 	isScaled = false;
-	texture = new gTexture("images/lena.png");
+	//texture = new gTexture("images/lena.png");
 
 }
 
@@ -82,17 +82,7 @@ void WorldMap::build() {
 	terrainDrawable = new gStaticIndexBufferedDrawable(VERTEX_PROP_COLOR | VERTEX_PROP_NORMAL | VERTEX_PROP_POSITION | VERTEX_PROP_UV, edgeCount*edgeCount, (edgeCount - 1)*(edgeCount - 1) * 6, false);
 	waterDrawable = new gStaticTriangleVertexBufferDrawable(VERTEX_PROP_POSITION, 6, false);
 
-
-	const int heightCacheSize = 16;
-	struct HeightCache {
-		WorldCoor coor;
-		float height;
-	};
-
-	heightCacheIndex = 0;
-	for (int i = 0; i < heightCacheSize; i++) {
-		heightCaches[i].coor.index = -1;
-	}
+	mainCacher.init(16);
 
 	buildHeightMap();
 	buildNormalMap();
@@ -234,16 +224,14 @@ void WorldMap::buildColorMap() {
 	}
 }
 
-float WorldMap::getHeightAt(WorldCoor &coor) {
+float WorldMap::getHeightAt(WorldCoor &coor, HeightCacher& cacher) const {
 	coor.fix(nodeSize);
 
+	float r;
 
-	for (int i = 0; i < heightCacheSize; i++) {
-		if (heightCaches[i].coor == coor) {
-			//return heightCaches[i].height;
-		}
+	if (cacher.getCachedHeight(coor, r)) {
+		return r;
 	}
-
 
 	int i, j;
 	i = coor.index.x;
@@ -255,7 +243,6 @@ float WorldMap::getHeightAt(WorldCoor &coor) {
 	// |  \  |
 	// p0 -- p1
 
-	float r;
 
 	if (dx + dy < 1.0f) {
 		float p0 = heightMap[i][j];
@@ -277,10 +264,8 @@ float WorldMap::getHeightAt(WorldCoor &coor) {
 	float t = detailMap.getHeightAt(coor);
 
 
-	heightCaches[heightCacheIndex].coor = coor;
-	heightCaches[heightCacheIndex].height = r + t;
-	heightCacheIndex++;
-	if (heightCacheIndex >= heightCacheSize) heightCacheIndex = 0;
+	cacher.cacheHeight(coor, r + t);
+
 	return r + t;
 }
 
@@ -346,3 +331,4 @@ void WorldMap::render() {
 
 	glClear(GL_DEPTH_BUFFER_BIT);
 }
+

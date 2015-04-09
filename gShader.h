@@ -206,8 +206,10 @@ class gShader {
 
 		glGetShaderiv(shader, GL_COMPILE_STATUS, &compileStatus);
 
-		if (!compileStatus)
+		if (!compileStatus){
+			printShaderInfoLog(shader);
 			return 0;
+		}
 
 		return shader;
 	}

@@ -16,6 +16,60 @@ class gStaticIndexBufferedDrawable;
 class gTexture;
 class gStaticTriangleVertexBufferDrawable;
 
+class HeightCacher{
+	int heightCacheSize;
+
+	struct HeightCache {
+		WorldCoor coor;
+		float height;
+	};
+
+	HeightCache* heightCaches;
+	int heightCacheIndex;
+public:
+	HeightCacher(){
+		heightCaches = nullptr;
+		heightCacheSize = -1;
+	}
+
+	void init(int size){
+		if(heightCacheSize != size){
+			SAFE_DELETE(heightCaches);
+			heightCaches = new HeightCache[size];
+		}
+		heightCacheSize = size;
+		heightCacheIndex = 0;
+
+
+		heightCacheIndex = 0;
+		for (int i = 0; i < heightCacheSize; i++) {
+			heightCaches[i].coor.index = -1;
+		}
+	}
+
+	~HeightCacher(){
+		SAFE_DELETE(heightCaches);
+	}
+
+	bool getCachedHeight(const WorldCoor & coor, float& height){
+		for (int i = 0; i < heightCacheSize; i++) {
+			if (heightCaches[i].coor == coor) {
+				height = heightCaches[i].height;
+				return true;
+			}
+		}
+		return false;
+	}
+
+	void HeightCacher::cacheHeight(const WorldCoor & coor, float t)
+	{
+		heightCaches[heightCacheIndex].coor = coor;
+		heightCaches[heightCacheIndex].height = t;
+		heightCacheIndex++;
+		if (heightCacheIndex >= heightCacheSize) heightCacheIndex = 0;
+	}
+
+};
 
 class WorldMap : public gRenderable {
 	friend class TerrainNode;
@@ -40,17 +94,10 @@ protected:
 	IntVec2 anchorPos;
 	bool isScaled;
 
-	const int heightCacheSize = 16;
-	struct HeightCache {
-		WorldCoor coor;
-		float height;
-	};
+	HeightCacher mainCacher;
 
-	HeightCache heightCaches[16];
-	int heightCacheIndex;
-
+	
 public:
-	WorldMap() : WorldMap(512 * 1024.0f, 128) {}
 
 	WorldMap(float mapSize, int edgeCount);
 
@@ -86,7 +133,10 @@ public:
 	void buildHeightMap();
 	void buildNormalMap();
 	void buildColorMap();
-	float getHeightAt(WorldCoor &coor);
+	float getHeightAt(WorldCoor &coor, HeightCacher& cacher) const;
+	float getHeightAt(WorldCoor &coor){
+		return getHeightAt(coor, mainCacher);
+	}
 	void buildBuffer();
 	virtual void render() override;
 };

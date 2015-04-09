@@ -12,7 +12,7 @@
 void Valhalla::init() {
 	activeCamera = camera = new gFocusCamera();
 
-	world = new WorldMap();
+	world = new WorldMap(512 * 1024.0f, 128);
 	world->build();
 
 	playerCoor.index = IntVec2(world->getEdgeCount() / 2, world->getEdgeCount() / 2);
