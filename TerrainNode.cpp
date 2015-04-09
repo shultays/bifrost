@@ -10,6 +10,8 @@ void TerrainNode::build(WorldCoor start, Vec2 size, int edgeCount) {
 
 	drawable = new gStaticIndexBufferedDrawable(VERTEX_PROP_COLOR | VERTEX_PROP_NORMAL | VERTEX_PROP_POSITION | VERTEX_PROP_UV, edgeCount*edgeCount, (edgeCount - 1)*(edgeCount - 1) * 6, false);
 
+	HeightCacher cacher;
+	cacher.init(16);
 
 	int k = 0;
 	for (int i = 0; i < edgeCount; i++) {
@@ -22,7 +24,7 @@ void TerrainNode::build(WorldCoor start, Vec2 size, int edgeCount) {
 			coor.pos += pos;
 			coor.fix(world->getNodeSize());
 
-			float h = world->getHeightAt(coor);
+			float h = world->getHeightAt(coor, cacher);
 
 			IntVec2 shift = coor.index - world->anchorPos;
 
@@ -32,8 +34,8 @@ void TerrainNode::build(WorldCoor start, Vec2 size, int edgeCount) {
 			float dx = size.x / (edgeCount - 1);
 			float dy = size.y / (edgeCount - 1);
 
-			float sx = world->getHeightAt(WorldCoor(coor, 0, 0, dx, 0)) - world->getHeightAt(WorldCoor(coor, 0, 0, -dx, 0));
-			float sy = world->getHeightAt(WorldCoor(coor, 0, 0, 0, dy)) - world->getHeightAt(WorldCoor(coor, 0, 0, 0, -dy));
+			float sx = world->getHeightAt(WorldCoor(coor, 0, 0, dx, 0), cacher) - world->getHeightAt(WorldCoor(coor, 0, 0, -dx, 0), cacher);
+			float sy = world->getHeightAt(WorldCoor(coor, 0, 0, 0, dy), cacher) - world->getHeightAt(WorldCoor(coor, 0, 0, 0, -dy), cacher);
 
 			*pointer.normal = Vec3(-sx, sy, 2.0f*dx);
 			pointer.normal->normalize();

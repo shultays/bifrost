@@ -1,5 +1,6 @@
 #include "PngExporter.h"
 
+#include "gTools.h"
 
 #include <stdio.h>
 #include <Math.h>
@@ -15,12 +16,12 @@ int PngExporter::writeGridToPng(const char* fileName, Grid<Vec3>& grid, int expo
 	float maxZ = FLT_MIN;
 	for (int i = 0; i < grid.w*grid.h; i++) {
 		const Vec3& v = grid.data[i];
-		minX = fminf(minX, v.x);
-		minY = fminf(minY, v.y);
-		minZ = fminf(minZ, v.z);
-		maxX = fmaxf(maxX, v.x);
-		maxY = fmaxf(maxY, v.y);
-		maxZ = fmaxf(maxZ, v.z);
+		minX = gmin(minX, v.x);
+		minY = gmin(minY, v.y);
+		minZ = gmin(minZ, v.z);
+		maxX = gmin(maxX, v.x);
+		maxY = gmin(maxY, v.y);
+		maxZ = gmin(maxZ, v.z);
 	}
 	int t = 0;
 

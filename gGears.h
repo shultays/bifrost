@@ -20,8 +20,8 @@ public:
 	gGame *game;
 	gSlaveController slaveController;
 
-	float lastDrawTime = 0.0f;
-	float lastUpdateTime = 0.0f;
+	float lastDrawTime;
+	float lastUpdateTime;
 
 	void init(int argc, char *argv[]);
 	void resize(int width, int height);

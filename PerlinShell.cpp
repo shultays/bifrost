@@ -12,6 +12,7 @@ float PerlinShell::getNodeHeight(int i, int j) const {
 }
 
 PerlinShell::PerlinShell(WorldMap* world, int edgeCount, float minHeight, float maxHeight, float percentage, float pow_val, unsigned int seed) {
+	maxHash = std::numeric_limits<size_t>::max();
 	this->world = world;
 	this->cellSize = world->getMapSize() / (edgeCount - 1);
 	this->cellPerNode = world->getNodeSize() / this->cellSize;
@@ -30,8 +31,8 @@ PerlinShell::PerlinShell(WorldMap* world, int edgeCount, float minHeight, float 
 		pow_type = pow_2;
 	} else if (almost_equal(pow_val, 0.5f)) {
 		pow_type = pow_0_5;
-	} else if (almost_equal(pow_val, roundf(pow_val))) {
-		pow_type = (int)roundf(pow_val);
+	} else if (almost_equal(pow_val, round(pow_val))) {
+		pow_type = (int)round(pow_val);
 	} else {
 		pow_type = pow_n;
 	}
