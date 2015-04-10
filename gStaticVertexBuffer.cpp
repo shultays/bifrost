@@ -2,6 +2,7 @@
 
 #include "gGlobals.h"
 #include "gGame.h"
+#include "gShader.h"
 
 gStaticVertexBuffer::gStaticVertexBuffer(int props, unsigned vertexCount) {
 	hasPosition = (props & VERTEX_PROP_POSITION) > 0;
@@ -128,27 +129,27 @@ void gStaticVertexBuffer::bind() {
 	glBindBuffer(GL_ARRAY_BUFFER, gl_buffer);
 
 	if (hasPosition) {
-		gears.game->shader.bindPosition(vertexSize, positionStart);
+		gears.game->shader->bindPosition(vertexSize, positionStart);
 	}
 	if (hasNormal) {
-		gears.game->shader.bindNormal(vertexSize, normalStart);
+		gears.game->shader->bindNormal(vertexSize, normalStart);
 	} else if (hasConstantNormal) {
-		gears.game->shader.setAttributeNormal(constantNormal);
+		gears.game->shader->setAttributeNormal(constantNormal);
 	}
 
 	if (hasColor) {
-		gears.game->shader.bindColor(vertexSize, colorStart);
+		gears.game->shader->bindColor(vertexSize, colorStart);
 	} else if (hasConstantColor) {
-		gears.game->shader.setAttributeColor(constantColor);
+		gears.game->shader->setAttributeColor(constantColor);
 	}
 
 	if (hasUV) {
-		gears.game->shader.bindUV(vertexSize, uvStart);
+		gears.game->shader->bindUV(vertexSize, uvStart);
 	}
 	if (hasTextureWeights) {
-		gears.game->shader.bindPosition(vertexSize, textureWeightsStart);
+		gears.game->shader->bindPosition(vertexSize, textureWeightsStart);
 	} else if (hasConstantTextureWeights) {
-		gears.game->shader.setAttributeTextureWeights(constantTextureWeights);
+		gears.game->shader->setAttributeTextureWeights(constantTextureWeights);
 	}
 
 }

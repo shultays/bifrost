@@ -1,5 +1,8 @@
 #include "gGame.h"
 #include "gGlobals.h"
+#include "gShader.h"
+#include "gCamera.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -14,8 +17,8 @@ void gGame::render() {
 	Vec3 up = activeCamera->getUp();
 
 	resetWorldStack();
-	shader.begin();
-	shader.setColor(Vec4(1.0, 1.0f, 1.0f, 1.0f));
+	shader->begin();
+	shader->setColor(Vec4(1.0, 1.0f, 1.0f, 1.0f));
 	/*
 	//
 	glMatrixMode(GL_PROJECTION);
@@ -60,11 +63,11 @@ void gGame::render() {
 
 void gGame::updateProjectionMatrix() {
 	Mat4 projection = Mat4::perspective(activeCamera->nearPlane, activeCamera->farPlane, degreeToRadian(90.0f), (float)gears.width, (float)gears.height);
-	shader.setProjectionMatrix(projection);
+	shader->setProjectionMatrix(projection);
 }
 void gGame::updateViewMatrix() {
 	Mat4 view = activeCamera->getLookAt();
-	shader.setViewMatrix(view);
+	shader->setViewMatrix(view);
 }
 
 gTickable::gTickable(bool autoAdd) {
@@ -122,5 +125,13 @@ gGame::gGame(bool setTop) {
 		gears.game = this;
 	}
 	currentStack = 0;
-	shader.loadFromFile("default.vs", "default.ps");
+	shader = new gShader();
+	shader->loadFromFile("default.vs", "default.ps");
+}
+
+
+void gGame::updateShaderUniforms() {
+	if (worldMatDirty) {
+		shader->setWorldMatrix(worldMatrixStack[currentStack]);
+	}
 }

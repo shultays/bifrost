@@ -5,9 +5,7 @@
 #include "gTools.h"
 #include "WorldMap.h"
 #include "DetailedMapController.h"
-#include "gSlave.h"
-
-#include <functional>
+#include "gCamera.h"
 
 void Valhalla::init() {
 	activeCamera = camera = new gFocusCamera();
@@ -24,8 +22,8 @@ void Valhalla::init() {
 	fpsCamera = new gFPSCamera();
 
 	detailedMapController = new DetailedMapController(world, 3, 1, 16);
-	detailedMapController2 = detailedMapController;
 	detailedMapController2 = new DetailedMapController(world, 15, 128, 4);
+
 }
 
 void Valhalla::tick(float dt) {
@@ -36,34 +34,8 @@ void Valhalla::tick(float dt) {
 	}
 }
 
-int t;
-class SlaveTest : public gSlaveWork {
-public:
-	int id;
-	SlaveTest() {
-		id = t++;
-	}
-	virtual void runOnSlave() {
-		int r = rand() % 5 + 4;
-		printf("%d >> counting to %d\n", id, r);
-
-		for (int i = 1; i <= r; i++) {
-			printf("%d >> %d\n", id, i);
-			sleepMS(1000);
-		}
-		printf("%d >> counting done\n", id);
-	}
-	virtual void runOnMain() {
-		printf("%d >> work done\n", id);
-	}
-};
-
-
 
 void Valhalla::update(float fixed_dt) {
-	if (input.isKeyPressed(GLFW_KEY_J)) {
-		gears.addSlaveWork(new SlaveTest());
-	}
 	if (input.isKeyPressed(GLFW_KEY_C)) {
 		isFPS = !isFPS;
 		world->setIsScaled(isFPS);

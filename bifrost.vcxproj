@@ -36,6 +36,7 @@
   <ItemGroup>
     <ClInclude Include="DetailedMapController.h" />
     <ClInclude Include="gMutex.h" />
+    <ClInclude Include="gResources.h" />
     <ClInclude Include="Grid.h" />
     <ClInclude Include="FixedSizedArray.h" />
     <ClInclude Include="FixedSizedPriorityArray.h" />
@@ -47,6 +48,7 @@
     <ClInclude Include="gMat.h" />
     <ClInclude Include="gPrimitives.h" />
     <ClInclude Include="gShader.h" />
+    <ClInclude Include="gSharedPtr.h" />
     <ClInclude Include="gSlave.h" />
     <ClInclude Include="gStaticBufferedDrawables.h" />
     <ClInclude Include="gStaticIndexBuffer.h" />

@@ -4,6 +4,7 @@
 #include "WorldMap.h"
 #include "gTexture.h"
 #include "gGlobals.h"
+#include "gCamera.h"
 
 
 WorldMap::WorldMap(float mapSize, int edgeCount) : gRenderable(true, 1) {

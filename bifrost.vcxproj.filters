@@ -140,9 +140,6 @@
     <ClInclude Include="PerlinMap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Grid.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="WorldMap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -180,6 +177,15 @@
       <Filter>engine</Filter>
     </ClInclude>
     <ClInclude Include="gMutex.h">
+      <Filter>engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Grid.h">
+      <Filter>engine</Filter>
+    </ClInclude>
+    <ClInclude Include="gResources.h">
+      <Filter>engine</Filter>
+    </ClInclude>
+    <ClInclude Include="gSharedPtr.h">
       <Filter>engine</Filter>
     </ClInclude>
   </ItemGroup>

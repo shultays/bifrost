@@ -3,9 +3,10 @@
 
 #include "FixedSizedPriorityArray.h"
 #include "FixedSizedArray.h"
-#include "gCamera.h"
-#include "gShader.h"
 #include "gMat.h"
+
+class gCamera;
+class gShader;
 
 //Tickable objects will be ticked before each render
 class gTickable {
@@ -67,7 +68,7 @@ class gGame {
 
 public:
 	gCamera *activeCamera;
-	gShader shader;
+	gShader *shader;
 	gGame(bool setTop = true);
 
 	virtual void init() = 0;
@@ -125,11 +126,8 @@ public:
 		worldMatDirty = true;
 		worldMatrixStack[currentStack].rotateBy(angle, dir);
 	}
-	void updateShaderUniforms() {
-		if (worldMatDirty) {
-			shader.setWorldMatrix(worldMatrixStack[currentStack]);
-		}
-	}
+	void updateShaderUniforms();
+
 	void rotateX(float angle) {
 		worldMatDirty = true;
 		worldMatrixStack[currentStack].rotateByX(angle);

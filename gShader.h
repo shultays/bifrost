@@ -160,7 +160,8 @@ class gShader {
 
 	GLuint vertexShader;
 	GLuint pixelShader;
-
+	char vertexShaderFile[64];
+	char pixelShaderFile[64];
 
 	void printShaderInfoLog(GLuint obj) {
 		int infologLength = 0;
@@ -206,7 +207,7 @@ class gShader {
 
 		glGetShaderiv(shader, GL_COMPILE_STATUS, &compileStatus);
 
-		if (!compileStatus){
+		if (!compileStatus) {
 			printShaderInfoLog(shader);
 			return 0;
 		}
@@ -232,7 +233,18 @@ public:
 
 	}
 
+	const char* getVertexShaderFileName() const {
+		return vertexShaderFile;
+	}
+
+	const char* getPixelShaderFileName() const {
+		return pixelShaderFile;
+	}
+
 	bool loadFromFile(char* vertexShaderFile, char* pixelShaderFile) {
+		strcpy_s(this->vertexShaderFile, vertexShaderFile);
+		strcpy_s(this->pixelShaderFile, pixelShaderFile);
+
 		vertexShader = loadShader(vertexShaderFile, GL_VERTEX_SHADER);
 		if (!vertexShader) {
 			return false;

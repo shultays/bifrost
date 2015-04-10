@@ -3,3 +3,4 @@
 gInput input;
 gTime time;
 gGears gears;
+gResources resources;
