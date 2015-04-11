@@ -27,12 +27,10 @@ class gSharedPtr {
 		}
 
 		void increment() {
-			printf("++\n");
 			referenceCount++;
 		}
 
 		void decrement() {
-			printf("--\n");
 			assert(referenceCount);
 			referenceCount--;
 		}
@@ -136,6 +134,10 @@ public:
 
 
 	T* operator->() {
+		return object;
+	}
+
+	T* getObject() {
 		return object;
 	}
 

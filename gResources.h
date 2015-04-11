@@ -11,6 +11,7 @@ typedef gSharedPtr<gShader> gShaderShr;
 
 class gResources : public gCustomDeallocator<gShader> {
 
+
 	void objectFreed(gShader* object) override {
 		std::string ID = shaderID(object->getVertexShaderFileName(), object->getPixelShaderFileName());
 		std::unordered_map<std::string, gShaderShr>::iterator got = shaders.find(ID);
@@ -25,6 +26,7 @@ class gResources : public gCustomDeallocator<gShader> {
 		ID += pixelShaderFile;
 		return ID;
 	}
+
 public:
 
 	gShaderShr loadShader(char* vertexShaderFile, char* pixelShaderFile) {
@@ -41,7 +43,6 @@ public:
 		shaders[ID] = shader;
 		return shader;
 	}
-
 
 };
 

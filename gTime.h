@@ -3,7 +3,7 @@
 
 #include "gTools.h"
 
-class gTime{
+class gTime {
 	friend class gGears;
 
 	float currentTime;
@@ -12,21 +12,21 @@ class gTime{
 
 public:
 
-	gTime(){
+	gTime() {
 		currentTime = (float)glfwGetTime();
 		dt = 0.0f;
 	}
 
-	float getTime(){
+	float getTime() {
 		return currentTime;
 	}
-	float getDt(){
+	float getDt() {
 		return dt;
 	}
-	float getFixed_dt(){
+	float getFixed_dt() {
 		return fixed_dt;
 	}
-	void tick(){
+	void tick() {
 		float newTime = (float)glfwGetTime();
 		dt = newTime - currentTime;
 		currentTime = newTime;
