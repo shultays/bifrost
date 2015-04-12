@@ -9,7 +9,7 @@
 #include "windows.h"
 #endif
 
-bool textFileRead(char *fileName, std::string &data) {
+bool textFileRead(const char *fileName, std::string &data) {
 	std::ifstream t(fileName);
 	if (!t.good()) {
 		return false;

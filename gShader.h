@@ -215,7 +215,7 @@ class gShader {
 		return shader;
 	}
 
-	GLuint loadShader(char *fileName, int shaderType) {
+	GLuint loadShader(const char *fileName, int shaderType) {
 		std::string shaderSource;
 		if (!textFileRead(fileName, shaderSource)) {
 			std::cout << "Cannot load shader file : " << fileName;
@@ -241,7 +241,7 @@ public:
 		return pixelShaderFile;
 	}
 
-	bool loadFromFile(char* vertexShaderFile, char* pixelShaderFile) {
+	bool loadFromFile(const char* vertexShaderFile, const char* pixelShaderFile) {
 		strcpy_s(this->vertexShaderFile, vertexShaderFile);
 		strcpy_s(this->pixelShaderFile, pixelShaderFile);
 

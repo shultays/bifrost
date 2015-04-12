@@ -9,8 +9,10 @@
 class gTexture {
 public:
 	GLuint textureID;
+	char textureName[128];
 
-	gTexture(char *fileName) {
+	gTexture(const char *fileName) {
+		strcpy_s(textureName, fileName);
 		std::vector<unsigned char> image;
 		unsigned width, height;
 		unsigned error = lodepng::decode(image, width, height, fileName);
@@ -24,6 +26,10 @@ public:
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	}
+
+	const char* getName() const {
+		return textureName;
 	}
 };
 

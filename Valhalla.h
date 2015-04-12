@@ -8,7 +8,7 @@ class WorldMap;
 class gFocusCamera;
 class DetailedMapController;
 class gFPSCamera;
-
+class gStaticIndexBufferedDrawable;
 class Valhalla : public gGame, public gTickable, public gUpdatable {
 	WorldMap *world;
 	gFocusCamera* camera;
@@ -17,6 +17,7 @@ class Valhalla : public gGame, public gTickable, public gUpdatable {
 	DetailedMapController* detailedMapController;
 	DetailedMapController* detailedMapController2;
 
+	gStaticIndexBufferedDrawable *tree;
 
 	WorldCoor playerCoor;
 

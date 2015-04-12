@@ -7,6 +7,7 @@
 #include "DetailedMapController.h"
 #include "gCamera.h"
 
+#include "gModelReader.h"
 void Valhalla::init() {
 	activeCamera = camera = new gFocusCamera();
 
@@ -24,6 +25,41 @@ void Valhalla::init() {
 	detailedMapController = new DetailedMapController(world, 3, 1, 16);
 	detailedMapController2 = new DetailedMapController(world, 15, 128, 4);
 
+	gModelReader reader;
+	reader.readMDLFile("models/Tree0.mdl");
+	int totalVertex = 0;
+	int totalIndex = 0;
+	for (unsigned i = 0; i < reader.geosets.size(); i++) {
+		totalIndex += reader.geosets[i].faces.size();
+		totalVertex += reader.geosets[i].vertices.size();
+	}
+	tree = new gStaticIndexBufferedDrawable(VERTEX_PROP_POSITION | VERTEX_PROP_NORMAL | VERTEX_PROP_UV, totalVertex, totalIndex);
+
+
+	int vStart = 0;
+	for (unsigned i = 0; i < reader.geosets.size(); i++) {
+		for (unsigned j = 0; j < reader.geosets[i].vertices.size(); j++) {
+			VertexPointer p = tree->getVertexPointerAt(vStart + j);
+			*p.position = reader.geosets[i].vertices[j];
+			*p.normal = reader.geosets[i].normals[j];
+			*p.uv = reader.geosets[i].textureCoors[j];
+		}
+		vStart += reader.geosets[i].vertices.size();
+	}
+
+	vStart = 0;
+	int uStart = 0;
+	for (unsigned i = 0; i < reader.geosets.size(); i++) {
+		for (unsigned j = 0; j < reader.geosets[i].faces.size(); j++) {
+			tree->setIndexAt(uStart + j, vStart + reader.geosets[i].faces[j]);
+		}
+
+		vStart += reader.geosets[i].vertices.size();
+		uStart += reader.geosets[i].faces.size();
+	}
+	tree->setConstantColor(Vec4(1.0f));
+	tree->build();
+	tree->enabled = false;
 }
 
 void Valhalla::tick(float dt) {
@@ -38,6 +74,7 @@ void Valhalla::tick(float dt) {
 void Valhalla::update(float fixed_dt) {
 	if (input.isKeyPressed(GLFW_KEY_C)) {
 		isFPS = !isFPS;
+		tree->enabled = isFPS;
 		world->setIsScaled(isFPS);
 		if (isFPS) {
 			world->setAnchorPos(playerCoor.index);
@@ -52,6 +89,15 @@ void Valhalla::update(float fixed_dt) {
 
 			detailedMapController->initMap(playerCoor);
 			detailedMapController2->initMap(playerCoor);
+
+			Vec3 treePos = Vec3(playerCoor.pos, 0.0f);
+			treePos.vec2 += fpsCamera->getDir().vec2*2.0f;
+			WorldCoor treeWorldCoor = playerCoor;
+			treeWorldCoor.pos = treePos.vec2;
+			treePos.z = world->getHeightAt(treeWorldCoor) + 1.0f;
+			tree->frame.makeIdentity();
+			tree->frame.scaleBy(0.01f);
+			tree->frame.translateBy(treePos);
 		} else {
 			world->frame.makeIdentity();
 			activeCamera = camera;

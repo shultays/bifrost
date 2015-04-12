@@ -80,7 +80,7 @@ inline double radianToDegree(double rad) {
 	return rad * 180.0 / d_pi;
 }
 
-bool textFileRead(char *fileName, std::string &data);
+bool textFileRead(const char *fileName, std::string &data);
 
 Vec3 lerpColor(const Vec3& c0, const Vec3& c1, float a);
 Vec2 lerpVec(const Vec2& v0, const Vec2& v1, float a);
