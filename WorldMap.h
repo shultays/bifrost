@@ -16,7 +16,7 @@ class gStaticIndexBufferedDrawable;
 class gTexture;
 class gStaticTriangleVertexBufferDrawable;
 
-class HeightCacher{
+class HeightCacher {
 	int heightCacheSize;
 
 	struct HeightCache {
@@ -27,13 +27,13 @@ class HeightCacher{
 	HeightCache* heightCaches;
 	int heightCacheIndex;
 public:
-	HeightCacher(){
+	HeightCacher() {
 		heightCaches = nullptr;
 		heightCacheSize = -1;
 	}
 
-	void init(int size){
-		if(heightCacheSize != size){
+	void init(int size) {
+		if (heightCacheSize != size) {
 			SAFE_DELETE(heightCaches);
 			heightCaches = new HeightCache[size];
 		}
@@ -47,11 +47,11 @@ public:
 		}
 	}
 
-	~HeightCacher(){
+	~HeightCacher() {
 		SAFE_DELETE(heightCaches);
 	}
 
-	bool getCachedHeight(const WorldCoor & coor, float& height){
+	bool getCachedHeight(const WorldCoor & coor, float& height) {
 		for (int i = 0; i < heightCacheSize; i++) {
 			if (heightCaches[i].coor == coor) {
 				height = heightCaches[i].height;
@@ -61,8 +61,7 @@ public:
 		return false;
 	}
 
-	void HeightCacher::cacheHeight(const WorldCoor & coor, float t)
-	{
+	void HeightCacher::cacheHeight(const WorldCoor & coor, float t) {
 		heightCaches[heightCacheIndex].coor = coor;
 		heightCaches[heightCacheIndex].height = t;
 		heightCacheIndex++;
@@ -86,7 +85,6 @@ protected:
 	Grid<Vec3> normalMap;
 	Grid<Vec3> colorMap;
 
-	gTexture* texture;
 
 	gStaticIndexBufferedDrawable *terrainDrawable;
 	gStaticTriangleVertexBufferDrawable *waterDrawable;
@@ -96,7 +94,7 @@ protected:
 
 	HeightCacher mainCacher;
 
-	
+
 public:
 
 	WorldMap(float mapSize, int edgeCount);
@@ -134,7 +132,7 @@ public:
 	void buildNormalMap();
 	void buildColorMap();
 	float getHeightAt(WorldCoor &coor, HeightCacher& cacher) const;
-	float getHeightAt(WorldCoor &coor){
+	float getHeightAt(WorldCoor &coor) {
 		return getHeightAt(coor, mainCacher);
 	}
 	void buildBuffer();

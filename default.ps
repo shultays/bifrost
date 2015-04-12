@@ -1,5 +1,21 @@
 
+uniform sampler2D uTexture0;
+uniform sampler2D uTexture1;
+uniform sampler2D uTexture2;
+uniform sampler2D uTexture3;
+uniform int uTextureCount;
+
 varying vec4 vColor;
+varying vec2 vVertexUV;
+varying vec2 vTextureWeights;
+
 void main(void) {
-    gl_FragColor = vColor;
+
+	if(uTextureCount == 0){
+		gl_FragColor = vColor;
+	} else {
+		gl_FragColor = texture2D(uTexture0, vVertexUV);
+	}
+	
+	if(gl_FragColor.a == 0.0f) discard;
 }

@@ -17,7 +17,6 @@ public:
 		unsigned width, height;
 		unsigned error = lodepng::decode(image, width, height, fileName);
 
-
 		glGenTextures(1, &textureID);
 		glBindTexture(GL_TEXTURE_2D, textureID);
 
@@ -30,6 +29,10 @@ public:
 
 	const char* getName() const {
 		return textureName;
+	}
+
+	void bind() {
+		glBindTexture(GL_TEXTURE_2D, textureID);
 	}
 };
 

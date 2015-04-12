@@ -4,10 +4,10 @@
 #include "FixedSizedPriorityArray.h"
 #include "FixedSizedArray.h"
 #include "gMat.h"
+#include "gResources.h"
 
 class gCamera;
 class gShader;
-
 //Tickable objects will be ticked before each render
 class gTickable {
 public:
@@ -29,7 +29,8 @@ public:
 
 class gRenderable {
 	friend class gGame;
-private:
+	friend class gRenderableGroup;
+protected:
 	void gRender();
 
 public:
@@ -38,6 +39,7 @@ public:
 	gRenderable(bool autoAdd = true, int priority = max_priority);
 	virtual ~gRenderable();
 	virtual void render() = 0;
+	gTextureShr texture;
 };
 
 

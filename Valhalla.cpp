@@ -8,6 +8,8 @@
 #include "gCamera.h"
 
 #include "gModelReader.h"
+#include "gRenderableGroup.h"
+
 void Valhalla::init() {
 	activeCamera = camera = new gFocusCamera();
 
@@ -23,55 +25,61 @@ void Valhalla::init() {
 	fpsCamera = new gFPSCamera();
 
 	detailedMapController = new DetailedMapController(world, 3, 1, 16);
-	detailedMapController2 = new DetailedMapController(world, 15, 128, 4);
+	detailedMapController2 = new DetailedMapController(world, 7, 256, 8);
 
-	gModelReader reader;
-	reader.readMDLFile("models/Tree0.mdl");
-	int totalVertex = 0;
-	int totalIndex = 0;
+	gMDLReader reader;
+	reader.readMDLFile("models/NewBirch0.mdl");
+
+	tree = new gRenderableGroup();
 	for (unsigned i = 0; i < reader.geosets.size(); i++) {
-		totalIndex += reader.geosets[i].faces.size();
-		totalVertex += reader.geosets[i].vertices.size();
-	}
-	tree = new gStaticIndexBufferedDrawable(VERTEX_PROP_POSITION | VERTEX_PROP_NORMAL | VERTEX_PROP_UV, totalVertex, totalIndex);
 
+		gStaticIndexBufferedDrawable* geosetRenderable = new gStaticIndexBufferedDrawable(VERTEX_PROP_POSITION | VERTEX_PROP_NORMAL | VERTEX_PROP_UV, reader.geosets[i].vertices.size(), reader.geosets[i].faces.size(), false);
 
-	int vStart = 0;
-	for (unsigned i = 0; i < reader.geosets.size(); i++) {
 		for (unsigned j = 0; j < reader.geosets[i].vertices.size(); j++) {
-			VertexPointer p = tree->getVertexPointerAt(vStart + j);
+			VertexPointer p = geosetRenderable->getVertexPointerAt(j);
 			*p.position = reader.geosets[i].vertices[j];
 			*p.normal = reader.geosets[i].normals[j];
 			*p.uv = reader.geosets[i].textureCoors[j];
 		}
-		vStart += reader.geosets[i].vertices.size();
-	}
 
-	vStart = 0;
-	int uStart = 0;
-	for (unsigned i = 0; i < reader.geosets.size(); i++) {
 		for (unsigned j = 0; j < reader.geosets[i].faces.size(); j++) {
-			tree->setIndexAt(uStart + j, vStart + reader.geosets[i].faces[j]);
+			geosetRenderable->setIndexAt(j, reader.geosets[i].faces[j]);
 		}
 
-		vStart += reader.geosets[i].vertices.size();
-		uStart += reader.geosets[i].faces.size();
+		geosetRenderable->setConstantColor(Vec4(1.0f));
+		geosetRenderable->build();
+
+		if (reader.geosets[i].materialID != -1) {
+			geosetRenderable->texture = resources.getTexture(("models/" + reader.textures[reader.materialTextures[reader.geosets[i].materialID]] + ".png").c_str());
+		}
+
+		tree->addRenderable(geosetRenderable);
 	}
-	tree->setConstantColor(Vec4(1.0f));
-	tree->build();
 	tree->enabled = false;
+
+
 }
 
 void Valhalla::tick(float dt) {
 	if (input.isKeyDown(GLFW_KEY_Z)) {
-		glPolygonMode(GL_FRONT, GL_LINE);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	} else {
-		glPolygonMode(GL_FRONT, GL_FILL);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
 }
 
 
 void Valhalla::update(float fixed_dt) {
+
+	if (input.isKeyPressed(GLFW_KEY_1)) {
+		tree->getChildrenAt(0)->enabled = !tree->getChildrenAt(0)->enabled;
+	}
+	if (input.isKeyPressed(GLFW_KEY_2)) {
+		tree->getChildrenAt(1)->enabled = !tree->getChildrenAt(1)->enabled;
+	}
+	if (input.isKeyPressed(GLFW_KEY_3)) {
+		tree->getChildrenAt(2)->enabled = !tree->getChildrenAt(2)->enabled;
+	}
 	if (input.isKeyPressed(GLFW_KEY_C)) {
 		isFPS = !isFPS;
 		tree->enabled = isFPS;
@@ -94,7 +102,7 @@ void Valhalla::update(float fixed_dt) {
 			treePos.vec2 += fpsCamera->getDir().vec2*2.0f;
 			WorldCoor treeWorldCoor = playerCoor;
 			treeWorldCoor.pos = treePos.vec2;
-			treePos.z = world->getHeightAt(treeWorldCoor) + 1.0f;
+			treePos.z = world->getHeightAt(treeWorldCoor);
 			tree->frame.makeIdentity();
 			tree->frame.scaleBy(0.01f);
 			tree->frame.translateBy(treePos);
@@ -123,15 +131,15 @@ void Valhalla::update(float fixed_dt) {
 		Vec2 side = dir * Mat2::rotation(pi_d2);
 
 		if (input.isKeyDown(GLFW_KEY_W)) {
-			playerCoor.pos += dir * fixed_dt * 20.0f;
+			playerCoor.pos += dir * fixed_dt * 2.0f;
 		} else if (input.isKeyDown(GLFW_KEY_S)) {
-			playerCoor.pos -= dir * fixed_dt * 20.0f;
+			playerCoor.pos -= dir * fixed_dt * 2.0f;
 		}
 
 		if (input.isKeyDown(GLFW_KEY_A)) {
-			playerCoor.pos -= side * fixed_dt * 20.0f;
+			playerCoor.pos -= side * fixed_dt * 2.0f;
 		} else if (input.isKeyDown(GLFW_KEY_D)) {
-			playerCoor.pos += side * fixed_dt * 20.0f;
+			playerCoor.pos += side * fixed_dt * 2.0f;
 		}
 
 		playerCoor.fix(world->getNodeSize());

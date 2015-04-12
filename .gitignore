@@ -45,3 +45,7 @@ debug/
 bifrost.opensdf
 *.opensdf
 bifrost_Wo/
+models/tools/
+*.sdf
+*.suo
+bifrost.vcxproj

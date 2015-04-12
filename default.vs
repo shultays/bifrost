@@ -17,6 +17,8 @@ uniform sampler2D uTexture3;
 uniform int uTextureCount;
 
 varying vec4 vColor;
+varying vec2 vVertexUV;
+varying vec2 vTextureWeights;
 
 void main(void) {
 
@@ -30,15 +32,13 @@ void main(void) {
 
     float directionalLightWeighting = max(dot(transformedNormal, uLightingDirection), 0.0);
 
-	vec4 finalColor;
+	vec4 finalColor = vec4(1.0);
 
-	if(uTextureCount == 0){
-		finalColor = vec4(1.0);
-	} else if(uTextureCount == 1){
-		finalColor = texture2D(uTexture0, aVertexUV);
-	}
     
 	finalColor *= aVertexColor*uColor;
 
     vColor = vec4((finalColor.rgb*0.2 + finalColor.rgb*directionalLightWeighting * 0.8), finalColor.a);
+
+	vVertexUV = aVertexUV;
+	vTextureWeights = aTextureWeights;
 }

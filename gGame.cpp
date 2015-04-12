@@ -103,12 +103,19 @@ gRenderable::gRenderable(bool autoAdd, int priority) {
 }
 
 void gRenderable::gRender() {
+	if (!enabled) return;
 	bool identity = frame.isIdentity();
 	if (!identity) {
 		gears.game->pushMatrix();
 		gears.game->multiply(frame);
 	}
 	gears.game->updateShaderUniforms();
+	if (texture.getObject()) {
+		texture->bind();
+		gears.game->shader->setUniform("uTextureCount", 1);
+	} else {
+		gears.game->shader->setUniform("uTextureCount", 0);
+	}
 	render();
 	if (!identity) {
 		gears.game->popMatrix();

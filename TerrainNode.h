@@ -14,7 +14,7 @@ class TerrainNode : public gRenderable {
 	WorldMap *world;
 	bool isBuilt;
 public:
-	TerrainNode(WorldMap *world) {
+	TerrainNode(WorldMap *world) : gRenderable(true, 2) {
 		drawable = NULL;
 		this->world = world;
 		isBuilt = false;

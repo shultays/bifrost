@@ -5,24 +5,26 @@
 #include "gVec.h"
 #include <iostream>
 #include <fstream>
-using namespace std;
 
-class gModelReader {
+class gMDLReader {
+	std::ifstream myfile;
+
+	std::string line;
+	std::string token;
 public:
-	ifstream myfile;
-
-	string line;
-	string token;
 
 	class GeoSet {
 	public:
-		vector<Vec3> vertices;
-		vector<Vec3> normals;
-		vector<Vec2> textureCoors;
-		vector<int> faces;
+		std::vector<Vec3> vertices;
+		std::vector<Vec3> normals;
+		std::vector<Vec2> textureCoors;
+		std::vector<int> faces;
+		int materialID;
 	};
 
-	vector<GeoSet> geosets;
+	std::vector<GeoSet> geosets;
+	std::vector<std::string> textures;
+	std::vector<int> materialTextures;
 
 	bool getToken() {
 		myfile >> token;
@@ -36,7 +38,7 @@ public:
 		return true;
 	}
 
-	void readMDLFile(char *fileName) {
+	void readMDLFile(const char *fileName) {
 		myfile.open(fileName);
 		if (!myfile.is_open()) {
 			return;
@@ -44,14 +46,65 @@ public:
 		while (getToken()) {
 			if (token == "Geoset") {
 				readGeoSet();
+			} else if (token == "Textures") {
+				readTextures();
+			} else if (token == "Materials") {
+				readMaterials();
 			} else {
 				ignoreToken();
 			}
 		}
 	}
 
+	void readMaterials() {
+		int materialCount;
+		myfile >> materialCount;
+		getToken();//{
+
+		int pCount = 1;
+		while (pCount) {
+			getToken();
+			if (token == "TextureID") {
+				int materialTexture;
+				myfile >> materialTexture;
+				materialTextures.push_back(materialTexture);
+			} else if (token == "{") {
+				pCount++;
+			} else if (token == "}") {
+				pCount--;
+			}
+		}
+
+
+	}
+	void readTextures() {
+		int textureCount;
+		myfile >> textureCount;
+
+		getToken();//{
+
+		for (int i = 0; i < textureCount; i++) {
+
+			getToken();//Bitmap 
+			getToken();//{
+			getToken();//Image
+			getline(myfile, line);
+
+			line = line.substr(2, line.length() - 8);
+			unsigned found = line.find_last_of("/\\");
+			if (found != std::string::npos) {
+				found++;
+				line = line.substr(found, line.length() - found);
+			}
+			textures.push_back(line);
+			getToken();//}
+		}
+		getToken();//}
+	}
+
 	void readGeoSet() {
 		GeoSet geoset;
+		geoset.materialID = -1;
 		getToken();//{
 		while (getToken()) {
 			if (token == "}") break;
@@ -81,6 +134,9 @@ public:
 				}
 				getToken(); //}
 				getToken(); //}
+			} else if (token == "MaterialID") {
+				myfile >> geoset.materialID;
+				getToken(); //,
 			} else {
 				ignoreToken();
 			}
@@ -89,9 +145,6 @@ public:
 	}
 
 	void ignoreToken() {
-
-		printf("ignored %s\n", token.c_str());
-
 		getline(myfile, line);
 		int pCount = 0;
 
@@ -108,7 +161,7 @@ public:
 		}
 	}
 
-	void readVec3Array(vector<Vec3>& arr) {
+	void readVec3Array(std::vector<Vec3>& arr) {
 		arr.clear();
 		int count;
 		myfile >> count;
@@ -130,7 +183,7 @@ public:
 	}
 
 
-	void readVec2Array(vector<Vec2>& arr) {
+	void readVec2Array(std::vector<Vec2>& arr) {
 		arr.clear();
 		int count;
 		myfile >> count;
@@ -148,10 +201,38 @@ public:
 		getToken();//{
 
 	}
-
-
 };
 
+
+class gBLPReader {
+
+public:
+	struct blp2header {
+		byte    ident[4];
+		unsigned compression;
+		unsigned flags;
+		unsigned width;
+		unsigned height;
+		unsigned pictureType;
+		unsigned pictureSubType;
+		unsigned mipMapOffset[16];
+		unsigned mipMapSize[16];
+	};
+
+	blp2header header;
+
+	std::ifstream myfile;
+
+	void readBLPFile(const char* filename) {
+
+		myfile.open(filename, std::ios::binary);
+
+		if (myfile.is_open() == false) return;
+
+		myfile.read((char*)&header, sizeof(header));
+
+	}
+};
 
 
 #endif

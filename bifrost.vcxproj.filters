@@ -191,6 +191,9 @@
     <ClInclude Include="gModelReader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="gRenderableGroup.h">
+      <Filter>engine\drawables</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="default.vs">
