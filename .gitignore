@@ -48,4 +48,4 @@ bifrost_Wo/
 models/tools/
 *.sdf
 *.suo
-bifrost.vcxproj
+bifrost.*
