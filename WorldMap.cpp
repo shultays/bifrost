@@ -311,6 +311,7 @@ void WorldMap::buildBuffer() {
 }
 
 void WorldMap::render() {
+
 	float oldFar, oldNear;
 	if (isScaled) {
 		oldFar = gears.game->activeCamera->farPlane;

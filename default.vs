@@ -1,4 +1,4 @@
-attribute vec3 aVertexPosition;
+layout(location = 0) attribute vec3 aVertexPosition;
 attribute vec3 aVertexNormal;
 attribute vec2 aVertexUV;
 attribute vec4 aVertexColor;
@@ -19,11 +19,12 @@ uniform int uTextureCount;
 varying vec4 vColor;
 varying vec2 vVertexUV;
 varying vec2 vTextureWeights;
+varying vec3 vPosition;
 
 void main(void) {
 
-    vec4 worldPos  = uViewMatrix *  uWorldMatrix* vec4(aVertexPosition, 1.0);
-    gl_Position = uProjectionMatrix * worldPos;
+    vec4 worldPos  =   uWorldMatrix* vec4(aVertexPosition, 1.0);
+    gl_Position = uProjectionMatrix * uViewMatrix *worldPos;
     
 
     vec3 transformedNormal = (uWorldMatrix * vec4(aVertexNormal, 0.0f)).xyz;
@@ -41,4 +42,5 @@ void main(void) {
 
 	vVertexUV = aVertexUV;
 	vTextureWeights = aTextureWeights;
+	vPosition = worldPos.xyz;
 }

@@ -40,6 +40,7 @@ public:
 	virtual ~gRenderable();
 	virtual void render() = 0;
 	gTextureShr texture;
+	gShaderShr shader;
 };
 
 
@@ -70,7 +71,7 @@ class gGame {
 
 public:
 	gCamera *activeCamera;
-	gShader *shader;
+	gShader *currentShader;
 	gGame(bool setTop = true);
 
 	virtual void init() = 0;
@@ -158,6 +159,7 @@ public:
 		worldMatDirty = true;
 		worldMatrixStack[currentStack] *= m;
 	}
+	void setShader(gShader* param1);
 };
 
 

@@ -27,7 +27,21 @@ DetailedMapController::DetailedMapController(WorldMap* world, int squareCount, i
 	cellSize = world->getNodeSize() / cellPerNode;
 	cellDetail = cellSize / edgePerCell;
 
-	nodes.init(squareCount*squareCount + 1, squareCount*squareCount + 1, nullptr);
+	nodes.init(squareCount + squareCount + 1, squareCount + squareCount + 1, nullptr);
+}
+
+void DetailedMapController::tick(float dt) {
+	if (cropArea.isNonZero()) {
+		for (int a = -squareCount; a <= squareCount; a++) {
+			for (int b = -squareCount; b <= squareCount; b++) {
+				int i = a + squareCount;
+				int j = b + squareCount;
+				if (nodes[i][j]) {
+					nodes[i][j]->setDiscardArea(cropArea);
+				}
+			}
+		}
+	}
 }
 
 IntVec2 DetailedMapController::coorToIndex(WorldCoor& coor) {
@@ -196,8 +210,8 @@ void DetailedMapController::updateMap(WorldCoor& coor) {
 }
 
 void DetailedMapController::initMap(WorldCoor& coor) {
-	for (int i = 0; i < squareCount*squareCount + 1; i++) {
-		for (int j = 0; j < squareCount*squareCount + 1; j++) {
+	for (int i = 0; i < squareCount + squareCount + 1; i++) {
+		for (int j = 0; j < squareCount + squareCount + 1; j++) {
 			SAFE_DELETE(nodes[i][j]);
 		}
 	}
@@ -221,7 +235,6 @@ void DetailedMapController::initMap(WorldCoor& coor) {
 			cellCoor.pos.y += b*cellSize;
 			cellCoor.fix(world->getNodeSize());
 			nodes[i][j] = new TerrainNode(world);
-
 			//nodes[i][j]->build(cellCoor, Vec2(cellSize), edgePerCell);
 			//nodes[i][j]->buildMesh();
 
@@ -230,4 +243,19 @@ void DetailedMapController::initMap(WorldCoor& coor) {
 		}
 	}
 
+}
+
+Vec4 DetailedMapController::getTerrainArea() const {
+	int end = squareCount + squareCount;
+	if (nodes[0][0] && nodes[0][0]->getIsBuilt() && nodes[end][end] && nodes[end][end]->getIsBuilt()) {
+		Vec4 r;
+		r[0] = nodes[0][0]->getMin().x;
+		r[1] = nodes[0][0]->getMin().y;
+		r[2] = nodes[end][end]->getMax().x;
+		r[3] = nodes[end][end]->getMax().y;
+
+		return r;
+	}
+
+	return Vec4::zero();
 }

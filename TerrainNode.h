@@ -13,11 +13,19 @@ class TerrainNode : public gRenderable {
 
 	WorldMap *world;
 	bool isBuilt;
+
+	Vec2 startPoint;
+	Vec2 endPoint;
+
+	Vec4 cropArea;
 public:
-	TerrainNode(WorldMap *world) : gRenderable(true, 2) {
-		drawable = NULL;
-		this->world = world;
-		isBuilt = false;
+	TerrainNode(WorldMap *world);
+
+	const Vec2& getMin() const {
+		return startPoint;
+	}
+	const Vec2& getMax() const {
+		return endPoint;
 	}
 
 	~TerrainNode() {
@@ -30,6 +38,12 @@ public:
 
 	void render();
 
+	bool getIsBuilt() {
+		return isBuilt;
+	}
+	void setDiscardArea(const Vec4& cropArea) {
+		this->cropArea = cropArea;
+	}
 };
 
 

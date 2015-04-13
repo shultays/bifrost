@@ -1,0 +1,28 @@
+
+uniform sampler2D uTexture0;
+uniform sampler2D uTexture1;
+uniform sampler2D uTexture2;
+uniform sampler2D uTexture3;
+uniform int uTextureCount;
+
+varying vec4 vColor;
+varying vec2 vVertexUV;
+varying vec4 vTextureWeights;
+varying vec3 vPosition;
+
+uniform vec4 uDiscardArea;
+
+void main(void) {
+	if(vPosition.x >= uDiscardArea[0] && vPosition.y >= uDiscardArea[1] && vPosition.x < uDiscardArea[2] && vPosition.y < uDiscardArea[3]){
+		discard;
+	}
+
+
+	if(uTextureCount == 0){
+		gl_FragColor = vColor;
+	} else if(uTextureCount == 1){
+		gl_FragColor = texture2D(uTexture0, vVertexUV);
+	} 
+	
+	if(gl_FragColor.a == 0.0f) discard;
+}

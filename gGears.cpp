@@ -7,7 +7,7 @@ void gGears::init(int argc, char *argv[]) {
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	slaveController.startSlaves(3);
-
+	defaultShader = resources.getShader("default.vs", "default.ps");
 	lastDrawTime = time.getTime() - draw_interval;
 	lastUpdateTime = time.getTime() - update_interval;
 	game->init();

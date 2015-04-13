@@ -7,67 +7,25 @@
 #include <stdlib.h>
 
 void gGame::render() {
-	updateProjectionMatrix();
-	updateViewMatrix();
+	resetWorldStack();
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	Vec3 pos = activeCamera->getPos();
-	Vec3 focus = pos + activeCamera->getDir();
-	Vec3 up = activeCamera->getUp();
+	currentShader = nullptr;
 
-	resetWorldStack();
-	shader->begin();
-	shader->setColor(Vec4(1.0, 1.0f, 1.0f, 1.0f));
-	/*
-	//
-	glMatrixMode(GL_PROJECTION);
-	glLoadMatrixf(projection.data);
-
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	gluLookAt(0, 0, 10, 0, 0, 0, 0, 1, 0);
-	glLoadMatrixf(world.data);
-	//
-
-
-
-
-	glShadeModel(GL_SMOOTH);*/
 	for (int i = 0; i < renderList.size(); i++) {
 		if (renderList[i]->enabled) renderList[i]->gRender();
 	}
-	/*
-	glUseProgram(0);
-	glMatrixMode(GL_PROJECTION);
-	glLoadMatrixf(projection.data);
 
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	gluLookAt(0, 0, 10, 0, 0, 0, 0, 1, 0);
-	glLoadMatrixf(world.data);
-
-
-	glDisable(GL_LIGHTING);
-	*/
-	/*
-	glBegin(GL_QUADS);
-	glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
-	glVertex3f(+10.0f, -10.f, 0.0f);
-	glVertex3f(+10.0f, +10.f, 0.0f);
-	glVertex3f(-10.0f, +10.f, 0.0f);
-	glVertex3f(-10.0f, -10.f, 0.0f);
-
-	glEnd();*/
 }
 
 void gGame::updateProjectionMatrix() {
 	Mat4 projection = Mat4::perspective(activeCamera->nearPlane, activeCamera->farPlane, degreeToRadian(90.0f), (float)gears.width, (float)gears.height);
-	shader->setProjectionMatrix(projection);
+	currentShader->setProjectionMatrix(projection);
 }
 void gGame::updateViewMatrix() {
 	Mat4 view = activeCamera->getLookAt();
-	shader->setViewMatrix(view);
+	currentShader->setViewMatrix(view);
 }
 
 gTickable::gTickable(bool autoAdd) {
@@ -97,6 +55,7 @@ gUpdatable::~gUpdatable() {
 gRenderable::gRenderable(bool autoAdd, int priority) {
 	enabled = true;
 	frame.makeIdentity();
+	shader = gears.defaultShader;
 	if (autoAdd) {
 		gears.game->addRenderable(this, priority);
 	}
@@ -104,7 +63,10 @@ gRenderable::gRenderable(bool autoAdd, int priority) {
 
 void gRenderable::gRender() {
 	if (!enabled) return;
-	bool identity = frame.isIdentity();
+	if (shader.getObject() != gears.game->currentShader) {
+		gears.game->setShader(shader.getObject());
+	}
+	bool identity = frame.isIdentity() && false;
 	if (!identity) {
 		gears.game->pushMatrix();
 		gears.game->multiply(frame);
@@ -112,9 +74,9 @@ void gRenderable::gRender() {
 	gears.game->updateShaderUniforms();
 	if (texture.getObject()) {
 		texture->bind();
-		gears.game->shader->setUniform("uTextureCount", 1);
+		gears.game->currentShader->setUniform("uTextureCount", 1);
 	} else {
-		gears.game->shader->setUniform("uTextureCount", 0);
+		gears.game->currentShader->setUniform("uTextureCount", 0);
 	}
 	render();
 	if (!identity) {
@@ -132,13 +94,21 @@ gGame::gGame(bool setTop) {
 		gears.game = this;
 	}
 	currentStack = 0;
-	shader = new gShader();
-	shader->loadFromFile("default.vs", "default.ps");
 }
 
 
 void gGame::updateShaderUniforms() {
 	if (worldMatDirty) {
-		shader->setWorldMatrix(worldMatrixStack[currentStack]);
+		worldMatDirty = false;
+		gears.game->currentShader->setWorldMatrix(worldMatrixStack[currentStack]);
 	}
+}
+
+void gGame::setShader(gShader* shader) {
+	currentShader = shader;
+	currentShader->begin();
+	updateProjectionMatrix();
+	updateViewMatrix();
+	currentShader->setColor(Vec4(1.0, 1.0f, 1.0f, 1.0f));
+	worldMatDirty = true;
 }

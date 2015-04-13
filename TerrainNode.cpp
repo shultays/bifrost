@@ -5,6 +5,14 @@
 #include "gGlobals.h"
 
 
+TerrainNode::TerrainNode(WorldMap *world) : gRenderable(true, 2) {
+	drawable = NULL;
+	this->world = world;
+	shader = world->shader;
+	isBuilt = false;
+	cropArea.setZero();
+}
+
 void TerrainNode::build(WorldCoor start, Vec2 size, int edgeCount) {
 	SAFE_DELETE(drawable);
 
@@ -30,7 +38,13 @@ void TerrainNode::build(WorldCoor start, Vec2 size, int edgeCount) {
 
 			*pointer.position = Vec3(coor.pos.x + shift.x * world->getNodeSize(), coor.pos.y + shift.y * world->getNodeSize(), h);
 
+			if (i == 0 && j == 0) {
+				startPoint = pointer.position->vec2;
+			}
 
+			if (i == edgeCount - 1 && j == edgeCount - 1) {
+				endPoint = pointer.position->vec2;
+			}
 			float dx = size.x / (edgeCount - 1);
 			float dy = size.y / (edgeCount - 1);
 
@@ -83,11 +97,6 @@ void TerrainNode::build(WorldCoor start, Vec2 size, int edgeCount) {
 		}
 	}
 
-
-	frame.makeIdentity();
-	frame.translateBy(Vec3(0.0f, 0.0f, 0.1f));
-
-	//frame.translateBy(Vec3(index.x * world->getNodeSize(), index.y * world->getNodeSize(), 0.0f));
 	isBuilt = false;
 }
 
@@ -98,6 +107,8 @@ void TerrainNode::buildMesh() {
 
 void TerrainNode::render() {
 	if (isBuilt) {
+		shader->setUniform("uDiscardArea", cropArea);
+		//shader->setUniform("uDiscardArea", Vec4::zero());
 		drawable->render();
 	}
 }

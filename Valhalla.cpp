@@ -24,8 +24,8 @@ void Valhalla::init() {
 
 	fpsCamera = new gFPSCamera();
 
-	detailedMapController = new DetailedMapController(world, 3, 1, 16);
-	detailedMapController2 = new DetailedMapController(world, 7, 256, 8);
+	detailedMapController = new DetailedMapController(world, 7, 256, 8);
+	detailedMapController2 = new DetailedMapController(world, 3, 1, 16);
 
 	gMDLReader reader;
 	reader.readMDLFile("models/NewBirch0.mdl");
@@ -58,6 +58,10 @@ void Valhalla::init() {
 	tree->enabled = false;
 
 
+	gShaderShr worldShader = resources.getShader("default.vs", "terrain.ps");
+	worldShader->addUniform("uDiscardArea", TypeVec4);
+
+	world->shader = worldShader;
 }
 
 void Valhalla::tick(float dt) {
@@ -66,6 +70,8 @@ void Valhalla::tick(float dt) {
 	} else {
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
+
+	detailedMapController2->setCropArea(detailedMapController->getTerrainArea());
 }
 
 
@@ -119,6 +125,9 @@ void Valhalla::update(float fixed_dt) {
 
 	if (isFPS) {
 
+		float speed = 2.0f;
+		if (input.isKeyDown(GLFW_KEY_LEFT_SHIFT)) speed = 20.0f;
+
 		if (input.isKeyDown(MOUSE_BUTTON_LEFT)) {
 			fpsCamera->angle += input.getMouseDelta().x * 0.003f;
 			fix_angle(camera->angle);
@@ -131,15 +140,15 @@ void Valhalla::update(float fixed_dt) {
 		Vec2 side = dir * Mat2::rotation(pi_d2);
 
 		if (input.isKeyDown(GLFW_KEY_W)) {
-			playerCoor.pos += dir * fixed_dt * 2.0f;
+			playerCoor.pos += dir * fixed_dt * speed;
 		} else if (input.isKeyDown(GLFW_KEY_S)) {
-			playerCoor.pos -= dir * fixed_dt * 2.0f;
+			playerCoor.pos -= dir * fixed_dt * speed;
 		}
 
 		if (input.isKeyDown(GLFW_KEY_A)) {
-			playerCoor.pos -= side * fixed_dt * 2.0f;
+			playerCoor.pos -= side * fixed_dt * speed;
 		} else if (input.isKeyDown(GLFW_KEY_D)) {
-			playerCoor.pos += side * fixed_dt * 2.0f;
+			playerCoor.pos += side * fixed_dt * speed;
 		}
 
 		playerCoor.fix(world->getNodeSize());

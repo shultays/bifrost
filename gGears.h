@@ -19,7 +19,7 @@ public:
 
 	gGame *game;
 	gSlaveController slaveController;
-
+	gShaderShr defaultShader;
 	float lastDrawTime;
 	float lastUpdateTime;
 
