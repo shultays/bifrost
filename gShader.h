@@ -282,7 +282,7 @@ public:
 
 
 	void addDefaultAttribs() {
-		addAttribute("aVertexPosition", TypeVec3);
+		addAttribute("aVertexPosition", TypeVec3, false, 0);
 		addAttribute("aVertexNormal", TypeVec3, true);
 		addAttribute("aVertexColor", TypeVec4);
 		addAttribute("aVertexUV", TypeVec2);
@@ -323,9 +323,17 @@ public:
 		glVertexAttribPointer(attribute.location, attribute.getCount(), attribute.getType(), attribute.isNormalized(), stride, (void*)pointer);
 	}
 
-	void addAttribute(char* name, int attributeType, bool normalized = false) {
+	void addAttribute(char* name, int attributeType, bool normalized = false, int attributeLocation = -1) {
 		Attribute& attribute = attributes[name] = Attribute(attributeType, normalized);
-		attribute.location = glGetAttribLocation(shaderProgram, name);
+		if(attributeLocation == -1)
+		{
+			attribute.location = glGetAttribLocation(shaderProgram, name);
+		}
+		else
+		{
+			attribute.location = attributeLocation;
+			glBindAttribLocation(shaderProgram, attributeLocation, name);
+		}
 	}
 
 	void addDefaultUniforms() {
