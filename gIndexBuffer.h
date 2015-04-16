@@ -1,19 +1,22 @@
 #pragma once
 
-#ifndef G_STATIC_INDEX_BUFFER_H__
-#define G_STATIC_INDEX_BUFFER_H__
+#ifndef G_INDEX_BUFFER_H__
+#define G_INDEX_BUFFER_H__
 
 #include "gTools.h"
 
-class gStaticIndexBuffer {
+class gIndexBuffer {
 	GLuint gl_buffer;
 	byte *buffer;
 	unsigned *bufferAsBig;
 	unsigned short *bufferAsSmall;
 
 protected:
+	bool isStatic;
 	unsigned elementCount;
 	bool isBig;
+
+	unsigned totalIndex;
 
 	bool built;
 	unsigned elementSize;
@@ -25,17 +28,21 @@ protected:
 	}
 
 public:
-	gStaticIndexBuffer() {
+	gIndexBuffer(bool isStatic = true) {
 		built = false;
 		buffer = NULL;
 		elementCount = 0;
 		elementSize = 0;
+		totalIndex = 0;
+		this->isStatic = isStatic;
 	}
 
-	gStaticIndexBuffer(unsigned elementCount, int primitiveType = GL_TRIANGLES);
-	~gStaticIndexBuffer();
-	void setIndexAt(unsigned i, unsigned val);
+	gIndexBuffer(unsigned elementCount, int primitiveType = GL_TRIANGLES, bool isStatic = true);
+	~gIndexBuffer();
 
+	void addIndex(unsigned val);
+	void removeIndexAt(unsigned i);
+	void setIndexAt(unsigned i, unsigned val);
 	unsigned getIndexAt(unsigned i);
 	void build();
 

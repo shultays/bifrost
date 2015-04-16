@@ -80,8 +80,9 @@ void WorldMap::build() {
 	SAFE_DELETE(terrainDrawable);
 	SAFE_DELETE(waterDrawable);
 
-	terrainDrawable = new gStaticIndexBufferedDrawable(VERTEX_PROP_COLOR | VERTEX_PROP_NORMAL | VERTEX_PROP_POSITION | VERTEX_PROP_UV, edgeCount*edgeCount, (edgeCount - 1)*(edgeCount - 1) * 6, false);
-	waterDrawable = new gStaticTriangleVertexBufferDrawable(VERTEX_PROP_POSITION, 6, false);
+	terrainDrawable = new gIndexBufferedDrawable(VERTEX_PROP_COLOR | VERTEX_PROP_NORMAL | VERTEX_PROP_POSITION | VERTEX_PROP_UV, edgeCount*edgeCount, (edgeCount - 1)*(edgeCount - 1) * 6, GL_TRIANGLES, true, false);
+	waterDrawable = new gVertexBufferRenderable(VERTEX_PROP_POSITION, 6, false);
+
 
 	mainCacher.init(16);
 
@@ -322,6 +323,7 @@ void WorldMap::render() {
 	}
 
 
+	shader->setUniform("uDiscardArea", Vec3::zero());
 	terrainDrawable->render();
 	waterDrawable->render();
 

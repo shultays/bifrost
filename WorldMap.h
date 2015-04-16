@@ -12,9 +12,9 @@
 #include "TerrainNode.h"
 #include "Tools.h"
 
-class gStaticIndexBufferedDrawable;
+class gIndexBufferedDrawable;
 class gTexture;
-class gStaticTriangleVertexBufferDrawable;
+class gVertexBufferRenderable;
 
 class HeightCacher {
 	int heightCacheSize;
@@ -86,8 +86,8 @@ protected:
 	Grid<Vec3> colorMap;
 
 
-	gStaticIndexBufferedDrawable *terrainDrawable;
-	gStaticTriangleVertexBufferDrawable *waterDrawable;
+	gIndexBufferedDrawable *terrainDrawable;
+	gVertexBufferRenderable *waterDrawable;
 
 	IntVec2 anchorPos;
 	bool isScaled;

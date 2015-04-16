@@ -27,13 +27,17 @@ void Valhalla::init() {
 	detailedMapController = new DetailedMapController(world, 7, 256, 8);
 	detailedMapController2 = new DetailedMapController(world, 3, 1, 16);
 
+	line = new gIndexBufferedLineDrawable(VERTEX_PROP_POSITION, 1000, false, true);
+	line->build();
+	line->setConstantColor(Vec4(1.0f));
+
 	gMDLReader reader;
 	reader.readMDLFile("models/NewBirch0.mdl");
 
 	tree = new gRenderableGroup();
 	for (unsigned i = 0; i < reader.geosets.size(); i++) {
 
-		gStaticIndexBufferedDrawable* geosetRenderable = new gStaticIndexBufferedDrawable(VERTEX_PROP_POSITION | VERTEX_PROP_NORMAL | VERTEX_PROP_UV, reader.geosets[i].vertices.size(), reader.geosets[i].faces.size(), false);
+		gIndexBufferedDrawable* geosetRenderable = new gIndexBufferedDrawable(VERTEX_PROP_POSITION | VERTEX_PROP_NORMAL | VERTEX_PROP_UV, reader.geosets[i].vertices.size(), reader.geosets[i].faces.size(), GL_TRIANGLES, true, false);
 
 		for (unsigned j = 0; j < reader.geosets[i].vertices.size(); j++) {
 			VertexPointer p = geosetRenderable->getVertexPointerAt(j);
@@ -155,9 +159,17 @@ void Valhalla::update(float fixed_dt) {
 
 
 		Vec2 shift = (playerCoor.index - world->getAnchorPos()).toVec()*world->getNodeSize();
+		Vec3 oldPos = fpsCamera->pos;
 
 		fpsCamera->pos.vec2 = shift + playerCoor.pos;
 		fpsCamera->pos.z = world->getHeightAt(playerCoor) + 1.8f;
+
+		if (input.isKeyDown(GLFW_KEY_R)) {
+			gLinePointer linePointer = line->addLine();
+			*linePointer.p0.position = Vec3(oldPos);
+			*linePointer.p1.position = Vec3(fpsCamera->pos);
+			line->build();
+		}
 
 		detailedMapController->updateMap(playerCoor);
 		detailedMapController2->updateMap(playerCoor);

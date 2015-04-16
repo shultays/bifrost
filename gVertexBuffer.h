@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef G_STATIC_VERTEX_BUFFER_H__
-#define G_STATIC_VERTEX_BUFFER_H__
+#ifndef G_VERTEX_BUFFER_H__
+#define G_VERTEX_BUFFER_H__
 
 #include "gTools.h"
 
@@ -21,10 +21,12 @@ public:
 #define VERTEX_PROP_TEXT_W   0x10
 
 
-class gStaticVertexBuffer {
+class gVertexBuffer {
 	GLuint gl_buffer;
 	byte *buffer;
 protected:
+	bool isStatic;
+
 	bool hasPosition;
 	bool hasNormal;
 	bool hasColor;
@@ -54,18 +56,18 @@ protected:
 	bool built;
 public:
 
-	gStaticVertexBuffer() {
+	gVertexBuffer(bool isStatic = true) {
 		built = false;
 		buffer = NULL;
 		vertexCount = 0;
-		int t = sizeof(byte);
 		vertexSize = 0;
+		this->isStatic = isStatic;
 	}
-	gStaticVertexBuffer(int props, unsigned vertexCount);
+	gVertexBuffer(int props, unsigned vertexCount, bool isStatic = true);
 	void setConstantNormal(const Vec3& normal);
 	void setConstantColor(const Vec4& color);
 	void setConstantTextureWeights(const Vec4& textureWeights);
-	~gStaticVertexBuffer();
+	~gVertexBuffer();
 
 	VertexPointer getVertexPointerAt(unsigned i);
 	void build();

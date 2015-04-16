@@ -1,6 +1,5 @@
-
 #include "TerrainNode.h"
-#include "gStaticBufferedDrawables.h"
+#include "gIndexBufferedDrawable.h"
 #include "WorldMap.h"
 #include "gGlobals.h"
 
@@ -16,7 +15,7 @@ TerrainNode::TerrainNode(WorldMap *world) : gRenderable(true, 2) {
 void TerrainNode::build(WorldCoor start, Vec2 size, int edgeCount) {
 	SAFE_DELETE(drawable);
 
-	drawable = new gStaticIndexBufferedDrawable(VERTEX_PROP_COLOR | VERTEX_PROP_NORMAL | VERTEX_PROP_POSITION | VERTEX_PROP_UV, edgeCount*edgeCount, (edgeCount - 1)*(edgeCount - 1) * 6, false);
+	drawable = new gIndexBufferedDrawable(VERTEX_PROP_COLOR | VERTEX_PROP_NORMAL | VERTEX_PROP_POSITION | VERTEX_PROP_UV, edgeCount*edgeCount, (edgeCount - 1)*(edgeCount - 1) * 6, GL_TRIANGLES, true, false);
 
 	HeightCacher cacher;
 	cacher.init(16);
@@ -108,7 +107,6 @@ void TerrainNode::buildMesh() {
 void TerrainNode::render() {
 	if (isBuilt) {
 		shader->setUniform("uDiscardArea", cropArea);
-		//shader->setUniform("uDiscardArea", Vec4::zero());
 		drawable->render();
 	}
 }
