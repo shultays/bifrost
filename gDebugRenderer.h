@@ -27,11 +27,12 @@ class gDebugRenderer : protected gIndexBufferedLineDrawable {
 	FixedSizedPriorityArray<LineData, MAX_LINE_COUNT> lines;
 	*/
 
-
+	std::vector<Vec3> sphere;
 public:
 
 	gDebugRenderer();
 	void init();
+	void addSphere(const Vec3& mid, float radius, unsigned lineColor = 0xFFFFFFFF, float lifeTime = LIFE_TIME_ONE_FRAME);
 	void addLine(const Vec3& lineBegin, const Vec3& lineEnd, unsigned lineColor = 0xFFFFFFFF, float lifeTime = LIFE_TIME_ONE_FRAME);
 
 	void render() override;

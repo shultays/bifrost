@@ -127,6 +127,14 @@ void Valhalla::update(float fixed_dt) {
 			TreeGenerator::generateTree(world->toGamePos(treeWorldCoor) + Vec3(0.0f, 0.0f, -0.1f));
 		}
 
+		if (input.isKeyPressed(GLFW_KEY_2)) {
+
+			WorldCoor treeWorldCoor = playerCoor;
+
+
+			debugRenderer.addSphere(world->toGamePos(treeWorldCoor) + fpsCamera->getDir()*2.0f + Vec3(0.0f, 0.0f, 2.0f), 0.5f, 0xFFFFFFFF, 5.0f);
+		}
+
 		float speed = 2.0f;
 		if (input.isKeyDown(GLFW_KEY_LEFT_SHIFT)) speed = 20.0f;
 
