@@ -86,7 +86,7 @@ protected:
 	Grid<Vec3> colorMap;
 
 
-	gIndexBufferedDrawable *terrainDrawable;
+	gVertexBufferRenderable *terrainDrawable;
 	gVertexBufferRenderable *waterDrawable;
 
 	IntVec2 anchorPos;

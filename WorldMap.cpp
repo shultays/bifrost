@@ -80,7 +80,7 @@ void WorldMap::build() {
 	SAFE_DELETE(terrainDrawable);
 	SAFE_DELETE(waterDrawable);
 
-	terrainDrawable = new gIndexBufferedDrawable(VERTEX_PROP_COLOR | VERTEX_PROP_NORMAL | VERTEX_PROP_POSITION | VERTEX_PROP_UV, edgeCount*edgeCount, (edgeCount - 1)*(edgeCount - 1) * 6, GL_TRIANGLES, true, false);
+	terrainDrawable = new gVertexBufferRenderable(VERTEX_PROP_COLOR | VERTEX_PROP_NORMAL | VERTEX_PROP_POSITION, (edgeCount - 1)*(edgeCount - 1) * 6, false);
 	waterDrawable = new gVertexBufferRenderable(VERTEX_PROP_POSITION, 6, false);
 
 
@@ -285,29 +285,46 @@ void WorldMap::buildBuffer() {
 	waterDrawable->setConstantColor(Vec4(0.0f, 0.0f, 0.5f, 0.8f));
 
 	int k = 0;
-	for (int i = 0; i < edgeCount; i++) {
-		for (int j = 0; j < edgeCount; j++) {
-			VertexPointer pointer = terrainDrawable->getVertexPointerAt(k++);
-			*pointer.position = Vec3((float)i, (float)j, heightMap[i][j] * 3.0f / nodeSize);
-			*pointer.normal = normalMap[i][j];
-			*pointer.color = Vec4(colorMap[i][j], 1.0f);
-			*pointer.uv = Vec2(((float)i) / edgeCount, ((float)j) / edgeCount);
+	for (int i = 0; i < edgeCount - 1; i++) {
+		for (int j = 0; j < edgeCount - 1; j++) {
+
+
+			VertexPointer pointer0 = terrainDrawable->getVertexPointerAt(k++);
+			VertexPointer pointer1 = terrainDrawable->getVertexPointerAt(k++);
+			VertexPointer pointer2 = terrainDrawable->getVertexPointerAt(k++);
+
+
+			*pointer0.position = Vec3((float)i, (float)j, heightMap[i][j] * 3.0f / nodeSize);
+			*pointer1.position = Vec3((float)i + 1, (float)j, heightMap[i + 1][j] * 3.0f / nodeSize);
+			*pointer2.position = Vec3((float)i + 1, (float)j + 1, heightMap[i + 1][j + 1] * 3.0f / nodeSize);
+
+			*pointer0.normal = *pointer1.normal = *pointer2.normal = Vec3::cross(*pointer1.position - *pointer0.position, *pointer2.position - *pointer0.position);
+
+			Vec3 color = (colorMap[i][j] + colorMap[i + 1][j] + colorMap[i + 1][j + 1]) / 3.0f;
+
+			*pointer0.color = Vec4(color, 1.0f);
+			*pointer1.color = Vec4(color, 1.0f);
+			*pointer2.color = Vec4(color, 1.0f);
+
+			pointer0 = terrainDrawable->getVertexPointerAt(k++);
+			pointer1 = terrainDrawable->getVertexPointerAt(k++);
+			pointer2 = terrainDrawable->getVertexPointerAt(k++);
+
+
+			*pointer0.position = Vec3((float)i + 1, (float)j + 1, heightMap[i + 1][j + 1] * 3.0f / nodeSize);
+			*pointer1.position = Vec3((float)i, (float)j + 1, heightMap[i][j + 1] * 3.0f / nodeSize);
+			*pointer2.position = Vec3((float)i, (float)j, heightMap[i][j] * 3.0f / nodeSize);
+
+			*pointer0.normal = *pointer1.normal = *pointer2.normal = Vec3::cross(*pointer1.position - *pointer0.position, *pointer2.position - *pointer0.position);
+
+			color = (colorMap[i][j] + colorMap[i][j + 1] + colorMap[i + 1][j + 1]) / 3.0f;
+
+			*pointer0.color = Vec4(color, 1.0f);
+			*pointer1.color = Vec4(color, 1.0f);
+			*pointer2.color = Vec4(color, 1.0f);
+
 		}
 	}
-	k = 0;
-	for (int i = 0; i < (edgeCount - 1); i++) {
-		for (int j = 0; j < (edgeCount - 1); j++) {
-			terrainDrawable->setIndexAt(k++, i + (j + 1)*edgeCount);
-			terrainDrawable->setIndexAt(k++, (i + 1) + j*edgeCount);
-			terrainDrawable->setIndexAt(k++, i + j*edgeCount);
-
-
-			terrainDrawable->setIndexAt(k++, i + (j + 1)*edgeCount);
-			terrainDrawable->setIndexAt(k++, (i + 1) + (j + 1)*edgeCount);
-			terrainDrawable->setIndexAt(k++, (i + 1) + j*edgeCount);
-		}
-	}
-
 	terrainDrawable->build();
 }
 

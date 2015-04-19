@@ -9,7 +9,7 @@
 class WorldMap;
 
 class TerrainNode : public gRenderable {
-	gIndexBufferedDrawable *drawable;
+	gVertexBufferRenderable *drawable;
 
 	WorldMap *world;
 	bool isBuilt;
