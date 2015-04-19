@@ -17,6 +17,8 @@ void gGame::render() {
 		if (renderList[i]->enabled) renderList[i]->gRender();
 	}
 
+	debugRenderer.gRender();
+
 }
 
 void gGame::updateProjectionMatrix() {

@@ -4,7 +4,7 @@
 #include "gGame.h"
 #include "gShader.h"
 
-gVertexBuffer::gVertexBuffer(int props, unsigned vertexCount, bool isStatic) {
+gVertexBuffer::gVertexBuffer(int props, unsigned maxVertexCount, bool isStatic) {
 	this->isStatic = isStatic;
 	hasPosition = (props & VERTEX_PROP_POSITION) > 0;
 	hasNormal = (props & VERTEX_PROP_NORMAL) > 0;
@@ -12,33 +12,39 @@ gVertexBuffer::gVertexBuffer(int props, unsigned vertexCount, bool isStatic) {
 	hasUV = (props & VERTEX_PROP_UV) > 0;
 	hasTextureWeights = (props & VERTEX_PROP_TEXT_W) > 0;
 
-	vertexSize = 0;
+	this->extraSize = props & 0xFF;
+	hasExtra = extraSize > 0;
+
+	vertexCount = 0;
 	positionStart = normalStart = colorStart = uvStart = textureWeightsStart = -1;
 
 	if (hasPosition) {
-		positionStart = vertexSize;
-		vertexSize += sizeof(Vec3);
+		positionStart = vertexCount;
+		vertexCount += sizeof(Vec3);
 	}
 
 	if (hasNormal) {
-		normalStart = vertexSize;
-		vertexSize += sizeof(Vec3);
+		normalStart = vertexCount;
+		vertexCount += sizeof(Vec3);
 	}
 	if (hasColor) {
-		colorStart = vertexSize;
-		vertexSize += sizeof(Vec4);
+		colorStart = vertexCount;
+		vertexCount += sizeof(Vec4);
 	}
 	if (hasUV) {
-		uvStart = vertexSize;
-		vertexSize += sizeof(Vec2);
+		uvStart = vertexCount;
+		vertexCount += sizeof(Vec2);
 	}
 	if (hasTextureWeights) {
-		textureWeightsStart = vertexSize;
-		vertexSize += sizeof(Vec4);
+		textureWeightsStart = vertexCount;
+		vertexCount += sizeof(Vec4);
 	}
-
-	this->vertexCount = vertexCount;
-	int buffsize = getStartPositionAt(vertexCount);
+	if (hasExtra) {
+		extraStart = vertexCount;
+		vertexCount += extraSize;
+	}
+	this->maxVertexCount = maxVertexCount;
+	int buffsize = getStartPositionAt(maxVertexCount);
 	buffer = new byte[buffsize];
 	built = false;
 }
@@ -72,7 +78,7 @@ gVertexBuffer::~gVertexBuffer() {
 VertexPointer gVertexBuffer::getVertexPointerAt(unsigned i) {
 	assert(!built || !isStatic);
 	assert(buffer);
-	assert(i >= 0 && i < vertexCount);
+	assert(i >= 0 && i < maxVertexCount);
 	VertexPointer pointer;
 	byte* start = buffer + getStartPositionAt(i);
 
@@ -111,6 +117,11 @@ VertexPointer gVertexBuffer::getVertexPointerAt(unsigned i) {
 	} else {
 		pointer.textureWeights = NULL;
 	}
+
+	if (hasExtra) {
+		pointer.extra = (void*)(start + extraStart);
+	}
+
 	return pointer;
 }
 
@@ -122,10 +133,10 @@ void gVertexBuffer::build() {
 		built = true;
 		glGenBuffers(1, &gl_buffer);
 		glBindBuffer(GL_ARRAY_BUFFER, gl_buffer);
-		glBufferData(GL_ARRAY_BUFFER, getStartPositionAt(vertexCount), buffer, isStatic ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, getStartPositionAt(maxVertexCount), buffer, isStatic ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
 	} else {
 		glBindBuffer(GL_ARRAY_BUFFER, gl_buffer);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, getStartPositionAt(vertexCount), buffer);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, getStartPositionAt(maxVertexCount), buffer);
 	}
 
 	if (isStatic) {
@@ -139,25 +150,25 @@ void gVertexBuffer::bind() {
 		glBindBuffer(GL_ARRAY_BUFFER, gl_buffer);
 
 		if (hasPosition) {
-			gears.game->currentShader->bindPosition(vertexSize, positionStart);
+			gears.game->currentShader->bindPosition(vertexCount, positionStart);
 		}
 		if (hasNormal) {
-			gears.game->currentShader->bindNormal(vertexSize, normalStart);
+			gears.game->currentShader->bindNormal(vertexCount, normalStart);
 		} else if (hasConstantNormal) {
 			gears.game->currentShader->setAttributeNormal(constantNormal);
 		}
 
 		if (hasColor) {
-			gears.game->currentShader->bindColor(vertexSize, colorStart);
+			gears.game->currentShader->bindColor(vertexCount, colorStart);
 		} else if (hasConstantColor) {
 			gears.game->currentShader->setAttributeColor(constantColor);
 		}
 
 		if (hasUV) {
-			gears.game->currentShader->bindUV(vertexSize, uvStart);
+			gears.game->currentShader->bindUV(vertexCount, uvStart);
 		}
 		if (hasTextureWeights) {
-			gears.game->currentShader->bindPosition(vertexSize, textureWeightsStart);
+			gears.game->currentShader->bindPosition(vertexCount, textureWeightsStart);
 		} else if (hasConstantTextureWeights) {
 			gears.game->currentShader->setAttributeTextureWeights(constantTextureWeights);
 		}

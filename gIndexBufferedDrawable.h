@@ -43,6 +43,7 @@ public:
 };
 
 class gIndexBufferedLineDrawable : public gIndexBufferedDrawable {
+protected:
 	int isStatic;
 	int maxLine;
 	int lineCount;
@@ -54,20 +55,26 @@ public:
 	}
 
 	gLinePointer addLine() {
-		gLinePointer r;
+		assert(lineCount < maxLine);
 		int p0Index = lineCount * 2;
-		r.p0 = getVertexPointerAt(p0Index);
-		r.p1 = getVertexPointerAt(p0Index + 1);
 		addIndex(p0Index);
 		addIndex(p0Index + 1);
-		lineCount++;
+		return getLine(lineCount++);
+	}
+	gLinePointer getLine(int lineIndex) {
+		assert(lineIndex < lineCount);
+		gLinePointer r;
+		int p0Index = getIndexAt(lineIndex * 2);
+		r.p0 = getVertexPointerAt(p0Index);
+		r.p1 = getVertexPointerAt(p0Index + 1);
 		return r;
 	}
-
 	void removeLine(int lineIndex) {
+		assert(lineIndex < lineCount);
 		int p0Index = lineIndex * 2;
 		removeIndexAt(p0Index + 1);
 		removeIndexAt(p0Index);
+		lineCount--;
 	}
 
 	void build() {

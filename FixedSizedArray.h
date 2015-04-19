@@ -38,6 +38,9 @@ public:
 	int size() {
 		return count;
 	}
+	int capacity() {
+		return N;
+	}
 };
 
 #endif

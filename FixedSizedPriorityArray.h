@@ -3,7 +3,9 @@
 
 #include "gTools.h"
 
-const int max_priority = 10000;
+const int max_priority = 0x0FFFFFFF;
+
+const int defaultPriority = 0x0FFFFFFF;
 
 template <class T, int N>
 class FixedSizedPriorityArray {
@@ -67,7 +69,7 @@ public:
 	}
 
 	void insert(T item) {
-		insert(item, max_priority);
+		insert(item, defaultPriority);
 	}
 
 	void remove(T item) {
@@ -79,9 +81,15 @@ public:
 		}
 	}
 	void removeAtIndex(int i) {
+		assert(i < count);
 		data[i].p = max_priority + 1;
 		fixRemove(i);
 		count--;
+	}
+
+	int getPriorityAt(int i) {
+		assert(i < count);
+		return data[i].p;
 	}
 
 	void changePriority(T item, int newPriority) {
@@ -93,6 +101,7 @@ public:
 		}
 	}
 	int changePriorityAtIndex(int i, int newPriority) {
+		assert(i < count);
 		data[i].p = newPriority;
 		fix(i);
 	}
@@ -102,6 +111,9 @@ public:
 
 	int size() {
 		return count;
+	}
+	int capacity() {
+		return N;
 	}
 };
 

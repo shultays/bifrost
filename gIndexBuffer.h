@@ -13,31 +13,31 @@ class gIndexBuffer {
 
 protected:
 	bool isStatic;
-	unsigned elementCount;
 	bool isBig;
 
-	unsigned totalIndex;
+	unsigned indexCount;
+	unsigned maxIndexCount;
 
 	bool built;
-	unsigned elementSize;
+	unsigned indexSize;
 
 	int primitiveType;
 
 	unsigned getStartPositionAt(unsigned i) {
-		return i*elementSize;
+		return i*indexSize;
 	}
 
 public:
 	gIndexBuffer(bool isStatic = true) {
 		built = false;
 		buffer = NULL;
-		elementCount = 0;
-		elementSize = 0;
-		totalIndex = 0;
+		maxIndexCount = 0;
+		indexSize = 0;
+		indexCount = 0;
 		this->isStatic = isStatic;
 	}
 
-	gIndexBuffer(unsigned elementCount, int primitiveType = GL_TRIANGLES, bool isStatic = true);
+	gIndexBuffer(unsigned maxIndexCount, int primitiveType = GL_TRIANGLES, bool isStatic = true);
 	~gIndexBuffer();
 
 	void addIndex(unsigned val);

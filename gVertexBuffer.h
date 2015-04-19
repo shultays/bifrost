@@ -12,13 +12,14 @@ public:
 	Vec4* color;
 	Vec2* uv;
 	Vec4* textureWeights;
+	void* extra;
 };
 
-#define VERTEX_PROP_POSITION 0x1
-#define VERTEX_PROP_NORMAL   0x2
-#define VERTEX_PROP_COLOR    0x4
-#define VERTEX_PROP_UV       0x8
-#define VERTEX_PROP_TEXT_W   0x10
+#define VERTEX_PROP_POSITION 0x100
+#define VERTEX_PROP_NORMAL   0x200
+#define VERTEX_PROP_COLOR    0x400
+#define VERTEX_PROP_UV       0x800
+#define VERTEX_PROP_TEXT_W   0x1000
 
 
 class gVertexBuffer {
@@ -40,29 +41,25 @@ protected:
 	bool hasConstantTextureWeights;
 	Vec4 constantTextureWeights;
 
+	bool hasExtra;
+	int extraSize;
+
 	int positionStart;
 	int normalStart;
 	int colorStart;
 	int uvStart;
 	int textureWeightsStart;
+	int extraStart;
 
-	unsigned vertexSize;
 	unsigned vertexCount;
-
+	unsigned maxVertexCount;
 
 	unsigned getStartPositionAt(unsigned i) {
-		return i*vertexSize;
+		return i*vertexCount;
 	}
 	bool built;
 public:
 
-	gVertexBuffer(bool isStatic = true) {
-		built = false;
-		buffer = NULL;
-		vertexCount = 0;
-		vertexSize = 0;
-		this->isStatic = isStatic;
-	}
 	gVertexBuffer(int props, unsigned vertexCount, bool isStatic = true);
 	void setConstantNormal(const Vec3& normal);
 	void setConstantColor(const Vec4& color);

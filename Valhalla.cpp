@@ -9,6 +9,7 @@
 
 #include "gModelReader.h"
 #include "gRenderableGroup.h"
+#include "TreeGenerator.h"
 
 void Valhalla::init() {
 	activeCamera = camera = new gFocusCamera();
@@ -27,9 +28,6 @@ void Valhalla::init() {
 	detailedMapController = new DetailedMapController(world, 7, 256, 8);
 	detailedMapController2 = new DetailedMapController(world, 3, 1, 16);
 
-	line = new gIndexBufferedLineDrawable(VERTEX_PROP_POSITION, 1000, false, true);
-	line->build();
-	line->setConstantColor(Vec4(1.0f));
 
 	gMDLReader reader;
 	reader.readMDLFile("models/NewBirch0.mdl");
@@ -81,15 +79,7 @@ void Valhalla::tick(float dt) {
 
 void Valhalla::update(float fixed_dt) {
 
-	if (input.isKeyPressed(GLFW_KEY_1)) {
-		tree->getChildrenAt(0)->enabled = !tree->getChildrenAt(0)->enabled;
-	}
-	if (input.isKeyPressed(GLFW_KEY_2)) {
-		tree->getChildrenAt(1)->enabled = !tree->getChildrenAt(1)->enabled;
-	}
-	if (input.isKeyPressed(GLFW_KEY_3)) {
-		tree->getChildrenAt(2)->enabled = !tree->getChildrenAt(2)->enabled;
-	}
+
 	if (input.isKeyPressed(GLFW_KEY_C)) {
 		isFPS = !isFPS;
 		tree->enabled = isFPS;
@@ -129,6 +119,14 @@ void Valhalla::update(float fixed_dt) {
 
 	if (isFPS) {
 
+		if (input.isKeyPressed(GLFW_KEY_1)) {
+
+			WorldCoor treeWorldCoor = playerCoor;
+			treeWorldCoor.pos += fpsCamera->getDir().vec2*2.0f;
+
+			TreeGenerator::generateTree(world->toGamePos(treeWorldCoor) + Vec3(0.0f, 0.0f, -0.1f));
+		}
+
 		float speed = 2.0f;
 		if (input.isKeyDown(GLFW_KEY_LEFT_SHIFT)) speed = 20.0f;
 
@@ -165,10 +163,7 @@ void Valhalla::update(float fixed_dt) {
 		fpsCamera->pos.z = world->getHeightAt(playerCoor) + 1.8f;
 
 		if (input.isKeyDown(GLFW_KEY_R)) {
-			gLinePointer linePointer = line->addLine();
-			*linePointer.p0.position = Vec3(oldPos);
-			*linePointer.p1.position = Vec3(fpsCamera->pos);
-			line->build();
+			debugRenderer.addLine(oldPos, fpsCamera->pos, 0xFF00FFFF, 1.0f);
 		}
 
 		detailedMapController->updateMap(playerCoor);

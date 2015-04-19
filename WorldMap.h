@@ -137,6 +137,7 @@ public:
 	}
 	void buildBuffer();
 	virtual void render() override;
+	Vec3 toGamePos(WorldCoor &coor);
 };
 
 #endif

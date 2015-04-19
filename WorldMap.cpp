@@ -336,3 +336,13 @@ void WorldMap::render() {
 	glClear(GL_DEPTH_BUFFER_BIT);
 }
 
+Vec3 WorldMap::toGamePos(WorldCoor &coor) {
+	coor.fix(nodeSize);
+
+	float h = getHeightAt(coor);
+
+	IntVec2 shift = coor.index - anchorPos;
+
+	return Vec3(coor.pos.x + shift.x * nodeSize, coor.pos.y + shift.y * nodeSize, h);
+}
+

@@ -20,7 +20,6 @@ class Valhalla : public gGame, public gTickable, public gUpdatable {
 	DetailedMapController* detailedMapController2;
 
 	gRenderableGroup *tree;
-	gIndexBufferedLineDrawable *line;
 
 	WorldCoor playerCoor;
 

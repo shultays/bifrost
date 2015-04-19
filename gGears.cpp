@@ -11,6 +11,7 @@ void gGears::init(int argc, char *argv[]) {
 	lastDrawTime = time.getTime() - draw_interval;
 	lastUpdateTime = time.getTime() - update_interval;
 	game->init();
+	debugRenderer.init();
 }
 
 void gGears::resize(int width, int height) {

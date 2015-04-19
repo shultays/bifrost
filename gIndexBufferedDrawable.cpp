@@ -11,5 +11,5 @@ void gIndexBufferedDrawable::render() {
 
 void gVertexBufferRenderable::render() {
 	bind();
-	glDrawArrays(primitiveType, 0, this->vertexCount);
+	glDrawArrays(primitiveType, 0, this->maxVertexCount);
 }

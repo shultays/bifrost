@@ -620,7 +620,7 @@ public:
 		float s = sin(angle);
 		float c = cos(angle);
 		float s_1 = 1.0f - s;
-		float c_1 = 1.0f - s;
+		float c_1 = 1.0f - c;
 
 		Mat3 mat;
 
@@ -642,7 +642,7 @@ public:
 		float s = sin(angle);
 		float c = cos(angle);
 		float s_1 = 1.0f - s;
-		float c_1 = 1.0f - s;
+		float c_1 = 1.0f - c;
 
 		Mat3 mat;
 
@@ -663,7 +663,7 @@ public:
 		float s = sin(angle);
 		float c = cos(angle);
 		float s_1 = 1.0f - s;
-		float c_1 = 1.0f - s;
+		float c_1 = 1.0f - c;
 
 		Mat3 mat;
 
@@ -684,7 +684,7 @@ public:
 		float s = sin(angle);
 		float c = cos(angle);
 		float s_1 = 1.0f - s;
-		float c_1 = 1.0f - s;
+		float c_1 = 1.0f - c;
 
 		Mat3 mat;
 
