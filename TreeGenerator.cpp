@@ -3,24 +3,34 @@
 #include "gGlobals.h"
 
 
+struct TreeTriangle {
+	Vec3 vertices[3];
+	Vec3 color;
+};
 
-void generateSphereRec(float radius, const Vec3& pointA, const Vec3& pointB, const Vec3& pointC, std::vector<Vec3>& points, int depth = 0)
-{
+void generateSphereRec(float radius, const Vec3& pointA, const Vec3& pointB, const Vec3& pointC, std::vector<Vec3>& points, int depth = 0) {
 
 	Vec3 v0 = pointB - pointA;
 	Vec3 v1 = pointC - pointA;
 	float t0 = v0.y*v1.z - v0.z*v1.y;
 	float t1 = v0.z*v1.x - v0.x*v1.z;
 	float t2 = v0.x*v1.y - v0.y*v1.x;
-	float areaSquared = (t0*t0 + t1*t1 + t2*t2)/4.0f;
-	if(depth < 2){
-		Vec3 mid = (pointA + pointB + pointC) / 3.0f;
-		mid.normalize();
-		mid *= radius;
-		generateSphereRec(radius, pointA, pointB, mid, points, depth+1);
-		generateSphereRec(radius, pointA, pointC, mid, points, depth+1);
-		generateSphereRec(radius, pointB, pointC, mid, points, depth+1);
-	}else{
+	float areaSquared = (t0*t0 + t1*t1 + t2*t2) / 4.0f;
+	if (depth < 2) {
+		Vec3 midAB = (pointA + pointB) / 2.0f;
+		Vec3 midBC = (pointB + pointC) / 2.0f;
+		Vec3 midAC = (pointA + pointC) / 2.0f;
+		midAB.normalize();
+		midAB *= radius;
+		midBC.normalize();
+		midBC *= radius;
+		midAC.normalize();
+		midAC *= radius;
+		generateSphereRec(radius, pointA, midAB, midAC, points, depth + 1);
+		generateSphereRec(radius, midAB, pointB, midBC, points, depth + 1);
+		generateSphereRec(radius, midAC, midBC, pointC, points, depth + 1);
+		generateSphereRec(radius, midBC, midAC, midAB, points, depth + 1);
+	} else {
 		points.push_back(pointA);
 		points.push_back(pointB);
 		points.push_back(pointC);
@@ -28,16 +38,16 @@ void generateSphereRec(float radius, const Vec3& pointA, const Vec3& pointB, con
 }
 
 
-void generateSphere(const Vec3& mid, float radius, std::vector<Vec3>& points)
-{
-	generateSphereRec(radius,Vec3(1.0f, 0.0f, 0.0f)*radius, Vec3(0.0f, 1.0f, 0.0f)*radius, Vec3(0.0f, 0.0f, 1.0f)*radius, points);
-	generateSphereRec(radius,Vec3(1.0f, 0.0f, 0.0f)*radius, Vec3(0.0f, 1.0f, 0.0f)*radius, Vec3(0.0f, 0.0f, 1.0f)*-radius, points);
-	generateSphereRec(radius,Vec3(1.0f, 0.0f, 0.0f)*radius, Vec3(0.0f, 1.0f, 0.0f)*-radius, Vec3(0.0f, 0.0f, 1.0f)*radius, points);
-	generateSphereRec(radius,Vec3(1.0f, 0.0f, 0.0f)*radius, Vec3(0.0f, 1.0f, 0.0f)*-radius, Vec3(0.0f, 0.0f, 1.0f)*-radius, points);
-	generateSphereRec(radius,Vec3(1.0f, 0.0f, 0.0f)*-radius, Vec3(0.0f, 1.0f, 0.0f)*radius, Vec3(0.0f, 0.0f, 1.0f)*radius, points);
-	generateSphereRec(radius,Vec3(1.0f, 0.0f, 0.0f)*-radius, Vec3(0.0f, 1.0f, 0.0f)*radius, Vec3(0.0f, 0.0f, 1.0f)*-radius, points);
-	generateSphereRec(radius,Vec3(1.0f, 0.0f, 0.0f)*-radius, Vec3(0.0f, 1.0f, 0.0f)*-radius, Vec3(0.0f, 0.0f, 1.0f)*radius, points);
-	generateSphereRec(radius,Vec3(1.0f, 0.0f, 0.0f)*-radius, Vec3(0.0f, 1.0f, 0.0f)*-radius, Vec3(0.0f, 0.0f, 1.0f)*-radius, points);
+void generateSphere(const Vec3& mid, float radius, std::vector<Vec3>& points) {
+	generateSphereRec(radius, Vec3(1.0f, 0.0f, 0.0f)*radius, Vec3(0.0f, 1.0f, 0.0f)*radius, Vec3(0.0f, 0.0f, 1.0f)*radius, points);
+	generateSphereRec(radius, Vec3(1.0f, 0.0f, 0.0f)*radius, Vec3(0.0f, 0.0f, 1.0f)*-radius, Vec3(0.0f, 1.0f, 0.0f)*radius, points);
+	generateSphereRec(radius, Vec3(1.0f, 0.0f, 0.0f)*radius, Vec3(0.0f, 0.0f, 1.0f)*radius, Vec3(0.0f, 1.0f, 0.0f)*-radius, points);
+	generateSphereRec(radius, Vec3(1.0f, 0.0f, 0.0f)*radius, Vec3(0.0f, 1.0f, 0.0f)*-radius, Vec3(0.0f, 0.0f, 1.0f)*-radius, points);
+	generateSphereRec(radius, Vec3(1.0f, 0.0f, 0.0f)*-radius, Vec3(0.0f, 0.0f, 1.0f)*radius, Vec3(0.0f, 1.0f, 0.0f)*radius, points);
+	generateSphereRec(radius, Vec3(1.0f, 0.0f, 0.0f)*-radius, Vec3(0.0f, 1.0f, 0.0f)*-radius, Vec3(0.0f, 0.0f, 1.0f)*radius, points);
+	generateSphereRec(radius, Vec3(1.0f, 0.0f, 0.0f)*-radius, Vec3(0.0f, 1.0f, 0.0f)*radius, Vec3(0.0f, 0.0f, 1.0f)*-radius, points);
+	generateSphereRec(radius, Vec3(1.0f, 0.0f, 0.0f)*-radius, Vec3(0.0f, 0.0f, 1.0f)*-radius, Vec3(0.0f, 1.0f, 0.0f)*-radius, points);
+
 }
 
 struct TrunkNode {
@@ -88,7 +98,7 @@ float getRandomBranchRotation(float initialRotation, float maxRotationAmount) {
 
 
 
-void generateBranch(Vec3 pos, float maxHeight, float widthMultiplier, Mat3 mat, FixedSizedArray<Branch, 200>& branches, int depth) {
+void generateBranch(Vec3 pos, float maxHeight, float widthMultiplier, Mat3 mat, FixedSizedArray<Branch, 200>& branches, int depth, std::vector<TreeTriangle>& vertices) {
 	branches.insert(Branch());
 	Branch& branch = branches[branches.size() - 1];
 	std::vector<TrunkNode>& nodes = branch.nodes;
@@ -151,7 +161,7 @@ void generateBranch(Vec3 pos, float maxHeight, float widthMultiplier, Mat3 mat, 
 
 					generateBranch(oldNode.midPoint + oldNode.mat.row2 * branchH, randFloat(remainingH * 0.5f, remainingH * 0.7f), widthMultiplier,
 						mat,
-						branches, depth + 1);
+						branches, depth + 1, vertices);
 
 					lastZRotation += randFloat(pi_d2, pi);
 				}
@@ -162,12 +172,26 @@ void generateBranch(Vec3 pos, float maxHeight, float widthMultiplier, Mat3 mat, 
 		}
 	}
 
-	generateSphere(nodes[nodes.size()-1].midPoint, maxHeight * 0.5f, branch.points);
-	Vec3 mid = nodes[nodes.size()-1].midPoint;
-	for(unsigned i=0; i<branch.points.size(); i+=3){
-		debugRenderer.addLine(mid + branch.points[i+0], mid + branch.points[i+1], 0xFFFFFFFF, LIFE_TIME_INFINITE);
-		debugRenderer.addLine(mid + branch.points[i+1], mid + branch.points[i+2], 0xFFFFFFFF, LIFE_TIME_INFINITE);
-		debugRenderer.addLine(mid + branch.points[i+2], mid + branch.points[i+0], 0xFFFFFFFF, LIFE_TIME_INFINITE);
+	generateSphere(nodes[nodes.size() - 1].midPoint, maxHeight * 0.5f, branch.points);
+	Vec3 mid = nodes[nodes.size() - 1].midPoint;
+
+	mat.identity();
+	mat.rotateByX(randFloat(-pi, +pi));
+	mat.rotateByY(randFloat(-pi, +pi));
+	mat.rotateByZ(randFloat(-pi, +pi));
+	for (unsigned i = 0; i < branch.points.size(); i += 3) {
+		/*debugRenderer.addLine(mid + branch.points[i + 0], mid + branch.points[i + 1], 0xFFFFFFFF, LIFE_TIME_INFINITE);
+		debugRenderer.addLine(mid + branch.points[i + 1], mid + branch.points[i + 2], 0xFFFFFFFF, LIFE_TIME_INFINITE);
+		debugRenderer.addLine(mid + branch.points[i + 2], mid + branch.points[i + 0], 0xFFFFFFFF, LIFE_TIME_INFINITE);*/
+		TreeTriangle tri;
+
+		tri.vertices[0] = mid + branch.points[i + 0] * mat;
+		tri.vertices[1] = mid + branch.points[i + 1] * mat;
+		tri.vertices[2] = mid + branch.points[i + 2] * mat;
+		tri.color = Vec3::fromColor(0x0D7000);
+
+
+		vertices.push_back(tri);
 	}
 
 	for (unsigned i = 0; i < nodes.size() - 1; i++) {
@@ -175,16 +199,34 @@ void generateBranch(Vec3 pos, float maxHeight, float widthMultiplier, Mat3 mat, 
 		TrunkNode& nextNode = nodes[i + 1];
 
 		for (int j = 0; j < node.sideCount; j++) {
+
+			TreeTriangle tri;
+
+			tri.vertices[0] = node.sides[j];
+			tri.vertices[1] = nextNode.sides[j];
+			tri.vertices[2] = nextNode.sides[j + 1];
+			tri.color = Vec3::fromColor(0x663500);
+			vertices.push_back(tri);
+
+			tri.vertices[0] = node.sides[j];
+			tri.vertices[1] = nextNode.sides[j + 1];
+			tri.vertices[2] = node.sides[j + 1];
+			tri.color = Vec3::fromColor(0x663500);
+			vertices.push_back(tri);
+			/*
 			debugRenderer.addLine(node.sides[j], nextNode.sides[j], 0xFFFFFFFF, LIFE_TIME_INFINITE);
 			if (i == 0) {
-				debugRenderer.addLine(node.sides[j], node.sides[j + 1], 0xFFFFFFFF, LIFE_TIME_INFINITE);
+			debugRenderer.addLine(node.sides[j], node.sides[j + 1], 0xFFFFFFFF, LIFE_TIME_INFINITE);
 			}
-			debugRenderer.addLine(nextNode.sides[j], nextNode.sides[j + 1], 0xFFFFFFFF, LIFE_TIME_INFINITE);
+			debugRenderer.addLine(nextNode.sides[j], nextNode.sides[j + 1], 0xFFFFFFFF, LIFE_TIME_INFINITE);*/
 		}
 	}
+
+
 }
 
-void TreeGenerator::generateTree(Vec3 pos) {
+gRenderable* TreeGenerator::generateTree(Vec3 pos) {
+	std::vector<TreeTriangle> vertices;
 
 	FixedSizedArray<Branch, 200> branches;
 
@@ -195,6 +237,26 @@ void TreeGenerator::generateTree(Vec3 pos) {
 	mat *= Mat3::rotationZ(randFloat(-pi, +pi));
 
 
-	generateBranch(pos, randFloat(3.0f, 7.0f), 1.0f, mat, branches, 0);
+	generateBranch(pos, randFloat(3.0f, 7.0f), 1.0f, mat, branches, 0, vertices);
 
+	gVertexBufferRenderable* renderable = new gVertexBufferRenderable(VERTEX_PROP_COLOR | VERTEX_PROP_POSITION | VERTEX_PROP_NORMAL, vertices.size() * 3);
+
+	for (unsigned i = 0; i < vertices.size(); i++) {
+		VertexPointer pointer0 = renderable->getVertexPointerAt(i * 3 + 0);
+		VertexPointer pointer1 = renderable->getVertexPointerAt(i * 3 + 1);
+		VertexPointer pointer2 = renderable->getVertexPointerAt(i * 3 + 2);
+
+		*pointer0.position = vertices[i].vertices[0];
+		*pointer1.position = vertices[i].vertices[1];
+		*pointer2.position = vertices[i].vertices[2];
+
+		*pointer0.color = *pointer1.color = *pointer2.color = Vec4(vertices[i].color, 1.0f);
+
+		Vec3 normal = Vec3::cross(vertices[i].vertices[1] - vertices[i].vertices[0], vertices[i].vertices[2] - vertices[i].vertices[0]);
+		normal.normalize();
+		*pointer0.normal = *pointer1.normal = *pointer2.normal = normal;
+
+	}
+	renderable->build();
+	return renderable;
 }

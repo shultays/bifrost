@@ -4,11 +4,13 @@
 
 #include "gTools.h"
 
+class gRenderable;
+
 class TreeGenerator {
 
 public:
 
-	static void generateTree(Vec3 pos);
+	static gRenderable* generateTree(Vec3 pos);
 };
 
 
