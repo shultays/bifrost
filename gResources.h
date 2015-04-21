@@ -43,8 +43,27 @@ class gResources : public gCustomDeallocator<gShader>, public gCustomDeallocator
 		std::string ID = textureName;
 		return ID;
 	}
+
 public:
 
+	gResources(){
+
+	}
+	~gResources(){
+		for ( unsigned i = 0; i < shaders.bucket_count(); ++i) {
+			for ( auto local_it = shaders.begin(i); local_it != shaders.end(i); ++local_it )
+			{
+				local_it->second.setCustomDeallocator(nullptr);
+			}
+		}
+
+		for ( unsigned i = 0; i < textures.bucket_count(); ++i) {
+			for ( auto local_it = textures.begin(i); local_it != textures.end(i); ++local_it )
+			{
+				local_it->second.setCustomDeallocator(nullptr);
+			}
+		}
+	}
 	gShaderShr getShader(const char* vertexShaderFile, const char* pixelShaderFile) {
 		std::string ID = shaderID(vertexShaderFile, pixelShaderFile);
 		std::unordered_map<std::string, gShaderShr>::iterator got = shaders.find(ID);

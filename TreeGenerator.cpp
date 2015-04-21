@@ -149,7 +149,7 @@ void generateBranch(Vec3 pos, float maxHeight, float widthMultiplier, Mat3 mat, 
 
 				float branchStartH = oldNode.height + branchH;
 
-				if (branchStartH > maxHeight * 0.4f && branchStartH < maxHeight * 0.9f) {
+				if (branchStartH > maxHeight * 0.3f && branchStartH < maxHeight * 0.7f) {
 					float remainingH = maxHeight - branchStartH;
 
 
@@ -172,7 +172,9 @@ void generateBranch(Vec3 pos, float maxHeight, float widthMultiplier, Mat3 mat, 
 		}
 	}
 
-	generateSphere(nodes[nodes.size() - 1].midPoint, maxHeight * 0.5f, branch.points);
+	float sphereRadius = maxHeight * 0.5f;
+	sphereRadius = gmax(sphereRadius, 0.4f);
+	generateSphere(nodes[nodes.size() - 1].midPoint, sphereRadius, branch.points);
 	Vec3 mid = nodes[nodes.size() - 1].midPoint;
 
 	mat.identity();
@@ -237,7 +239,7 @@ gRenderable* TreeGenerator::generateTree(Vec3 pos) {
 	mat *= Mat3::rotationZ(randFloat(-pi, +pi));
 
 
-	generateBranch(pos, randFloat(3.0f, 7.0f), 1.0f, mat, branches, 0, vertices);
+	generateBranch(pos, randFloat(1.0f, 7.0f), 1.0f, mat, branches, 0, vertices);
 
 	gVertexBufferRenderable* renderable = new gVertexBufferRenderable(VERTEX_PROP_COLOR | VERTEX_PROP_POSITION | VERTEX_PROP_NORMAL, vertices.size() * 3);
 

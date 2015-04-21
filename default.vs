@@ -1,4 +1,4 @@
-layout(location = 0) attribute vec3 aVertexPosition;
+attribute vec3 aVertexPosition;
 attribute vec3 aVertexNormal;
 attribute vec2 aVertexUV;
 attribute vec4 aVertexColor;
@@ -31,8 +31,8 @@ void main(void) {
 	transformedNormal = normalize(transformedNormal);
     vec3 uLightingDirection = vec3(0.0, 0.8, 0.6);
 
-    float directionalLightWeighting = max(dot(transformedNormal, uLightingDirection), 0.0);
-
+    float directionalLightWeighting = max(dot(transformedNormal, uLightingDirection), -1.0);
+	directionalLightWeighting = (directionalLightWeighting + 1.0)/2.0;
 	vec4 finalColor = vec4(1.0);
 
     

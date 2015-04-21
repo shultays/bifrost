@@ -1,4 +1,4 @@
-layout(location = 0) attribute vec3 aVertexPosition;
+attribute vec3 aVertexPosition;
 attribute vec4 aVertexColor;
 
 
