@@ -9,14 +9,14 @@ struct TreeTriangle {
 };
 
 void generateSphereRec(float radius, const Vec3& pointA, const Vec3& pointB, const Vec3& pointC, std::vector<Vec3>& points, int depth = 0) {
+	float a = Vec3::distanceSquared(pointA, pointB);
+	float b = Vec3::distanceSquared(pointB, pointC);
+	float c = Vec3::distanceSquared(pointC, pointA);
 
-	Vec3 v0 = pointB - pointA;
-	Vec3 v1 = pointC - pointA;
-	float t0 = v0.y*v1.z - v0.z*v1.y;
-	float t1 = v0.z*v1.x - v0.x*v1.z;
-	float t2 = v0.x*v1.y - v0.y*v1.x;
-	float areaSquared = (t0*t0 + t1*t1 + t2*t2) / 4.0f;
-	if (depth < 2) {
+	float t = a + b - c;
+	float areaSquared = (4 * a*b - t*t) / 16.0f;
+
+	if (sqrt(radius) / (depth + 1) > 0.8f) {
 		Vec3 midAB = (pointA + pointB) / 2.0f;
 		Vec3 midBC = (pointB + pointC) / 2.0f;
 		Vec3 midAC = (pointA + pointC) / 2.0f;

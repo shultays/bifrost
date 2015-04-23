@@ -14,7 +14,16 @@ public:
 
 	}
 
+	~gRenderableGroup() {
+		children.clear();
+	}
 
+	void deleteChildren() {
+		for (unsigned i = 0; i < children.size(); i++) {
+			delete children[i];
+		}
+		children.clear();
+	}
 
 	int getChildCount() const {
 		return children.size();

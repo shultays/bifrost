@@ -4,17 +4,31 @@
 #include "gSlave.h"
 #include "gGlobals.h"
 
+class NodeBuilder : public gSlaveWork {
+public:
+	DetailedMapController* mapController;
+	TerrainNode* node;
+	WorldCoor cellCoor;
+	float cellSize;
+	int edgePerCell;
 
-void NodeBuilder::runOnSlave() {
+	NodeBuilder(DetailedMapController* mapController, TerrainNode* node, WorldCoor cellCoor, float cellSize, int edgePerCell) {
+		this->mapController = mapController;
+		this->node = node;
+		this->cellCoor = cellCoor;
+		this->cellSize = cellSize;
+		this->edgePerCell = edgePerCell;
+	}
+	virtual void runOnSlave() override {
 
-	node->build(cellCoor, Vec2(cellSize), edgePerCell);
-}
-void NodeBuilder::runOnMain() {
-	node->buildMesh();
-	mapController->waitingJobs--;
-	delete this;
-
-}
+		node->build(cellCoor, Vec2(cellSize), edgePerCell);
+	}
+	virtual void runOnMain() override {
+		node->buildMesh();
+		mapController->waitingJobs--;
+		delete this;
+	}
+};
 
 DetailedMapController::DetailedMapController(WorldMap* world, int squareCount, int cellPerNode, int edgePerCell) {
 	this->world = world;

@@ -29,36 +29,6 @@ void Valhalla::init() {
 	detailedMapController2 = new DetailedMapController(world, 3, 1, 16);
 
 
-	gMDLReader reader;
-	reader.readMDLFile("models/NewBirch0.mdl");
-
-	tree = new gRenderableGroup();
-	for (unsigned i = 0; i < reader.geosets.size(); i++) {
-
-		gIndexBufferedDrawable* geosetRenderable = new gIndexBufferedDrawable(VERTEX_PROP_POSITION | VERTEX_PROP_NORMAL | VERTEX_PROP_UV, reader.geosets[i].vertices.size(), reader.geosets[i].faces.size(), GL_TRIANGLES, true, false);
-
-		for (unsigned j = 0; j < reader.geosets[i].vertices.size(); j++) {
-			VertexPointer p = geosetRenderable->getVertexPointerAt(j);
-			*p.position = reader.geosets[i].vertices[j];
-			*p.normal = reader.geosets[i].normals[j];
-			*p.uv = reader.geosets[i].textureCoors[j];
-		}
-
-		for (unsigned j = 0; j < reader.geosets[i].faces.size(); j++) {
-			geosetRenderable->setIndexAt(j, reader.geosets[i].faces[j]);
-		}
-
-		geosetRenderable->setConstantColor(Vec4(1.0f));
-		geosetRenderable->build();
-
-		if (reader.geosets[i].materialID != -1) {
-			geosetRenderable->texture = resources.getTexture(("models/" + reader.textures[reader.materialTextures[reader.geosets[i].materialID]] + ".png").c_str());
-		}
-
-		tree->addRenderable(geosetRenderable);
-	}
-	tree->enabled = false;
-
 
 	gShaderShr worldShader = resources.getShader("default.vs", "terrain.ps");
 	worldShader->addUniform("uDiscardArea", TypeVec4);
@@ -82,7 +52,6 @@ void Valhalla::update(float fixed_dt) {
 
 	if (input.isKeyPressed(GLFW_KEY_C)) {
 		isFPS = !isFPS;
-		tree->enabled = isFPS;
 		world->setIsScaled(isFPS);
 		if (isFPS) {
 			world->setAnchorPos(playerCoor.index);
@@ -98,14 +67,6 @@ void Valhalla::update(float fixed_dt) {
 			detailedMapController->initMap(playerCoor);
 			detailedMapController2->initMap(playerCoor);
 
-			Vec3 treePos = Vec3(playerCoor.pos, 0.0f);
-			treePos.vec2 += fpsCamera->getDir().vec2*2.0f;
-			WorldCoor treeWorldCoor = playerCoor;
-			treeWorldCoor.pos = treePos.vec2;
-			treePos.z = world->getHeightAt(treeWorldCoor);
-			tree->frame.makeIdentity();
-			tree->frame.scaleBy(0.01f);
-			tree->frame.translateBy(treePos);
 		} else {
 			world->frame.makeIdentity();
 			activeCamera = camera;
