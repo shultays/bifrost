@@ -33,7 +33,6 @@ void main(void) {
 
 	
     float directionalLightWeighting = (dot(transformedNormal, uLightingDirection) + 1.0f)/2.0;
-
 	vec4 finalColor = vec4(1.0);
 
     

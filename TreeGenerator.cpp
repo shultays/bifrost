@@ -1,12 +1,7 @@
 #include "TreeGenerator.h"
 
 #include "gGlobals.h"
-
-
-struct TreeTriangle {
-	Vec3 vertices[3];
-	Vec3 color;
-};
+#include "gGeometry.h"
 
 void generateSphereRec(float radius, const Vec3& pointA, const Vec3& pointB, const Vec3& pointC, std::vector<Vec3>& points, int depth = 0) {
 	float a = Vec3::distanceSquared(pointA, pointB);
@@ -93,12 +88,12 @@ float getRandomBranchRotation(float initialRotation, float maxRotationAmount) {
 	rotationMaxWeight = 1.0f - (rotationMaxWeight);
 
 
-	return initialRotation + randFloat(-maxRotationAmount * rotationMinMult, maxRotationAmount * rotationMaxMult);
+	return initialRotation + random.randFloat(-maxRotationAmount * rotationMinMult, maxRotationAmount * rotationMaxMult);
 }
 
 
 
-void generateBranch(Vec3 pos, float maxHeight, float widthMultiplier, Mat3 mat, FixedSizedArray<Branch, 200>& branches, int depth, std::vector<TreeTriangle>& vertices) {
+void generateBranch(Vec3 pos, float maxHeight, float widthMultiplier, Mat3 mat, FixedSizedArray<Branch, 200>& branches, int depth, std::vector<TreeTriangle>& vertices, std::vector<Sphere>& spheres, gRandom& random) {
 	branches.insert(Branch());
 	Branch& branch = branches[branches.size() - 1];
 	std::vector<TrunkNode>& nodes = branch.nodes;
@@ -117,53 +112,136 @@ void generateBranch(Vec3 pos, float maxHeight, float widthMultiplier, Mat3 mat, 
 	float minWidth = 0.15f * widthMultiplier * widthMultiplierViaHeight;
 	nodes[0].createSides();
 
-	float lastZRotation = randFloat(pi_2);
+	float lastZRotation = random.randFloat(pi_2);
 
 	while (nodes[nodes.size() - 1].height < maxHeight) {
 		nodes.push_back(nodes[nodes.size() - 1]);
 		TrunkNode& node = nodes[nodes.size() - 1];
 		TrunkNode& oldNode = nodes[nodes.size() - 2];
 
-		float heightDiff = randFloat(0.6f, 1.0f);
+		float heightDiff = random.randFloat(0.6f, 1.0f);
 		node.height += heightDiff;
 		node.midPoint = oldNode.midPoint + oldNode.mat.row2 * heightDiff;
 
 		node.width = oldNode.width * 0.6f + minWidth*0.4f;
 
 
-		node.mat.rotateByX(randFloat(-pi / 80, pi / 80));
-		node.mat.rotateByY(randFloat(-pi / 80, pi / 80));
-		node.mat.rotateByZ(randFloat(-pi / 10, pi / 10));
+		node.mat.rotateByX(random.randFloat(-pi / 80, pi / 80));
+		node.mat.rotateByY(random.randFloat(-pi / 80, pi / 80));
+		node.mat.rotateByZ(random.randFloat(-pi / 10, pi / 10));
 
 
 		node.createSides();
+	}
+
+	float sphereRadius = maxHeight * 0.5f;
+	sphereRadius = gmax(sphereRadius, 0.4f);
+	Sphere sphere(nodes[nodes.size() - 1].midPoint, sphereRadius);
+	bool inside = false;
+	for (unsigned i = 0; i < spheres.size(); i++) {
+		if (gGeometry::contains(spheres[i], sphere)) {
+			inside = true;
+			break;
+		}
+	}
+
+	if (inside == false) {
+		generateSphere(nodes[nodes.size() - 1].midPoint, sphereRadius, branch.points);
+		Vec3 mid = nodes[nodes.size() - 1].midPoint;
+
+		mat.identity();
+		mat.rotateByX(random.randFloat(-pi, +pi));
+		mat.rotateByY(random.randFloat(-pi, +pi));
+		mat.rotateByZ(random.randFloat(-pi, +pi));
+
+		for (unsigned i = 0; i < branch.points.size(); i += 3) {
+			TreeTriangle tri;
+
+			tri.vertices[0] = mid + branch.points[i + 0] * mat;
+			tri.vertices[1] = mid + branch.points[i + 1] * mat;
+			tri.vertices[2] = mid + branch.points[i + 2] * mat;
+			tri.color = Vec3::fromColor(0x0D7000);
+
+			vertices.push_back(tri);
+
+			float distance = ((tri.vertices[0] + tri.vertices[1] + tri.vertices[2]) * 0.33333f).distance(mid);
+
+			spheres.push_back(Sphere(mid, distance));
+		}
+	}
+
+	for (unsigned i = 0; i < nodes.size() - 1; i++) {
+		TrunkNode& node = nodes[i];
+		TrunkNode& nextNode = nodes[i + 1];
+
+		float radiusMin = 10000.0f;
+		for (int j = 0; j < node.sideCount; j++) {
+			float t1 = ((node.sides[j] + node.sides[j + 1]) * 0.5f).distanceSquared(node.midPoint);
+			float t2 = ((nextNode.sides[j] + nextNode.sides[j + 1]) * 0.5f).distanceSquared(nextNode.midPoint);
+
+			radiusMin = gmin(radiusMin, t1);
+			radiusMin = gmin(radiusMin, t2);
+		}
+		inside = false;
+		Capsule capsule(node.midPoint, nextNode.midPoint, sqrtf(radiusMin));
+		for (unsigned i = 0; i < spheres.size(); i++) {
+			if (gGeometry::contains(spheres[i], capsule)) {
+				inside = true;
+				break;
+			}
+		}
+		if (inside == false) {
+			for (int j = 0; j < node.sideCount; j++) {
+
+				TreeTriangle tri;
+
+				tri.vertices[0] = node.sides[j];
+				tri.vertices[1] = nextNode.sides[j];
+				tri.vertices[2] = nextNode.sides[j + 1];
+				tri.color = Vec3::fromColor(0x663500);
+				vertices.push_back(tri);
+
+				tri.vertices[0] = node.sides[j];
+				tri.vertices[1] = nextNode.sides[j + 1];
+				tri.vertices[2] = node.sides[j + 1];
+				tri.color = Vec3::fromColor(0x663500);
+				vertices.push_back(tri);
+			}
+		}
+	}
+
+
+	for (unsigned i = 1; i < nodes.size(); i++) {
+
+		TrunkNode& node = nodes[i];
+		TrunkNode& oldNode = nodes[i - 1];
 
 		float h = node.height - oldNode.height;
 		float startH = oldNode.height;
 
 		while (node.width > 0.04f && h > 0.0f) {
 			if (1) {
-				float branchH = randFloat(h);
+				float branchH = random.randFloat(h);
 				startH += branchH + 0.3f;
 				h -= branchH + 0.3f;
 
 				float branchStartH = oldNode.height + branchH;
 
-				if (branchStartH > maxHeight * 0.4f && branchStartH < maxHeight * 0.9f) {
+				if (branchStartH > maxHeight * 0.3f && branchStartH < maxHeight * 0.7f) {
 					float remainingH = maxHeight - branchStartH;
 
 
 					Mat3 mat = oldNode.mat;
 
-					mat.rotateBy(randFloat(0.2f*pi_d2, 0.7f*pi_d2), oldNode.mat.row0);
-					mat.rotateBy(randFloat(0.2f*pi_d2, 0.7f*pi_d2), oldNode.mat.row1);
+					mat.rotateBy(random.randFloat(0.2f*pi_d2, 0.7f*pi_d2), oldNode.mat.row0);
+					mat.rotateBy(random.randFloat(0.2f*pi_d2, 0.7f*pi_d2), oldNode.mat.row1);
 					mat.rotateBy(lastZRotation, oldNode.mat.row2);
 
-					generateBranch(oldNode.midPoint + oldNode.mat.row2 * branchH, randFloat(remainingH * 0.5f, remainingH * 0.7f), widthMultiplier,
+					generateBranch(oldNode.midPoint + oldNode.mat.row2 * branchH, random.randFloat(remainingH * 0.5f, remainingH * 0.7f), widthMultiplier,
 						mat,
-						branches, depth + 1, vertices);
+						branches, depth + 1, vertices, spheres, random);
 
-					lastZRotation += randFloat(pi_d2, pi);
+					lastZRotation += random.randFloat(pi_d2, pi);
 				}
 			} else {
 				startH += 0.1f;
@@ -172,91 +250,19 @@ void generateBranch(Vec3 pos, float maxHeight, float widthMultiplier, Mat3 mat, 
 		}
 	}
 
-	generateSphere(nodes[nodes.size() - 1].midPoint, maxHeight * 0.5f, branch.points);
-	Vec3 mid = nodes[nodes.size() - 1].midPoint;
-
-	mat.identity();
-	mat.rotateByX(randFloat(-pi, +pi));
-	mat.rotateByY(randFloat(-pi, +pi));
-	mat.rotateByZ(randFloat(-pi, +pi));
-	for (unsigned i = 0; i < branch.points.size(); i += 3) {
-		/*debugRenderer.addLine(mid + branch.points[i + 0], mid + branch.points[i + 1], 0xFFFFFFFF, LIFE_TIME_INFINITE);
-		debugRenderer.addLine(mid + branch.points[i + 1], mid + branch.points[i + 2], 0xFFFFFFFF, LIFE_TIME_INFINITE);
-		debugRenderer.addLine(mid + branch.points[i + 2], mid + branch.points[i + 0], 0xFFFFFFFF, LIFE_TIME_INFINITE);*/
-		TreeTriangle tri;
-
-		tri.vertices[0] = mid + branch.points[i + 0] * mat;
-		tri.vertices[1] = mid + branch.points[i + 1] * mat;
-		tri.vertices[2] = mid + branch.points[i + 2] * mat;
-		tri.color = Vec3::fromColor(0x0D7000);
-
-
-		vertices.push_back(tri);
-	}
-
-	for (unsigned i = 0; i < nodes.size() - 1; i++) {
-		TrunkNode& node = nodes[i];
-		TrunkNode& nextNode = nodes[i + 1];
-
-		for (int j = 0; j < node.sideCount; j++) {
-
-			TreeTriangle tri;
-
-			tri.vertices[0] = node.sides[j];
-			tri.vertices[1] = nextNode.sides[j];
-			tri.vertices[2] = nextNode.sides[j + 1];
-			tri.color = Vec3::fromColor(0x663500);
-			vertices.push_back(tri);
-
-			tri.vertices[0] = node.sides[j];
-			tri.vertices[1] = nextNode.sides[j + 1];
-			tri.vertices[2] = node.sides[j + 1];
-			tri.color = Vec3::fromColor(0x663500);
-			vertices.push_back(tri);
-			/*
-			debugRenderer.addLine(node.sides[j], nextNode.sides[j], 0xFFFFFFFF, LIFE_TIME_INFINITE);
-			if (i == 0) {
-			debugRenderer.addLine(node.sides[j], node.sides[j + 1], 0xFFFFFFFF, LIFE_TIME_INFINITE);
-			}
-			debugRenderer.addLine(nextNode.sides[j], nextNode.sides[j + 1], 0xFFFFFFFF, LIFE_TIME_INFINITE);*/
-		}
-	}
-
 
 }
 
-gRenderable* TreeGenerator::generateTree(Vec3 pos) {
-	std::vector<TreeTriangle> vertices;
-
+void TreeGenerator::generateTree(Vec3 pos, std::vector<TreeTriangle>& vertices, gRandom& random) {
+	std::vector<Sphere> spheres;
 	FixedSizedArray<Branch, 200> branches;
 
 	Mat3 mat;
 	mat.makeIdentity();
 	mat *= Mat3::rotationX(0.0f);
 	mat *= Mat3::rotationY(0.0f);
-	mat *= Mat3::rotationZ(randFloat(-pi, +pi));
+	mat *= Mat3::rotationZ(random.randFloat(-pi, +pi));
 
 
-	generateBranch(pos, randFloat(3.0f, 7.0f), 1.0f, mat, branches, 0, vertices);
-
-	gVertexBufferRenderable* renderable = new gVertexBufferRenderable(VERTEX_PROP_COLOR | VERTEX_PROP_POSITION | VERTEX_PROP_NORMAL, vertices.size() * 3);
-
-	for (unsigned i = 0; i < vertices.size(); i++) {
-		VertexPointer pointer0 = renderable->getVertexPointerAt(i * 3 + 0);
-		VertexPointer pointer1 = renderable->getVertexPointerAt(i * 3 + 1);
-		VertexPointer pointer2 = renderable->getVertexPointerAt(i * 3 + 2);
-
-		*pointer0.position = vertices[i].vertices[0];
-		*pointer1.position = vertices[i].vertices[1];
-		*pointer2.position = vertices[i].vertices[2];
-
-		*pointer0.color = *pointer1.color = *pointer2.color = Vec4(vertices[i].color, 1.0f);
-
-		Vec3 normal = Vec3::cross(vertices[i].vertices[1] - vertices[i].vertices[0], vertices[i].vertices[2] - vertices[i].vertices[0]);
-		normal.normalize();
-		*pointer0.normal = *pointer1.normal = *pointer2.normal = normal;
-
-	}
-	renderable->build();
-	return renderable;
+	generateBranch(pos, random.randFloat(1.0f, 7.0f), 1.0f, mat, branches, 0, vertices, spheres, random);
 }
