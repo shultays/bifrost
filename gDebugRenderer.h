@@ -28,6 +28,7 @@ class gDebugRenderer : protected gIndexBufferedLineDrawable {
 	*/
 
 	std::vector<Vec3> sphere;
+	bool needsBuild;
 public:
 
 	gDebugRenderer();

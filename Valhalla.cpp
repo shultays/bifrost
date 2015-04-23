@@ -10,6 +10,7 @@
 #include "gModelReader.h"
 #include "gRenderableGroup.h"
 #include "TreeGenerator.h"
+#include "ForestGenerator.h"
 
 void Valhalla::init() {
 	activeCamera = camera = new gFocusCamera();
@@ -27,7 +28,7 @@ void Valhalla::init() {
 
 	detailedMapController = new DetailedMapController(world, 7, 256, 8);
 	detailedMapController2 = new DetailedMapController(world, 3, 1, 16);
-
+	forestGenerator = new ForestGenerator(world);
 
 
 	gShaderShr worldShader = resources.getShader("default.vs", "terrain.ps");
@@ -51,25 +52,33 @@ void Valhalla::update(float fixed_dt) {
 
 
 	if (input.isKeyPressed(GLFW_KEY_C)) {
-		isFPS = !isFPS;
-		world->setIsScaled(isFPS);
-		if (isFPS) {
-			world->setAnchorPos(playerCoor.index);
+		bool hasJob = detailedMapController->hasWaitingJob() || detailedMapController2->hasWaitingJob() || forestGenerator->hasWaitingJob();
+		if (hasJob == false) {
+			isFPS = !isFPS;
+			world->setIsScaled(isFPS);
+			if (isFPS) {
+				world->setAnchorPos(playerCoor.index);
 
-			world->frame.translateBy(Vec3((float)-playerCoor.index.x, (float)-playerCoor.index.y, 0.0f));
-			world->frame.scaleBy(Vec3(world->getNodeSize(), world->getNodeSize(), world->getNodeSize() / 3.0f));
+				world->frame.translateBy(Vec3((float)-playerCoor.index.x, (float)-playerCoor.index.y, 0.0f));
+				world->frame.scaleBy(Vec3(world->getNodeSize(), world->getNodeSize(), world->getNodeSize() / 3.0f));
 
-			Vec4 v(0.0f, 0.0f, 0.0f, 1.0f);
-			v *= world->frame;
+				Vec4 v(0.0f, 0.0f, 0.0f, 1.0f);
+				v *= world->frame;
 
-			activeCamera = fpsCamera;
+				activeCamera = fpsCamera;
 
-			detailedMapController->initMap(playerCoor);
-			detailedMapController2->initMap(playerCoor);
+				detailedMapController->initMap(playerCoor);
+				detailedMapController2->initMap(playerCoor);
+				forestGenerator->initMap(playerCoor);
 
-		} else {
-			world->frame.makeIdentity();
-			activeCamera = camera;
+			} else {
+				world->frame.makeIdentity();
+				activeCamera = camera;
+
+				detailedMapController->deleteMap();
+				detailedMapController2->deleteMap();
+				forestGenerator->deleteMap();
+			}
 		}
 	}
 
@@ -79,19 +88,8 @@ void Valhalla::update(float fixed_dt) {
 	}
 
 	if (isFPS) {
-
-		if (input.isKeyPressed(GLFW_KEY_1)) {
-
-			WorldCoor treeWorldCoor = playerCoor;
-			treeWorldCoor.pos += fpsCamera->getDir().vec2*2.0f;
-
-			TreeGenerator::generateTree(world->toGamePos(treeWorldCoor) + Vec3(0.0f, 0.0f, -0.1f));
-		}
-
 		if (input.isKeyPressed(GLFW_KEY_2)) {
-
 			WorldCoor treeWorldCoor = playerCoor;
-
 
 			debugRenderer.addSphere(world->toGamePos(treeWorldCoor) + fpsCamera->getDir()*2.0f + Vec3(0.0f, 0.0f, 2.0f), 0.5f, 0xFFFFFFFF, 5.0f);
 		}
@@ -129,7 +127,7 @@ void Valhalla::update(float fixed_dt) {
 		Vec3 oldPos = fpsCamera->pos;
 
 		fpsCamera->pos.vec2 = shift + playerCoor.pos;
-		fpsCamera->pos.z = world->getHeightAt(playerCoor) + 1.8f;
+		fpsCamera->pos.z = world->getHeightAt(playerCoor) + 1.8f * 1.0f;
 
 		if (input.isKeyDown(GLFW_KEY_R)) {
 			debugRenderer.addLine(oldPos, fpsCamera->pos, 0xFF00FFFF, 1.0f);
@@ -137,6 +135,7 @@ void Valhalla::update(float fixed_dt) {
 
 		detailedMapController->updateMap(playerCoor);
 		detailedMapController2->updateMap(playerCoor);
+		forestGenerator->updateMap(playerCoor);
 	} else {
 		if (input.isKeyDown(MOUSE_BUTTON_LEFT)) {
 			camera->angle += input.getMouseDelta().x * 0.003f;

@@ -52,6 +52,7 @@ public:
 	}
 
 	bool getCachedHeight(const WorldCoor & coor, float& height) {
+		if (!heightCaches) return false;
 		for (int i = 0; i < heightCacheSize; i++) {
 			if (heightCaches[i].coor == coor) {
 				height = heightCaches[i].height;
@@ -62,6 +63,7 @@ public:
 	}
 
 	void HeightCacher::cacheHeight(const WorldCoor & coor, float t) {
+		if (!heightCaches) return;
 		heightCaches[heightCacheIndex].coor = coor;
 		heightCaches[heightCacheIndex].height = t;
 		heightCacheIndex++;
@@ -138,6 +140,8 @@ public:
 	void buildBuffer();
 	virtual void render() override;
 	Vec3 toGamePos(WorldCoor &coor);
+	Vec3 toGamePos(WorldCoor &coor, HeightCacher& cacher) const;
+	float getTreeProbabilityAt(WorldCoor &coor, HeightCacher& cacher) const;
 };
 
 #endif

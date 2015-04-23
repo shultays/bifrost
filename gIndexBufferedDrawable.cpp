@@ -10,6 +10,8 @@ void gIndexBufferedDrawable::render() {
 }
 
 void gVertexBufferRenderable::render() {
-	bind();
-	glDrawArrays(primitiveType, 0, this->maxVertexCount);
+	if (inited && built) {
+		bind();
+		glDrawArrays(primitiveType, 0, this->maxVertexCount);
+	}
 }

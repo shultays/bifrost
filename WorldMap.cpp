@@ -354,12 +354,32 @@ void WorldMap::render() {
 }
 
 Vec3 WorldMap::toGamePos(WorldCoor &coor) {
+	return toGamePos(coor, mainCacher);
+}
+
+Vec3 WorldMap::toGamePos(WorldCoor &coor, HeightCacher& cacher) const {
 	coor.fix(nodeSize);
 
-	float h = getHeightAt(coor);
+	if (coor.h == INVALID_HEIGHT) {
+		coor.h = getHeightAt(coor, cacher);
+	}
 
 	IntVec2 shift = coor.index - anchorPos;
 
-	return Vec3(coor.pos.x + shift.x * nodeSize, coor.pos.y + shift.y * nodeSize, h);
+	return Vec3(coor.pos.x + shift.x * nodeSize, coor.pos.y + shift.y * nodeSize, coor.h);
 }
 
+
+float WorldMap::getTreeProbabilityAt(WorldCoor &coor, HeightCacher& cacher) const {
+	coor.fix(nodeSize);
+
+	if (coor.h == INVALID_HEIGHT) {
+		coor.h = getHeightAt(coor, cacher);
+	}
+
+	if (coor.h < 1.0f) {
+		return 0.0f;
+	}
+
+	return earthMap.getHeightAt(coor);
+}

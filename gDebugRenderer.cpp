@@ -43,6 +43,7 @@ void gDebugRenderer::init() {
 	}
 
 	build();
+	needsBuild = false;
 }
 
 void gDebugRenderer::addSphere(const Vec3& mid, float radius, unsigned lineColor, float lifeTime) {
@@ -72,12 +73,12 @@ void gDebugRenderer::addLine(const Vec3& lineBegin, const Vec3& lineEnd, unsigne
 		*(float*)linePointer.p0.extra = timeToDie;
 		*(float*)linePointer.p0.extra = timeToDie;
 
-		build();
+		needsBuild = true;
 	}
 }
 
 void gDebugRenderer::render() {
-	bool hasChange = false;
+	bool hasChange = needsBuild;
 	for (int i = 0; i < lineCount; i++) {
 		gLinePointer linePointer = getLine(i);
 		if (*(float*)linePointer.p0.extra >= 0 && *(float*)linePointer.p0.extra < time.getTime()) {

@@ -4,50 +4,16 @@
 #include "gGame.h"
 #include "gShader.h"
 
-gVertexBuffer::gVertexBuffer(int props, unsigned maxVertexCount, bool isStatic) {
-	this->isStatic = isStatic;
-	hasPosition = (props & VERTEX_PROP_POSITION) > 0;
-	hasNormal = (props & VERTEX_PROP_NORMAL) > 0;
-	hasColor = (props & VERTEX_PROP_COLOR) > 0;
-	hasUV = (props & VERTEX_PROP_UV) > 0;
-	hasTextureWeights = (props & VERTEX_PROP_TEXT_W) > 0;
-
-	this->extraSize = props & 0xFF;
-	hasExtra = extraSize > 0;
-
-	vertexCount = 0;
-	positionStart = normalStart = colorStart = uvStart = textureWeightsStart = -1;
-
-	if (hasPosition) {
-		positionStart = vertexCount;
-		vertexCount += sizeof(Vec3);
-	}
-
-	if (hasNormal) {
-		normalStart = vertexCount;
-		vertexCount += sizeof(Vec3);
-	}
-	if (hasColor) {
-		colorStart = vertexCount;
-		vertexCount += sizeof(Vec4);
-	}
-	if (hasUV) {
-		uvStart = vertexCount;
-		vertexCount += sizeof(Vec2);
-	}
-	if (hasTextureWeights) {
-		textureWeightsStart = vertexCount;
-		vertexCount += sizeof(Vec4);
-	}
-	if (hasExtra) {
-		extraStart = vertexCount;
-		vertexCount += extraSize;
-	}
-	this->maxVertexCount = maxVertexCount;
-	int buffsize = getStartPositionAt(maxVertexCount);
-	buffer = new byte[buffsize];
+gVertexBuffer::gVertexBuffer() {
+	inited = false;
 	built = false;
+	buffer = nullptr;
 }
+
+gVertexBuffer::gVertexBuffer(int props, unsigned maxVertexCount, bool isStatic) : gVertexBuffer() {
+	init(props, maxVertexCount, isStatic);
+}
+
 
 void gVertexBuffer::setConstantNormal(const Vec3& normal) {
 	assert(!hasNormal);
@@ -76,6 +42,7 @@ gVertexBuffer::~gVertexBuffer() {
 }
 
 VertexPointer gVertexBuffer::getVertexPointerAt(unsigned i) {
+	assert(inited);
 	assert(!built || !isStatic);
 	assert(buffer);
 	assert(i >= 0 && i < maxVertexCount);
@@ -126,6 +93,7 @@ VertexPointer gVertexBuffer::getVertexPointerAt(unsigned i) {
 }
 
 void gVertexBuffer::build() {
+	assert(inited);
 	assert(!built || !isStatic);
 	assert(buffer);
 
@@ -145,6 +113,7 @@ void gVertexBuffer::build() {
 }
 
 void gVertexBuffer::bind() {
+	assert(inited);
 	assert(built || !isStatic);
 	if (built) {
 		glBindBuffer(GL_ARRAY_BUFFER, gl_buffer);
@@ -173,4 +142,51 @@ void gVertexBuffer::bind() {
 			gears.game->currentShader->setAttributeTextureWeights(constantTextureWeights);
 		}
 	}
+}
+
+void gVertexBuffer::init(int props, unsigned maxVertexCount, bool isStatic) {
+	assert(inited == false);
+	inited = true;
+	this->isStatic = isStatic;
+	hasPosition = (props & VERTEX_PROP_POSITION) > 0;
+	hasNormal = (props & VERTEX_PROP_NORMAL) > 0;
+	hasColor = (props & VERTEX_PROP_COLOR) > 0;
+	hasUV = (props & VERTEX_PROP_UV) > 0;
+	hasTextureWeights = (props & VERTEX_PROP_TEXT_W) > 0;
+
+	this->extraSize = props & 0xFF;
+	hasExtra = extraSize > 0;
+
+	vertexCount = 0;
+	positionStart = normalStart = colorStart = uvStart = textureWeightsStart = -1;
+
+	if (hasPosition) {
+		positionStart = vertexCount;
+		vertexCount += sizeof(Vec3);
+	}
+
+	if (hasNormal) {
+		normalStart = vertexCount;
+		vertexCount += sizeof(Vec3);
+	}
+	if (hasColor) {
+		colorStart = vertexCount;
+		vertexCount += sizeof(Vec4);
+	}
+	if (hasUV) {
+		uvStart = vertexCount;
+		vertexCount += sizeof(Vec2);
+	}
+	if (hasTextureWeights) {
+		textureWeightsStart = vertexCount;
+		vertexCount += sizeof(Vec4);
+	}
+	if (hasExtra) {
+		extraStart = vertexCount;
+		vertexCount += extraSize;
+	}
+	this->maxVertexCount = maxVertexCount;
+	int buffsize = getStartPositionAt(maxVertexCount);
+	buffer = new byte[buffsize];
+	built = false;
 }

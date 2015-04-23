@@ -7,26 +7,19 @@
 #include "gTools.h"
 #include "Tools.h"
 #include "Grid.h"
-
-
+#include <vector>
+#include "DetailCreator.h"
 class WorldMap;
-class gRenderableGroup;
+class gVertexBufferRenderable;
 
-class ForestGenerator {
-	int squareCount;
-	int cellPerNode;
-	float cellSize;
+class ForestGenerator : public DetailCreator<gVertexBufferRenderable> {
+	friend class ForestNodeBuilder;
 
-	WorldMap* world;
-
-	Grid<gRenderableGroup*> nodes;
 public:
 	ForestGenerator(WorldMap* world);
 
-	void updateMap(WorldCoor& coor);
-	void initMap(WorldCoor& coor);
-
-
+	virtual void initNode(gVertexBufferRenderable*& node, WorldCoor& nodeCoor, gRandom& random) override;
+	virtual void deleteNode(gVertexBufferRenderable*& node) override;
 };
 
 

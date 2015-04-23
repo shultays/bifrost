@@ -138,22 +138,3 @@ void sleepMS(int ms) {
 	Sleep(ms);
 #endif
 }
-
-int randInt() {
-	return rand();
-}
-int randInt(int max) {
-	return randInt() % max;
-}
-int randInt(int start, int end) {
-	return randInt(end - start + 1) + start;
-}
-float randFloat() {
-	return ((float)randInt()) / RAND_MAX;
-}
-float randFloat(float max) {
-	return randFloat() * max;
-}
-float randFloat(float start, float end) {
-	return randFloat() * (end - start) + start;
-}

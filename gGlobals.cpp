@@ -5,3 +5,4 @@ gTime time;
 gGears gears;
 gResources resources;
 gDebugRenderer debugRenderer;
+gRandom random;

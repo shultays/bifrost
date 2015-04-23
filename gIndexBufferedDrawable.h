@@ -11,6 +11,15 @@ class gVertexBufferRenderable : public gVertexBuffer, public gRenderable {
 	int isStatic;
 	int primitiveType;
 public:
+	gVertexBufferRenderable(bool autoAdd = true) : gVertexBuffer(), gRenderable(autoAdd) {
+
+	}
+
+	void init(int props, unsigned vertexCount, bool autoAdd = true, bool isStatic = true, int primitiveType = GL_TRIANGLES) {
+		gVertexBuffer::init(props, vertexCount, isStatic);
+		this->isStatic = isStatic;
+		this->primitiveType = primitiveType;
+	}
 	gVertexBufferRenderable(int props, unsigned vertexCount, bool autoAdd = true, bool isStatic = true, int primitiveType = GL_TRIANGLES) : gVertexBuffer(props, vertexCount, isStatic), gRenderable(autoAdd) {
 		this->isStatic = isStatic;
 		this->primitiveType = primitiveType;

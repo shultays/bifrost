@@ -6,6 +6,7 @@
 #include "gGears.h"
 #include "gResources.h"
 #include "gDebugRenderer.h"
+#include "gRandom.h"
 
 
 extern gInput input;
@@ -13,4 +14,5 @@ extern gTime time;
 extern gGears gears;
 extern gResources resources;
 extern gDebugRenderer debugRenderer;
+extern gRandom random;
 #endif

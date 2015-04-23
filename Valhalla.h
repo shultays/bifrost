@@ -8,6 +8,7 @@ class WorldMap;
 class gFocusCamera;
 class DetailedMapController;
 class gFPSCamera;
+class ForestGenerator;
 
 class Valhalla : public gGame, public gTickable, public gUpdatable {
 	WorldMap *world;
@@ -16,6 +17,7 @@ class Valhalla : public gGame, public gTickable, public gUpdatable {
 
 	DetailedMapController* detailedMapController;
 	DetailedMapController* detailedMapController2;
+	ForestGenerator* forestGenerator;
 
 	WorldCoor playerCoor;
 

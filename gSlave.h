@@ -13,7 +13,9 @@ class gSlaveController;
 class gSlaveWork {
 	bool done;
 public:
+	int priority;
 	gSlaveWork() {
+		priority = 0;
 		done = false;
 	}
 	void setIsDone(bool done) {

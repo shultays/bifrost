@@ -91,12 +91,4 @@ Vec3 hsvToRgb(const Vec3& color);
 
 void sleepMS(int ms);
 
-int randInt();
-int randInt(int max);
-int randInt(int start, int end);
-
-float randFloat();
-float randFloat(float max);
-float randFloat(float start, float end);
-
 #endif

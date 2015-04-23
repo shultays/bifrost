@@ -58,8 +58,9 @@ protected:
 		return i*vertexCount;
 	}
 	bool built;
+	bool inited;
 public:
-
+	gVertexBuffer();
 	gVertexBuffer(int props, unsigned vertexCount, bool isStatic = true);
 	void setConstantNormal(const Vec3& normal);
 	void setConstantColor(const Vec4& color);
@@ -69,6 +70,7 @@ public:
 	VertexPointer getVertexPointerAt(unsigned i);
 	void build();
 	void bind();
+	void init(int props, unsigned maxVertexCount, bool isStatic = true);
 };
 
 

@@ -4,6 +4,7 @@
 #include "gVec.h"
 #include "Tools.h"
 #include "WorldMap.h"
+#include "gGlobals.h"
 
 #include <functional>
 
@@ -17,7 +18,7 @@ PerlinShell::PerlinShell(WorldMap* world, int edgeCount, float minHeight, float 
 	this->cellSize = world->getMapSize() / (edgeCount - 1);
 	this->cellPerNode = world->getNodeSize() / this->cellSize;
 	if (seed == -1) {
-		seed = rand();
+		seed = random.randInt();
 	}
 	this->seed = seed;
 	this->edgeCount = edgeCount;
@@ -38,9 +39,19 @@ PerlinShell::PerlinShell(WorldMap* world, int edgeCount, float minHeight, float 
 	}
 	acceptHash = (unsigned int)(maxHash * percentage);
 
+	unsigned int t = seed;
+	float rotation = (t & 0xFF) / 255.0f;
+	t /= 0xFF + 1;
+
 	rotate.makeIdentity();
-	rotate.rotateBy(pi_2*(rand() % 1000) / 1000.0f);
-	add = Vec2(((rand() % 1000) / 1000.0f), ((rand() % 1000) / 1000.0f));
+	rotate.rotateBy(pi_2*rotation);
+
+	float addX = (t & 0xFFF) / (0xFFF + 1.0f);
+	t /= 0xFFF + 1;
+	float addY = (t & 0xFFF) / (0xFFF + 1.0f);
+	t /= 0xFFF + 1;
+
+	add = Vec2(addX, addY);
 }
 float PerlinShell::getHeightAt(const WorldCoor& coor) const {
 	Vec2 p;

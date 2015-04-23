@@ -4,18 +4,21 @@
 
 #include "gVec.h"
 
+#define INVALID_HEIGHT -1000000.0f
 
 class WorldCoor {
 public:
 	WorldCoor() {
 		index.setZero();
 		pos.setZero();
+		h = INVALID_HEIGHT;
 	}
 
 	WorldCoor(int i, int j) {
 		index.x = i;
 		index.y = j;
 		pos.setZero();
+		h = INVALID_HEIGHT;
 	}
 
 	WorldCoor(int i, int j, float x, float y) {
@@ -23,11 +26,13 @@ public:
 		index.y = j;
 		pos.x = x;
 		pos.y = y;
+		h = INVALID_HEIGHT;
 	}
 
 	WorldCoor(const IntVec2& index, const Vec2& pos) {
 		this->index = index;
 		this->pos = pos;
+		h = INVALID_HEIGHT;
 	}
 
 	WorldCoor(const WorldCoor& coor, int i, int j, float x, float y) {
@@ -36,6 +41,7 @@ public:
 		index.y += j;
 		pos.x += x;
 		pos.y += y;
+		this->h = coor.h;
 	}
 
 	WorldCoor operator-(const WorldCoor &other) const {

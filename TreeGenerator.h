@@ -3,14 +3,21 @@
 #define TREE_GENERATOR_H__
 
 #include "gTools.h"
+#include "gRandom.h"
+#include <vector>
 
-class gRenderable;
+
+
+struct TreeTriangle {
+	Vec3 vertices[3];
+	Vec3 color;
+};
 
 class TreeGenerator {
 
 public:
 
-	static gRenderable* generateTree(Vec3 pos);
+	static void generateTree(Vec3 pos, std::vector<TreeTriangle>& triangles, gRandom& random);
 };
 
 
