@@ -14,15 +14,34 @@ protected:
 	float cellSize;
 	WorldMap* world;
 
-	WorldCoor oldCoor;
+	IntVec2 centerIndex;
 
 	Grid<T*> nodes;
 
 	std::vector<IntVec2> buildOrder;
 
 	int waitingJobs;
-	virtual void initNode(T*& node, WorldCoor& nodeCoor, gRandom& random) = 0;
+	virtual void initNode(T*& node, WorldCoor& nodeCoor, gRandom& random, int a, int b) = 0;
 	virtual void deleteNode(T*& node) = 0;
+
+
+	IntVec2 coorToIndex(const WorldCoor& coor) {
+		IntVec2 r = coor.index * cellPerNode;
+		r.x += (int)(coor.pos.x / cellSize);
+		r.y += (int)(coor.pos.y / cellSize);
+		return r;
+	}
+
+	WorldCoor indexToCoor(const IntVec2& index) {
+		WorldCoor coor;
+		coor.index.x = index.x / cellPerNode;
+		coor.index.y = index.y / cellPerNode;
+
+		coor.pos.x = (index.x%cellPerNode)*cellSize;
+		coor.pos.y = (index.y%cellPerNode)*cellSize;
+
+		return coor;
+	}
 public:
 
 	DetailCreator(WorldMap* world, int cellPerNode, int squareCount) {
@@ -47,27 +66,25 @@ public:
 
 	virtual void updateMap(WorldCoor& coor) {
 		if (waitingJobs) return;
-		WorldCoor baseCoor = coor;
-		int baseX = ((int)(baseCoor.pos.x / cellSize));
-		int baseY = ((int)(baseCoor.pos.y / cellSize));
-		baseCoor.pos.x = baseX * cellSize;
-		baseCoor.pos.y = baseY * cellSize;
 
-		WorldCoor diff = baseCoor - oldCoor;
-		Vec2 diffPos = diff.pos + diff.index.toVec() * world->getNodeSize();
+		IntVec2 newCenterIndex = coorToIndex(coor);
 
-		if (diffPos.x > cellSize) {
+		const int moveCount = 2;
+
+		if (newCenterIndex.x >= centerIndex.x + moveCount) {
+			centerIndex.x += moveCount;
+			WorldCoor baseCoor = indexToCoor(centerIndex);
 			for (int a = -squareCount; a <= squareCount; a++) {
 				for (int b = -squareCount; b <= squareCount; b++) {
 					int i = a + squareCount;
 					int j = b + squareCount;
 
-					if (a < -squareCount + 2) {
+					if (a < -squareCount + moveCount) {
 						deleteNode(nodes[i][j]);
 						nodes[i][j] = nullptr;
 					}
-					if (a <= squareCount - 2) {
-						nodes[i][j] = nodes[i + 2][j];
+					if (a <= squareCount - moveCount) {
+						nodes[i][j] = nodes[i + moveCount][j];
 					}
 				}
 			}
@@ -77,34 +94,31 @@ public:
 					int i = a + squareCount;
 					int j = b + squareCount;
 
-					if (a > squareCount - 2) {
+					if (a > squareCount - moveCount) {
 						WorldCoor cellCoor = baseCoor;
 						cellCoor.pos.x += a*cellSize;
 						cellCoor.pos.y += b*cellSize;
 						cellCoor.fix(world->getNodeSize());
 
-						gRandom random(baseCoor.index.x * cellPerNode + baseX + a, baseCoor.index.y * cellPerNode + baseY + b);
-						initNode(nodes[i][j], cellCoor, random);
+						gRandom random(baseCoor.index.x * cellPerNode + centerIndex.x + a, baseCoor.index.y * cellPerNode + centerIndex.y + b);
+						initNode(nodes[i][j], cellCoor, random, a, b);
 					}
 				}
 			}
-			oldCoor.index.x = baseCoor.index.x;
-			oldCoor.pos.x = baseCoor.pos.x;
-		}
-
-
-		if (diffPos.x < -cellSize) {
+		} else if (newCenterIndex.x <= centerIndex.x - moveCount) {
+			centerIndex.x -= moveCount;
+			WorldCoor baseCoor = indexToCoor(centerIndex);
 			for (int a = squareCount; a >= -squareCount; a--) {
 				for (int b = squareCount; b >= -squareCount; b--) {
 					int i = a + squareCount;
 					int j = b + squareCount;
 
-					if (a > squareCount - 2) {
+					if (a > squareCount - moveCount) {
 						deleteNode(nodes[i][j]);
 						nodes[i][j] = nullptr;
 					}
-					if (a >= -squareCount + 2) {
-						nodes[i][j] = nodes[i - 2][j];
+					if (a >= -squareCount + moveCount) {
+						nodes[i][j] = nodes[i - moveCount][j];
 					}
 				}
 			}
@@ -114,35 +128,31 @@ public:
 					int i = a + squareCount;
 					int j = b + squareCount;
 
-					if (a < -squareCount + 2) {
+					if (a < -squareCount + moveCount) {
 						WorldCoor cellCoor = baseCoor;
 						cellCoor.pos.x += a*cellSize;
 						cellCoor.pos.y += b*cellSize;
 						cellCoor.fix(world->getNodeSize());
 
-						gRandom random(baseCoor.index.x * cellPerNode + baseX + a, baseCoor.index.y * cellPerNode + baseY + b);
-						initNode(nodes[i][j], cellCoor, random);
+						gRandom random(baseCoor.index.x * cellPerNode + centerIndex.x + a, baseCoor.index.y * cellPerNode + centerIndex.y + b);
+						initNode(nodes[i][j], cellCoor, random, a, b);
 					}
 				}
 			}
-
-			oldCoor.index.x = baseCoor.index.x;
-			oldCoor.pos.x = baseCoor.pos.x;
-		}
-
-
-		if (diffPos.y > cellSize) {
+		} else if (newCenterIndex.y >= centerIndex.y + moveCount) {
+			centerIndex.y += moveCount;
+			WorldCoor baseCoor = indexToCoor(centerIndex);
 			for (int a = -squareCount; a <= squareCount; a++) {
 				for (int b = -squareCount; b <= squareCount; b++) {
 					int i = a + squareCount;
 					int j = b + squareCount;
 
-					if (b < -squareCount + 2) {
+					if (b < -squareCount + moveCount) {
 						deleteNode(nodes[i][j]);
 						nodes[i][j] = nullptr;
 					}
-					if (b <= squareCount - 2) {
-						nodes[i][j] = nodes[i][j + 2];
+					if (b <= squareCount - moveCount) {
+						nodes[i][j] = nodes[i][j + moveCount];
 					}
 				}
 			}
@@ -152,34 +162,31 @@ public:
 					int i = a + squareCount;
 					int j = b + squareCount;
 
-					if (b > squareCount - 2) {
+					if (b > squareCount - moveCount) {
 						WorldCoor cellCoor = baseCoor;
 						cellCoor.pos.x += a*cellSize;
 						cellCoor.pos.y += b*cellSize;
 						cellCoor.fix(world->getNodeSize());
 
-						gRandom random(baseCoor.index.x * cellPerNode + baseX + a, baseCoor.index.y * cellPerNode + baseY + b);
-						initNode(nodes[i][j], cellCoor, random);
+						gRandom random(baseCoor.index.x * cellPerNode + centerIndex.x + a, baseCoor.index.y * cellPerNode + centerIndex.y + b);
+						initNode(nodes[i][j], cellCoor, random, a, b);
 					}
 				}
 			}
-			oldCoor.index.y = baseCoor.index.y;
-			oldCoor.pos.y = baseCoor.pos.y;
-		}
-
-
-		if (diffPos.y < -cellSize) {
+		} else if (newCenterIndex.y <= centerIndex.y - moveCount) {
+			centerIndex.y -= moveCount;
+			WorldCoor baseCoor = indexToCoor(centerIndex);
 			for (int a = squareCount; a >= -squareCount; a--) {
 				for (int b = squareCount; b >= -squareCount; b--) {
 					int i = a + squareCount;
 					int j = b + squareCount;
 
-					if (b > squareCount - 2) {
+					if (b > squareCount - moveCount) {
 						deleteNode(nodes[i][j]);
 						nodes[i][j] = nullptr;
 					}
-					if (b >= -squareCount + 2) {
-						nodes[i][j] = nodes[i][j - 2];
+					if (b >= -squareCount + moveCount) {
+						nodes[i][j] = nodes[i][j - moveCount];
 					}
 				}
 			}
@@ -189,20 +196,17 @@ public:
 					int i = a + squareCount;
 					int j = b + squareCount;
 
-					if (b < -squareCount + 2) {
+					if (b < -squareCount + moveCount) {
 						WorldCoor cellCoor = baseCoor;
 						cellCoor.pos.x += a*cellSize;
 						cellCoor.pos.y += b*cellSize;
 						cellCoor.fix(world->getNodeSize());
 
-						gRandom random(baseCoor.index.x * cellPerNode + baseX + a, baseCoor.index.y * cellPerNode + baseY + b);
-						initNode(nodes[i][j], cellCoor, random);
+						gRandom random(baseCoor.index.x * cellPerNode + centerIndex.x + a, baseCoor.index.y * cellPerNode + centerIndex.y + b);
+						initNode(nodes[i][j], cellCoor, random, a, b);
 					}
 				}
 			}
-
-			oldCoor.index.y = baseCoor.index.y;
-			oldCoor.pos.y = baseCoor.pos.y;
 		}
 	}
 
@@ -210,15 +214,8 @@ public:
 		waitingJobs = 0;
 		deleteMap();
 
-		IntVec3 centerIndex;
-
-		WorldCoor baseCoor = coor;
-		int baseX = ((int)(baseCoor.pos.x / cellSize));
-		int baseY = ((int)(baseCoor.pos.y / cellSize));
-		baseCoor.pos.x = baseX * cellSize;
-		baseCoor.pos.y = baseY * cellSize;
-
-		oldCoor = baseCoor;
+		centerIndex = coorToIndex(coor);
+		WorldCoor baseCoor = indexToCoor(centerIndex);
 
 		for (unsigned n = 0; n < buildOrder.size(); n++) {
 			int a = buildOrder[n].x;
@@ -230,10 +227,9 @@ public:
 			cellCoor.pos.y += b*cellSize;
 			cellCoor.fix(world->getNodeSize());
 
-			gRandom random(baseCoor.index.x * cellPerNode + baseX + a, baseCoor.index.y * cellPerNode + baseY + b);
+			gRandom random(baseCoor.index.x * cellPerNode + centerIndex.x + a, baseCoor.index.y * cellPerNode + centerIndex.y + b);
 
-
-			initNode(nodes[i][j], cellCoor, random);
+			initNode(nodes[i][j], cellCoor, random, a, b);
 		}
 	}
 

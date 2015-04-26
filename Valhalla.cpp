@@ -4,13 +4,14 @@
 #include "gGlobals.h"
 #include "gTools.h"
 #include "WorldMap.h"
-#include "DetailedMapController.h"
+#include "DetailedMapGenerator.h"
 #include "gCamera.h"
 
 #include "gModelReader.h"
 #include "gRenderableGroup.h"
 #include "TreeGenerator.h"
 #include "ForestGenerator.h"
+#include "Sky.h"
 
 void Valhalla::init() {
 	activeCamera = camera = new gFocusCamera();
@@ -26,15 +27,16 @@ void Valhalla::init() {
 
 	fpsCamera = new gFPSCamera();
 
-	detailedMapController = new DetailedMapController(world, 7, 256, 8);
-	detailedMapController2 = new DetailedMapController(world, 3, 1, 16);
+	detailedMapController = new DetailedMapGenerator(world, 7, 256, 8);
+	detailedMapController2 = new DetailedMapGenerator(world, 3, 1, 16);
 	forestGenerator = new ForestGenerator(world);
-
+	sky = new Sky(world);
 
 	gShaderShr worldShader = resources.getShader("default.vs", "terrain.ps");
 	worldShader->addUniform("uDiscardArea", TypeVec4);
 
 	world->shader = worldShader;
+
 }
 
 void Valhalla::tick(float dt) {
@@ -70,6 +72,7 @@ void Valhalla::update(float fixed_dt) {
 				detailedMapController->initMap(playerCoor);
 				detailedMapController2->initMap(playerCoor);
 				forestGenerator->initMap(playerCoor);
+				//sky->initSky(playerCoor);
 
 			} else {
 				world->frame.makeIdentity();
@@ -78,6 +81,7 @@ void Valhalla::update(float fixed_dt) {
 				detailedMapController->deleteMap();
 				detailedMapController2->deleteMap();
 				forestGenerator->deleteMap();
+				sky->deleteSky();
 			}
 		}
 	}
@@ -136,6 +140,7 @@ void Valhalla::update(float fixed_dt) {
 		detailedMapController->updateMap(playerCoor);
 		detailedMapController2->updateMap(playerCoor);
 		forestGenerator->updateMap(playerCoor);
+		sky->updateSky(playerCoor);
 	} else {
 		if (input.isKeyDown(MOUSE_BUTTON_LEFT)) {
 			camera->angle += input.getMouseDelta().x * 0.003f;

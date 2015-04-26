@@ -12,20 +12,21 @@ public:
 
 	WorldCoor cellCoor;
 	float cellSize;
-	const WorldMap* world;
+	WorldMap* world;
 	std::vector<gVertexBufferRenderable*> trees;
 
 	gVertexBufferRenderable* renderable;
 
 	gRandom random;
 public:
-	ForestNodeBuilder(ForestGenerator* forestGenerator, const WorldMap*world, gVertexBufferRenderable* renderable, WorldCoor cellCoor, float cellSize, gRandom random) {
+	ForestNodeBuilder(ForestGenerator* forestGenerator, WorldMap*world, gVertexBufferRenderable* renderable, WorldCoor cellCoor, float cellSize, gRandom random, int priority) {
 		this->forestGenerator = forestGenerator;
 		this->cellCoor = cellCoor;
 		this->cellSize = cellSize;
 		this->renderable = renderable;
 		this->world = world;
 		this->random = random;
+		this->priority = priority;
 	}
 	virtual void runOnSlave() override {
 		HeightCacher cacher;
@@ -49,8 +50,6 @@ public:
 			}
 		}
 
-
-
 		renderable->init(VERTEX_PROP_COLOR | VERTEX_PROP_POSITION | VERTEX_PROP_NORMAL, vertices.size() * 3, true);
 
 		for (unsigned i = 0; i < vertices.size(); i++) {
@@ -73,6 +72,7 @@ public:
 		renderable->build();
 
 		forestGenerator->waitingJobs--;
+
 		delete this;
 	}
 };
@@ -81,10 +81,10 @@ ForestGenerator::ForestGenerator(WorldMap* world) : DetailCreator(world, 200, 3)
 
 }
 
-void ForestGenerator::initNode(gVertexBufferRenderable*& node, WorldCoor& nodeCoor, gRandom& random) {
+void ForestGenerator::initNode(gVertexBufferRenderable*& node, WorldCoor& nodeCoor, gRandom& random, int a, int b) {
 	node = new gVertexBufferRenderable();
 
-	gears.addSlaveWork(new ForestNodeBuilder(this, world, node, nodeCoor, cellSize, random));
+	gears.addSlaveWork(new ForestNodeBuilder(this, world, node, nodeCoor, cellSize, random, 1000 - (abs(a) + abs(b) * 4)));
 	waitingJobs++;
 }
 

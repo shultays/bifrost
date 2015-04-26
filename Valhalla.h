@@ -6,18 +6,20 @@
 
 class WorldMap;
 class gFocusCamera;
-class DetailedMapController;
+class DetailedMapGenerator;
 class gFPSCamera;
 class ForestGenerator;
+class Sky;
 
 class Valhalla : public gGame, public gTickable, public gUpdatable {
 	WorldMap *world;
 	gFocusCamera* camera;
 	gFPSCamera* fpsCamera;
 
-	DetailedMapController* detailedMapController;
-	DetailedMapController* detailedMapController2;
+	DetailedMapGenerator* detailedMapController;
+	DetailedMapGenerator* detailedMapController2;
 	ForestGenerator* forestGenerator;
+	Sky* sky;
 
 	WorldCoor playerCoor;
 

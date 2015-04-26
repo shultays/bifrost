@@ -6,15 +6,15 @@
 #include "DetailCreator.h"
 
 
-class DetailedMapController : public DetailCreator<TerrainNode>, public gTickable {
-	friend class NodeBuilder;
+class DetailedMapGenerator : public DetailCreator<TerrainNode>, public gTickable {
+	friend class DetailedMapNodeBuilder;
 
 	int edgePerCell;
 	float cellDetail;
 
 	Vec4 cropArea;
 public:
-	DetailedMapController(WorldMap* world, int squareCount, int cellPerNode, int edgePerCell);
+	DetailedMapGenerator(WorldMap* world, int squareCount, int cellPerNode, int edgePerCell);
 
 
 	void setCropArea(const Vec4& cropArea) {
@@ -26,7 +26,7 @@ public:
 	Vec4 getTerrainArea() const;
 
 
-	virtual void initNode(TerrainNode*& node, WorldCoor& nodeCoor, gRandom& random);
+	virtual void initNode(TerrainNode*& node, WorldCoor& nodeCoor, gRandom& random, int a, int b);
 	virtual void deleteNode(TerrainNode*& node);
 };
 

@@ -27,7 +27,12 @@ public:
 	virtual void runOnSlave() = 0;
 	virtual void runOnMain() = 0;
 };
-
+class Compare {
+public:
+	bool operator() (const gSlaveWork* slave0, const gSlaveWork* slave1) {
+		return slave0->priority < slave1->priority;
+	}
+};
 
 struct ThreadData {
 	gSlave* slave;
@@ -67,7 +72,7 @@ public:
 class gSlaveController {
 	int slaveCount;
 	gSlave* slaves;
-	std::queue<gSlaveWork*> workForSlavesQueue;
+	std::priority_queue<gSlaveWork*, std::vector<gSlaveWork*>, Compare> workForSlavesQueue;
 	std::queue<gSlaveWork*> workForMainQueue;
 	gMutex controllerMutex;
 	friend class gSlave;
@@ -77,7 +82,7 @@ class gSlaveController {
 			gSlaveWork* work = nullptr;
 			controllerMutex.waitAndGetMutex();
 			if (workForSlavesQueue.size()) {
-				work = workForSlavesQueue.front();
+				work = workForSlavesQueue.top();
 				workForSlavesQueue.pop();
 			}
 			controllerMutex.releaseMutex();

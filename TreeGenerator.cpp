@@ -3,7 +3,7 @@
 #include "gGlobals.h"
 #include "gGeometry.h"
 
-void generateSphereRec(float radius, const Vec3& pointA, const Vec3& pointB, const Vec3& pointC, std::vector<Vec3>& points, int depth = 0) {
+void generateSphereRec(float radius, const Vec3& pointA, const Vec3& pointB, const Vec3& pointC, std::vector<Vec3>& points, int depth = 0, float minRadius = 0.8f) {
 	float a = Vec3::distanceSquared(pointA, pointB);
 	float b = Vec3::distanceSquared(pointB, pointC);
 	float c = Vec3::distanceSquared(pointC, pointA);
@@ -11,7 +11,7 @@ void generateSphereRec(float radius, const Vec3& pointA, const Vec3& pointB, con
 	float t = a + b - c;
 	float areaSquared = (4 * a*b - t*t) / 16.0f;
 
-	if (sqrt(radius) / (depth + 1) > 0.8f) {
+	if (sqrt(radius) / (depth + 1) > minRadius) {
 		Vec3 midAB = (pointA + pointB) / 2.0f;
 		Vec3 midBC = (pointB + pointC) / 2.0f;
 		Vec3 midAC = (pointA + pointC) / 2.0f;
@@ -33,16 +33,15 @@ void generateSphereRec(float radius, const Vec3& pointA, const Vec3& pointB, con
 }
 
 
-void generateSphere(const Vec3& mid, float radius, std::vector<Vec3>& points) {
-	generateSphereRec(radius, Vec3(1.0f, 0.0f, 0.0f)*radius, Vec3(0.0f, 1.0f, 0.0f)*radius, Vec3(0.0f, 0.0f, 1.0f)*radius, points);
-	generateSphereRec(radius, Vec3(1.0f, 0.0f, 0.0f)*radius, Vec3(0.0f, 0.0f, 1.0f)*-radius, Vec3(0.0f, 1.0f, 0.0f)*radius, points);
-	generateSphereRec(radius, Vec3(1.0f, 0.0f, 0.0f)*radius, Vec3(0.0f, 0.0f, 1.0f)*radius, Vec3(0.0f, 1.0f, 0.0f)*-radius, points);
-	generateSphereRec(radius, Vec3(1.0f, 0.0f, 0.0f)*radius, Vec3(0.0f, 1.0f, 0.0f)*-radius, Vec3(0.0f, 0.0f, 1.0f)*-radius, points);
-	generateSphereRec(radius, Vec3(1.0f, 0.0f, 0.0f)*-radius, Vec3(0.0f, 0.0f, 1.0f)*radius, Vec3(0.0f, 1.0f, 0.0f)*radius, points);
-	generateSphereRec(radius, Vec3(1.0f, 0.0f, 0.0f)*-radius, Vec3(0.0f, 1.0f, 0.0f)*-radius, Vec3(0.0f, 0.0f, 1.0f)*radius, points);
-	generateSphereRec(radius, Vec3(1.0f, 0.0f, 0.0f)*-radius, Vec3(0.0f, 1.0f, 0.0f)*radius, Vec3(0.0f, 0.0f, 1.0f)*-radius, points);
-	generateSphereRec(radius, Vec3(1.0f, 0.0f, 0.0f)*-radius, Vec3(0.0f, 0.0f, 1.0f)*-radius, Vec3(0.0f, 1.0f, 0.0f)*-radius, points);
-
+void generateSphere(float radius, std::vector<Vec3>& points, float minRadius = 0.8f) {
+	generateSphereRec(radius, Vec3(1.0f, 0.0f, 0.0f)*radius, Vec3(0.0f, 1.0f, 0.0f)*radius, Vec3(0.0f, 0.0f, 1.0f)*radius, points, 0, minRadius);
+	generateSphereRec(radius, Vec3(1.0f, 0.0f, 0.0f)*radius, Vec3(0.0f, 0.0f, 1.0f)*-radius, Vec3(0.0f, 1.0f, 0.0f)*radius, points, 0, minRadius);
+	generateSphereRec(radius, Vec3(1.0f, 0.0f, 0.0f)*radius, Vec3(0.0f, 0.0f, 1.0f)*radius, Vec3(0.0f, 1.0f, 0.0f)*-radius, points, 0, minRadius);
+	generateSphereRec(radius, Vec3(1.0f, 0.0f, 0.0f)*radius, Vec3(0.0f, 1.0f, 0.0f)*-radius, Vec3(0.0f, 0.0f, 1.0f)*-radius, points, 0, minRadius);
+	generateSphereRec(radius, Vec3(1.0f, 0.0f, 0.0f)*-radius, Vec3(0.0f, 0.0f, 1.0f)*radius, Vec3(0.0f, 1.0f, 0.0f)*radius, points, 0, minRadius);
+	generateSphereRec(radius, Vec3(1.0f, 0.0f, 0.0f)*-radius, Vec3(0.0f, 1.0f, 0.0f)*-radius, Vec3(0.0f, 0.0f, 1.0f)*radius, points, 0, minRadius);
+	generateSphereRec(radius, Vec3(1.0f, 0.0f, 0.0f)*-radius, Vec3(0.0f, 1.0f, 0.0f)*radius, Vec3(0.0f, 0.0f, 1.0f)*-radius, points, 0, minRadius);
+	generateSphereRec(radius, Vec3(1.0f, 0.0f, 0.0f)*-radius, Vec3(0.0f, 0.0f, 1.0f)*-radius, Vec3(0.0f, 1.0f, 0.0f)*-radius, points, 0, minRadius);
 }
 
 struct TrunkNode {
@@ -93,7 +92,7 @@ float getRandomBranchRotation(float initialRotation, float maxRotationAmount) {
 
 
 
-void generateBranch(Vec3 pos, float maxHeight, float widthMultiplier, Mat3 mat, FixedSizedArray<Branch, 200>& branches, int depth, std::vector<TreeTriangle>& vertices, std::vector<Sphere>& spheres, gRandom& random) {
+void generateBranch(const Vec3& pos, float maxHeight, float widthMultiplier, Mat3 mat, FixedSizedArray<Branch, 200>& branches, int depth, std::vector<TreeTriangle>& vertices, std::vector<Sphere>& spheres, gRandom& random) {
 	branches.insert(Branch());
 	Branch& branch = branches[branches.size() - 1];
 	std::vector<TrunkNode>& nodes = branch.nodes;
@@ -146,7 +145,7 @@ void generateBranch(Vec3 pos, float maxHeight, float widthMultiplier, Mat3 mat, 
 	}
 
 	if (inside == false) {
-		generateSphere(nodes[nodes.size() - 1].midPoint, sphereRadius, branch.points);
+		generateSphere(sphereRadius, branch.points);
 		Vec3 mid = nodes[nodes.size() - 1].midPoint;
 
 		mat.identity();
@@ -154,13 +153,14 @@ void generateBranch(Vec3 pos, float maxHeight, float widthMultiplier, Mat3 mat, 
 		mat.rotateByY(random.randFloat(-pi, +pi));
 		mat.rotateByZ(random.randFloat(-pi, +pi));
 
+		Vec3 color = lerp(Vec3::fromColor(0xB6E016), Vec3::fromColor(0x07B508), random.randFloat());
 		for (unsigned i = 0; i < branch.points.size(); i += 3) {
 			TreeTriangle tri;
 
 			tri.vertices[0] = mid + branch.points[i + 0] * mat;
 			tri.vertices[1] = mid + branch.points[i + 1] * mat;
 			tri.vertices[2] = mid + branch.points[i + 2] * mat;
-			tri.color = Vec3::fromColor(0x0D7000);
+			tri.color = color;
 
 			vertices.push_back(tri);
 
@@ -253,7 +253,7 @@ void generateBranch(Vec3 pos, float maxHeight, float widthMultiplier, Mat3 mat, 
 
 }
 
-void TreeGenerator::generateTree(Vec3 pos, std::vector<TreeTriangle>& vertices, gRandom& random) {
+void TreeGenerator::generateTree(const Vec3& pos, std::vector<TreeTriangle>& vertices, gRandom& random) {
 	std::vector<Sphere> spheres;
 	FixedSizedArray<Branch, 200> branches;
 
@@ -265,4 +265,45 @@ void TreeGenerator::generateTree(Vec3 pos, std::vector<TreeTriangle>& vertices, 
 
 
 	generateBranch(pos, random.randFloat(1.0f, 7.0f), 1.0f, mat, branches, 0, vertices, spheres, random);
+}
+
+
+void TreeGenerator::generateCloud(const Vec3& pos, const Vec3& dir, std::vector<TreeTriangle>& triangles, gRandom& random) {
+	float cloudLen = random.randFloat(400.0f, 700.0f);
+	Vec3& current = pos - cloudLen * 0.5f;
+
+
+	Vec3 side = Vec3::cross(dir, Vec3(0.0f, 0.0f, 1.0f));
+
+	while (cloudLen > 0.0f) {
+		std::vector<Vec3> points;
+		float radius = random.randFloat(200.0f, 500.0f);
+		float pushSide = random.randFloat();
+		pushSide *= pushSide;
+		if (random.randBool()) pushSide = -pushSide;
+
+		generateSphere(radius, points, 130.0f);
+
+		float move = random.randFloat(70.0f, 120.0f) * radius;
+		cloudLen -= move;
+		current += dir * move;
+
+		Vec3 mid = current + side * pushSide * 20.0f;
+
+		Mat3 mat;
+		mat.makeIdentity();
+		mat.rotateByX(random.randFloat(-pi, +pi));
+		mat.rotateByY(random.randFloat(-pi, +pi));
+		mat.rotateByZ(random.randFloat(-pi, +pi));
+
+		for (unsigned i = 0; i < points.size(); i += 3) {
+			TreeTriangle tri;
+
+			tri.vertices[0] = mid + points[i + 0] * mat;
+			tri.vertices[1] = mid + points[i + 1] * mat;
+			tri.vertices[2] = mid + points[i + 2] * mat;
+			tri.color = Vec3(1.0f);
+			triangles.push_back(tri);
+		}
+	}
 }

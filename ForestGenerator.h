@@ -18,7 +18,7 @@ class ForestGenerator : public DetailCreator<gVertexBufferRenderable> {
 public:
 	ForestGenerator(WorldMap* world);
 
-	virtual void initNode(gVertexBufferRenderable*& node, WorldCoor& nodeCoor, gRandom& random) override;
+	virtual void initNode(gVertexBufferRenderable*& node, WorldCoor& nodeCoor, gRandom& random, int a, int b) override;
 	virtual void deleteNode(gVertexBufferRenderable*& node) override;
 };
 
