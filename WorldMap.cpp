@@ -17,6 +17,7 @@ WorldMap::WorldMap(float mapSize, int edgeCount) : gRenderable(true, 1) {
 	heightMap.init(edgeCount);
 	normalMap.init(edgeCount);
 	colorMap.init(edgeCount);
+	drainage.init(edgeCount);
 
 	earthMap.setWorldMap(this);
 	perlinMap.setWorldMap(this);
@@ -88,11 +89,14 @@ void WorldMap::build() {
 
 	buildHeightMap();
 	buildNormalMap();
+	buildDrainage();
+	buildRivers();
 	buildColorMap();
 	buildBuffer();
 
 	PngExporter::writeGridToPng("images/normalMap.png", normalMap, ExportTypeVec3AsNormal);
 	PngExporter::writeGridToPng("images/heightMap.png", heightMap);
+	PngExporter::writeGridToPng("images/drainage.png", drainage);
 	PngExporter::writeGridToPng("images/earthMap.png", earthMap, edgeCount, Vec3(0.0f), Vec3(0.0f, 1.0f, 0.0));
 }
 
@@ -382,4 +386,98 @@ float WorldMap::getTreeProbabilityAt(WorldCoor &coor, HeightCacher& cacher) cons
 	}
 
 	return earthMap.getHeightAt(coor);
+}
+
+void WorldMap::buildDrainage(){
+	drainage.setAll(100.0f);
+
+
+
+	std::vector<IntVec2> nodes;
+
+	for (int i = 0; i < edgeCount; i++) {
+		for (int j = 0; j < edgeCount; j++) {
+			nodes.push_back(IntVec2(i, j));
+		}
+	}
+
+	std::sort( nodes.begin( ), nodes.end( ), [=]( const IntVec2& lhs, const IntVec2& rhs )
+	{
+		return heightMap[lhs.x][lhs.y] > heightMap[rhs.x][rhs.y];
+	});
+
+	for(unsigned a=0; a<nodes.size(); a++){
+		int i=nodes[a].x;
+		int j=nodes[a].y;
+		float f = normalMap[i][j].z;
+		if(heightMap[i][j] < 0.0f) continue;
+		float over = drainage[i][j];
+
+		// sup[i][j] -= over;
+
+		float t = 0;
+		if(i>0 && heightMap[i][j] > heightMap[i-1][j] ) t+= heightMap[i][j]-heightMap[i-1][j];
+		if(j>0 && heightMap[i][j] > heightMap[i][j-1] ) t+= heightMap[i][j]-heightMap[i][j-1];
+
+
+
+		if(i<edgeCount-1 && heightMap[i][j] > heightMap[i+1][j] ) t+= heightMap[i][j]-heightMap[i+1][j];
+		if(j<edgeCount-1 && heightMap[i][j] > heightMap[i][j+1] ) t+= heightMap[i][j]-heightMap[i][j+1];
+
+		if(t==0) continue;
+
+		if(i>0 && heightMap[i][j] > heightMap[i-1][j] ) drainage[i-1][j] += over*(heightMap[i][j]-heightMap[i-1][j])/t;
+		if(j>0 && heightMap[i][j] > heightMap[i][j-1] ) drainage[i][j-1] += over*(heightMap[i][j]-heightMap[i][j-1])/t;
+
+		if(i<edgeCount-1 && heightMap[i][j] > heightMap[i+1][j] ) drainage[i+1][j] += over*(heightMap[i][j]-heightMap[i+1][j])/t;
+		if(j<edgeCount-1 && heightMap[i][j] > heightMap[i][j+1] ) drainage[i][j+1] += over*(heightMap[i][j]-heightMap[i][j+1])/t;
+
+	}
+	float maxSup = -100000000.0f;
+	float minSup = 100000000.0f;
+	float max = -1;
+	for(int i=0; i<edgeCount; i++){
+		for(int j=0; j<edgeCount; j++){
+			
+			if(heightMap[i][j] < 0.0f) continue;
+			maxSup = gmax(maxSup, drainage[i][j]);
+			minSup = gmin(minSup, drainage[i][j]);
+		}
+	}
+
+
+	for (int i = 0; i < edgeCount; i++) {
+		for (int j = 0; j < edgeCount; j++) {
+
+
+			Vec3 p =  Vec3((float)i, (float)j, heightMap[i][j] * 3.0f / nodeSize);;
+			debugRenderer.addLine(p, p + Vec3(0, 0, (drainage[i][j] - minSup) / (maxSup - minSup)*10.0f), 0xFFFF0000, 100.0f);
+
+			nodes.push_back(IntVec2(i, j));
+		}
+	}
+
+}
+
+void WorldMap::buildRivers(){
+
+	std::vector<IntVec2> nodes;
+
+	for (int i = 0; i < edgeCount; i++) {
+		for (int j = 0; j < edgeCount; j++) {
+
+
+			Vec3 p =  Vec3((float)i, (float)j, heightMap[i][j] * 3.0f / nodeSize);;
+			debugRenderer.addLine(p, drainage[i][j]);
+
+			nodes.push_back(IntVec2(i, j));
+		}
+	}
+
+	std::sort( nodes.begin( ), nodes.end( ), [=]( const IntVec2& lhs, const IntVec2& rhs )
+	{
+		return drainage[lhs.x][lhs.y] > drainage[rhs.x][rhs.y];
+	});
+
+
 }

@@ -17,7 +17,6 @@
  */
 
 #include <stdint.h>
-#include <inttypes.h>
 
 #define TINYMT64_MEXP 127
 #define TINYMT64_SH0 12

@@ -10,7 +10,10 @@ gVertexBuffer::gVertexBuffer() {
 	buffer = nullptr;
 }
 
-gVertexBuffer::gVertexBuffer(int props, unsigned maxVertexCount, bool isStatic) : gVertexBuffer() {
+gVertexBuffer::gVertexBuffer(int props, unsigned maxVertexCount, bool isStatic) {
+	inited = false;
+	built = false;
+	buffer = nullptr;
 	init(props, maxVertexCount, isStatic);
 }
 

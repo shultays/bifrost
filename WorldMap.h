@@ -84,6 +84,7 @@ protected:
 	int edgeCount;
 
 	Grid<float> heightMap;
+	Grid<float> drainage;
 	Grid<Vec3> normalMap;
 	Grid<Vec3> colorMap;
 
@@ -142,6 +143,8 @@ public:
 	Vec3 toGamePos(WorldCoor &coor);
 	Vec3 toGamePos(WorldCoor &coor, HeightCacher& cacher) const;
 	float getTreeProbabilityAt(WorldCoor &coor, HeightCacher& cacher) const;
+	void buildDrainage();
+	void buildRivers();
 };
 
 #endif

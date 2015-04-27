@@ -10,8 +10,8 @@ class gRandom {
 
 	tinymt32_t tinymt;
 public:
-	gRandom() : gRandom(0x42042) {
-
+	gRandom()  {
+		setSeed(0x42042);
 	}
 
 	gRandom(std::vector<unsigned int>& seeds) {
