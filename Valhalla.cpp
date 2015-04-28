@@ -36,7 +36,6 @@ void Valhalla::init() {
 	worldShader->addUniform("uDiscardArea", TypeVec4);
 
 	world->shader = worldShader;
-
 }
 
 void Valhalla::tick(float dt) {

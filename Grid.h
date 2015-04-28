@@ -43,6 +43,11 @@ public:
 		while (p-- > data) *p = a;
 	}
 
+	inline T& operator[](const IntVec2& v) const {
+		return *(data + v.x*h + v.y);
+	}
+
+
 	inline T* operator[](int i) const {
 		return data + i*h;
 	}

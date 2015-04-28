@@ -16,6 +16,13 @@ class gIndexBufferedDrawable;
 class gTexture;
 class gVertexBufferRenderable;
 
+struct DrainageNode {
+	WorldCoor coor;
+	IntVec2 drainageIndex;
+	Vec3 normal;
+	float drainage;
+};
+
 class HeightCacher {
 	int heightCacheSize;
 
@@ -83,8 +90,8 @@ protected:
 	float nodeSize;
 	int edgeCount;
 
+
 	Grid<float> heightMap;
-	Grid<float> drainage;
 	Grid<Vec3> normalMap;
 	Grid<Vec3> colorMap;
 
@@ -97,6 +104,10 @@ protected:
 
 	HeightCacher mainCacher;
 
+	int drainageEdgeCount;
+	float maxDrainage, minDrainage;
+	std::vector<DrainageNode*> drainageNodes;
+	Grid<DrainageNode> drainageGrid;
 
 public:
 
@@ -145,6 +156,7 @@ public:
 	float getTreeProbabilityAt(WorldCoor &coor, HeightCacher& cacher) const;
 	void buildDrainage();
 	void buildRivers();
+	bool generateRiver(const WorldCoor& coor);
 };
 
 #endif
