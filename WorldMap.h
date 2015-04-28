@@ -156,7 +156,7 @@ public:
 	float getTreeProbabilityAt(WorldCoor &coor, HeightCacher& cacher) const;
 	void buildDrainage();
 	void buildRivers();
-	bool generateRiver(const WorldCoor& coor);
+	bool generateRiver(const IntVec2& index);
 };
 
 #endif

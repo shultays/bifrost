@@ -8,7 +8,7 @@
 #define LIFE_TIME_INFINITE -1.0f
 #define LIFE_TIME_ONE_FRAME 0.0f
 
-#define MAX_LINE_COUNT 15000
+#define MAX_LINE_COUNT 150000
 
 class gDebugRenderer : protected gIndexBufferedLineDrawable {
 	friend class gGame;

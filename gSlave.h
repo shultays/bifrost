@@ -73,6 +73,7 @@ class gSlaveController {
 	int slaveCount;
 	gSlave* slaves;
 	std::priority_queue<gSlaveWork*, std::vector<gSlaveWork*>, Compare> workForSlavesQueue;
+
 	std::queue<gSlaveWork*> workForMainQueue;
 	gMutex controllerMutex;
 	friend class gSlave;

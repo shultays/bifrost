@@ -43,6 +43,10 @@ public:
 		while (p-- > data) *p = a;
 	}
 
+	void setZero() {
+		memset(data, 0, sizeof(T)*w*h);
+	}
+
 	inline T& operator[](const IntVec2& v) const {
 		return *(data + v.x*h + v.y);
 	}
@@ -58,3 +62,4 @@ public:
 };
 
 #endif
+

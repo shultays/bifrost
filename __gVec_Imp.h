@@ -442,6 +442,82 @@ public:
 		data[3] = o;
 	}
 #endif
+
+#ifndef G_IS_TYPE_FLOATING
+
+	G_VEC_IMP_NAME getSide(int side)const{
+		switch(side){
+		case 0: return left();
+		case 1: return right();
+		case 2: return down();
+		case 3: return up();
+#if GVEC_N >= 3
+		case 4: return bottom();
+		case 5: return top();
+
+#if GVEC_N >= 4
+		case 6: return oMinus();
+		case 7: return oPlus();
+#endif
+#endif
+		default:assert(false && "InvalidSide"); return zero();
+		}
+	}
+
+
+	G_VEC_IMP_NAME left()const{
+		G_VEC_IMP_NAME v = *this;
+		v.x--;
+		return v;
+	}
+	G_VEC_IMP_NAME right()const{
+		G_VEC_IMP_NAME v = *this;
+		v.x++;
+		return v;
+	}
+	G_VEC_IMP_NAME up()const{
+		G_VEC_IMP_NAME v = *this;
+		v.y++;
+		return v;
+	}
+	G_VEC_IMP_NAME down()const{
+		G_VEC_IMP_NAME v = *this;
+		v.y--;
+		return v;
+	}
+
+#if GVEC_N >= 3
+	G_VEC_IMP_NAME top()const{
+		G_VEC_IMP_NAME v = *this;
+		v.z++;
+		return v;
+	}
+	G_VEC_IMP_NAME bottom()const{
+		G_VEC_IMP_NAME v = *this;
+		v.z--;
+		return v;
+	}
+
+#if GVEC_N >= 4
+	G_VEC_IMP_NAME oMinus()const{
+		G_VEC_IMP_NAME v = *this;
+		v.o++;
+		return v;
+	}
+	G_VEC_IMP_NAME oPlus()const{
+		G_VEC_IMP_NAME v = *this;
+		v.o--;
+		return v;
+	}
+#endif
+
+#endif
+
+	static int sideCount() {
+		return GVEC_N * 2;
+	}
+
+#endif
 };
 
 #undef G_VEC_TYPE

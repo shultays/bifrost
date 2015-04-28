@@ -8,6 +8,15 @@
 #define G_TYPE_LONG 2
 #define G_TYPE_DOUBLE 3
 
+enum IntVecSide{
+	LEFT,
+	RIGHT,
+	DOWN,
+	UP,
+	BOTTOM,
+	TOP
+};
+
 // float
 #define G_VEC_TYPE_ID G_TYPE_FLOAT
 

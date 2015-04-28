@@ -87,7 +87,7 @@ void Valhalla::update(float fixed_dt) {
 
 
 	if (input.isKeyPressed(GLFW_KEY_SPACE)) {
-		world->build();
+		world->buildRivers();
 	}
 
 	if (isFPS) {

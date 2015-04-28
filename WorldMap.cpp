@@ -5,7 +5,7 @@
 #include "gTexture.h"
 #include "gGlobals.h"
 #include "gCamera.h"
-
+#include <queue>
 #define DRAINAGE_NODE_SIZE 1500.0f
 
 WorldMap::WorldMap(float mapSize, int edgeCount) : gRenderable(true, 1) {
@@ -99,8 +99,18 @@ void WorldMap::build() {
 
 	PngExporter::writeGridToPng("images/normalMap.png", normalMap, ExportTypeVec3AsNormal);
 	PngExporter::writeGridToPng("images/heightMap.png", heightMap);
-	//PngExporter::writeGridToPng("images/drainage.png", drainage);
 	PngExporter::writeGridToPng("images/earthMap.png", earthMap, edgeCount, Vec3(0.0f), Vec3(0.0f, 1.0f, 0.0));
+
+
+	Grid<float> drainageVals;
+	drainageVals.init(drainageEdgeCount);
+
+	for (int i = 0; i < drainageEdgeCount; i++) {
+		for (int j = 0; j < drainageEdgeCount; j++) {
+			drainageVals[i][j] = sqrt(drainageGrid[i][j].drainage);
+		}
+	}
+	PngExporter::writeGridToPng("images/drainage.png", drainageVals);
 }
 
 
@@ -467,6 +477,7 @@ void WorldMap::buildDrainage() {
 }
 
 void WorldMap::buildRivers() {
+	debugRenderer.clear();
 	std::vector<DrainageNode*> nodes;
 
 	IntVec2 dirs[4];
@@ -495,18 +506,98 @@ void WorldMap::buildRivers() {
 	});
 
 
-	for (unsigned a = 0; a < nodes.size(); a++) {
-		DrainageNode* n = nodes[a];
+	for (int i = 0; i < drainageEdgeCount; i++) {
+		for (int j = 0; j < drainageEdgeCount; j++) {
+			DrainageNode& n = drainageGrid[i][j];
+			Vec3 p = Vec3(n.drainageIndex.x * DRAINAGE_NODE_SIZE / nodeSize, n.drainageIndex.y * DRAINAGE_NODE_SIZE / nodeSize, heightMap[n.coor.index] * 3.0f / nodeSize);
 
-		Vec3 p = Vec3(n->drainageIndex.x * DRAINAGE_NODE_SIZE / nodeSize, n->drainageIndex.y * DRAINAGE_NODE_SIZE / nodeSize, heightMap[n->coor.index] * 3.0f / nodeSize);
+			debugRenderer.addLine(p, p + Vec3(0.0f, 0.0f, (n.drainage - minDrainage) * 10.0f / (maxDrainage - minDrainage)), 0xFFFF0000, 100.0f);
 
-		debugRenderer.addLine(p, p + Vec3(0.0f, 0.0f, (n->drainage - minDrainage) * 100.0f / (maxDrainage - minDrainage)), 0xFFFF0000, 100.0f);
-
-
+		}
 	}
+ 	generateRiver(nodes[0]->drainageIndex);
 }
 
-bool WorldMap::generateRiver(const WorldCoor& startCoor) {
+bool WorldMap::generateRiver(const IntVec2& index) {
+	class SearchNode{
+	public:
+		IntVec2 index;
+		float waterAmount;
+		SearchNode(IntVec2 index, float waterAmount){
+			this->index = index;
+			this->waterAmount = waterAmount;
+		}
+	};
 
+
+	class Compare {
+	public:
+		bool operator() (const SearchNode& node1, const SearchNode& node2) {
+			return node1.waterAmount < node2.waterAmount;
+		}
+	};
+
+	std::priority_queue<SearchNode, std::vector<SearchNode>, Compare> searchQueue;
+
+	searchQueue.push(SearchNode(index, drainageGrid[index].drainage));
+
+	Grid<bool> added;
+	added.init(drainageEdgeCount);
+	added.setZero();
+
+	for(int i=0; i<drainageEdgeCount; i++){
+		added[0][i] = true;
+		added[i][0] = true;
+		added[drainageEdgeCount-1][i] = true;
+		added[i][drainageEdgeCount-1] = true;
+	}
+	std::vector<SearchNode> addedNodes;
+	while(searchQueue.size()){
+		SearchNode n = searchQueue.top();
+		searchQueue.pop();
+		added[n.index] = true;
+		addedNodes.push_back(n);
+
+		IntVec2 maxSide = -1;
+		float maxVal = 100.0f;
+		for(int i=0; i<IntVec2::sideCount(); i++){
+			IntVec2 side = n.index.getSide(i);
+			if(added[side] == false && drainageGrid[side].coor.h > 0.0f){
+
+				float goodness1 = drainageGrid[side].drainage;
+				float goodness2 = drainageGrid[side].coor.h - drainageGrid[n.index].coor.h;
+				float goodness3 = 1000.0f - drainageGrid[side].coor.h;
+				float goodness = goodness1 + goodness2 * 0.1f + goodness3 * 0.1f;
+				if(goodness > maxVal){
+					maxVal = goodness;
+					maxSide = side;
+				}
+			}
+		}
+
+		if(maxSide.x != -1){
+			float newWaterAmount = n.waterAmount - (drainageGrid[maxSide].coor.h - drainageGrid[n.index].coor.h) * 0.01f;
+
+			searchQueue.push(SearchNode(maxSide, newWaterAmount));
+		}
+	}
+
+	Vec3 p = Vec3(addedNodes[0].index.x * DRAINAGE_NODE_SIZE / nodeSize, addedNodes[0].index.y * DRAINAGE_NODE_SIZE / nodeSize,
+		drainageGrid[addedNodes[0].index].coor.h * 3.0f / nodeSize);
+
+	debugRenderer.addSphere(p, 0.5f, 0xFF00FF00, 500.0f);
+
+	for (unsigned a = 1; a < addedNodes.size(); a++) {
+
+		Vec3 p0 = Vec3(addedNodes[a].index.x * DRAINAGE_NODE_SIZE / nodeSize, addedNodes[a].index.y * DRAINAGE_NODE_SIZE / nodeSize,
+			drainageGrid[addedNodes[a].index].coor.h * 3.0f / nodeSize);
+
+		Vec3 p1 = Vec3(addedNodes[a-1].index.x * DRAINAGE_NODE_SIZE / nodeSize, addedNodes[a-1].index.y * DRAINAGE_NODE_SIZE / nodeSize,
+			drainageGrid[addedNodes[a-1].index].coor.h * 3.0f / nodeSize);
+		
+		
+		debugRenderer.addLine(p0, p1, 0xFF0000FF, 500.0f);
+
+	}
 	return false;
 }
