@@ -94,6 +94,7 @@ protected:
 	Grid<float> heightMap;
 	Grid<Vec3> normalMap;
 	Grid<Vec3> colorMap;
+	Grid<int> islandMap;
 
 
 	gVertexBufferRenderable *terrainDrawable;
@@ -108,6 +109,7 @@ protected:
 	float maxDrainage, minDrainage;
 	std::vector<DrainageNode*> drainageNodes;
 	Grid<DrainageNode> drainageGrid;
+
 
 public:
 
@@ -156,7 +158,9 @@ public:
 	float getTreeProbabilityAt(WorldCoor &coor, HeightCacher& cacher) const;
 	void buildDrainage();
 	void buildRivers();
-	bool generateRiver(const IntVec2& index);
+	bool generateRiver(const IntVec2& start_index, const IntVec2& end_index);
+	Vec3 drainageNodeToVec3(const DrainageNode& node);
+	Vec3 toWorldGamePos(int i, int j);
 };
 
 #endif

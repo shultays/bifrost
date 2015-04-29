@@ -5,7 +5,9 @@
 #include "gTexture.h"
 #include "gGlobals.h"
 #include "gCamera.h"
+#include "gCamera.h"
 #include <queue>
+#include <set>
 #define DRAINAGE_NODE_SIZE 1500.0f
 
 WorldMap::WorldMap(float mapSize, int edgeCount) : gRenderable(true, 1) {
@@ -17,10 +19,12 @@ WorldMap::WorldMap(float mapSize, int edgeCount) : gRenderable(true, 1) {
 
 	drainageEdgeCount = (int)(mapSize / DRAINAGE_NODE_SIZE);
 
+
 	heightMap.init(edgeCount);
 	normalMap.init(edgeCount);
 	colorMap.init(edgeCount);
 	drainageGrid.init(drainageEdgeCount);
+	islandMap.init(drainageEdgeCount);
 
 	earthMap.setWorldMap(this);
 	perlinMap.setWorldMap(this);
@@ -33,6 +37,7 @@ WorldMap::WorldMap(float mapSize, int edgeCount) : gRenderable(true, 1) {
 
 
 void WorldMap::build() {
+	debugRenderer.clear();
 	perlinMap.clear();
 	earthMap.clear();
 
@@ -90,11 +95,17 @@ void WorldMap::build() {
 
 	mainCacher.init(16);
 
+	printf("buildHeightMap.\n");
 	buildHeightMap();
+	printf("buildNormalMap.\n");
 	buildNormalMap();
-	buildDrainage();
-	buildRivers();
+	printf("buildDrainage.\n");
+	//buildDrainage();
+	printf("buildRivers.\n");
+	//buildRivers();
+	printf("buildColorMap.\n");
 	buildColorMap();
+	printf("buildBuffer.\n");
 	buildBuffer();
 
 	PngExporter::writeGridToPng("images/normalMap.png", normalMap, ExportTypeVec3AsNormal);
@@ -144,14 +155,16 @@ void WorldMap::buildHeightMap() {
 		}
 	}
 
+	const int areaToCheck = 2;
+	int minArea = 5;
 	//fix too small areas
-	for (int i = 5; i < edgeCount - 5; i++) {
-		for (int j = 5; j < edgeCount - 5; j++) {
-			if (heightMap[i][j] < 0) {
-				int waterToAccept = 20;
-				for (int a = i - 5; a < i + 5; a++) {
-					for (int b = j - 5; b < j + 5; b++) {
-						if (heightMap[a][b] < 0) {
+	for (int i = areaToCheck; i <= edgeCount - areaToCheck; i++) {
+		for (int j = areaToCheck; j <= edgeCount - areaToCheck; j++) {
+			if (heightMap[i][j] < 0.0f) {
+				int waterToAccept = minArea;
+				for (int a = i - areaToCheck; a < i + areaToCheck; a++) {
+					for (int b = j - areaToCheck; b < j + areaToCheck; b++) {
+						if (heightMap[a][b] < -100.0f) {
 							waterToAccept--;
 							if (!waterToAccept) break;
 						}
@@ -161,10 +174,10 @@ void WorldMap::buildHeightMap() {
 					heightMap[i][j] = -heightMap[i][j] + 0.1f;;
 				}
 			} else {
-				int landToAccept = 20;
-				for (int a = i - 5; a < i + 5; a++) {
-					for (int b = j - 5; b < j + 5; b++) {
-						if (heightMap[a][b] > 0) {
+				int landToAccept = minArea;
+				for (int a = i - areaToCheck; a < i + areaToCheck; a++) {
+					for (int b = j - areaToCheck; b < j + areaToCheck; b++) {
+						if (heightMap[a][b] > 100.0f) {
 							landToAccept--;
 							if (!landToAccept) break;
 						}
@@ -187,7 +200,110 @@ void WorldMap::buildHeightMap() {
 			max = gmax(max, heightMap[i][j]);
 		}
 	}
+
+	islandMap.setZero();
+
+	int nextLandID = 1;
+	int nextWaterID = -1;
+
+
+	auto paint = [&] (const IntVec2& startPos, int toSet, int setIf, std::unordered_map<int, IntVec2>& edges, std::vector<IntVec2>& added) {
+		std::queue<IntVec2> queue;
+		queue.push(startPos);
+
+		edges.clear();
+		added.clear();
+		islandMap[startPos] = toSet;
+
+		while(queue.size()){
+			IntVec2 pos = queue.front();
+			queue.pop();
+			added.push_back(pos);
+			for(int i=0; i<IntVec2::sideCount(); i++){
+				IntVec2 side = pos.getSide(i);
+				if(heightMap.isValid(side)){
+					if(islandMap[side] == setIf){
+						if(same_sign(toSet, heightMap[side])){
+							islandMap[side] = toSet;
+							queue.push(side);
+						}
+					}else if(islandMap[side] != toSet){
+						edges[islandMap[side]] = side;
+					}
+				}
+			}
+		}
+	};
+
+	std::unordered_map<int, int> sizes;
+
+	for (int i = 0; i < edgeCount; i++) {
+		for (int j = 0; j < edgeCount; j++) {
+			if(islandMap[i][j] == 0){
+				IntVec2 startPos = IntVec2(i, j);
+				int id;
+				if(heightMap[i][j] > 0.0f){
+					id = nextLandID++;
+				}else{
+					id = nextWaterID--;
+				}
+				sizes[id] = 0;
+
+				std::unordered_map<int, IntVec2> edges;
+				std::vector<IntVec2> added;
+
+				paint(startPos, id, 0, edges, added);
+
+				if(added.size() < 6){
+					for(unsigned k=0; k<added.size(); k++){
+						heightMap[added[k]] = -heightMap[added[k]] - 0.1f;
+					}
+				
+					int oldId = id;
+					id = edges.begin()->first;
+
+					for (auto it=edges.begin(); it!=edges.end(); ++it){
+						if(abs(it->first) < id){
+							id = it->first;
+						}
+					}
+					std::unordered_map<int, IntVec2> edgesTemp;
+					std::vector<IntVec2> addedTemp;
+
+					for (auto it=edges.begin(); it!=edges.end(); ++it){
+						if(id != it->first){
+							if(same_sign(heightMap[startPos], heightMap[it->second])){
+								paint(it->second, 0, it->first, edgesTemp, addedTemp);
+							}
+						}
+					}
+
+					paint(startPos, 0, oldId, edgesTemp, addedTemp);
+					paint(startPos, id, 0, edgesTemp, addedTemp);
+
+				}else{
+					debugRenderer.addLine(toWorldGamePos(i, j), toWorldGamePos(i, j) + Vec3(0.0f, 0.0f, 1.0f), id>0?0xFFFFFFFF : 0xFFFF0000, 100.0f);
+				}
+			}
+		}
+	}
+
+	for (int i = 0; i < edgeCount; i++) {
+		for (int j = 0; j < edgeCount; j++) {
+			sizes[islandMap[i][j]]++;
+		}
+	}
+	
+	int totalSize = 0;
+	
+	for (auto it=sizes.begin(); it!=sizes.end(); ++it){
+		totalSize += it->second;
+		printf("%s %d count %d\n", it->second>0?"land": "watr", it->first, it->second);
+	}
+	printf("total %d (%d)\n", totalSize, edgeCount * edgeCount);
+	
 }
+
 void WorldMap::buildNormalMap() {
 	for (int i = 1; i < edgeCount - 1; i++) {
 		for (int j = 1; j < edgeCount - 1; j++) {
@@ -246,7 +362,7 @@ void WorldMap::buildColorMap() {
 float WorldMap::getHeightAt(WorldCoor &coor, HeightCacher& cacher) const {
 	coor.fix(nodeSize);
 	if (coor.h != INVALID_HEIGHT) {
-		return coor.h;
+		//return coor.h;
 	}
 	float r;
 
@@ -307,15 +423,14 @@ void WorldMap::buildBuffer() {
 	for (int i = 0; i < edgeCount - 1; i++) {
 		for (int j = 0; j < edgeCount - 1; j++) {
 
-
 			VertexPointer pointer0 = terrainDrawable->getVertexPointerAt(k++);
 			VertexPointer pointer1 = terrainDrawable->getVertexPointerAt(k++);
 			VertexPointer pointer2 = terrainDrawable->getVertexPointerAt(k++);
 
 
-			*pointer0.position = Vec3((float)i, (float)j, heightMap[i][j] * 3.0f / nodeSize);
-			*pointer1.position = Vec3((float)i + 1, (float)j, heightMap[i + 1][j] * 3.0f / nodeSize);
-			*pointer2.position = Vec3((float)i + 1, (float)j + 1, heightMap[i + 1][j + 1] * 3.0f / nodeSize);
+			*pointer0.position = toWorldGamePos(i, j);
+			*pointer1.position = toWorldGamePos(i+1, j);
+			*pointer2.position = toWorldGamePos(i+1, j+1);
 
 			*pointer0.normal = *pointer1.normal = *pointer2.normal = Vec3::cross(*pointer1.position - *pointer0.position, *pointer2.position - *pointer0.position);
 
@@ -330,9 +445,9 @@ void WorldMap::buildBuffer() {
 			pointer2 = terrainDrawable->getVertexPointerAt(k++);
 
 
-			*pointer0.position = Vec3((float)i + 1, (float)j + 1, heightMap[i + 1][j + 1] * 3.0f / nodeSize);
-			*pointer1.position = Vec3((float)i, (float)j + 1, heightMap[i][j + 1] * 3.0f / nodeSize);
-			*pointer2.position = Vec3((float)i, (float)j, heightMap[i][j] * 3.0f / nodeSize);
+			*pointer0.position = toWorldGamePos(i+1, j+1);
+			*pointer1.position = toWorldGamePos(i, j+1);
+			*pointer2.position = toWorldGamePos(i, j);
 
 			*pointer0.normal = *pointer1.normal = *pointer2.normal = Vec3::cross(*pointer1.position - *pointer0.position, *pointer2.position - *pointer0.position);
 
@@ -376,6 +491,10 @@ Vec3 WorldMap::toGamePos(WorldCoor &coor) {
 	return toGamePos(coor, mainCacher);
 }
 
+Vec3 WorldMap::toWorldGamePos(int i, int j) {
+	return Vec3((float)i, (float)j, heightMap[i][j] * 3.0f / nodeSize);
+}
+
 Vec3 WorldMap::toGamePos(WorldCoor &coor, HeightCacher& cacher) const {
 	coor.fix(nodeSize);
 
@@ -404,7 +523,7 @@ float WorldMap::getTreeProbabilityAt(WorldCoor &coor, HeightCacher& cacher) cons
 }
 
 void WorldMap::buildDrainage() {
-
+	drainageNodes.clear();
 	for (int i = 0; i < drainageEdgeCount; i++) {
 		for (int j = 0; j < drainageEdgeCount; j++) {
 			DrainageNode& n = drainageGrid[i][j];
@@ -477,7 +596,6 @@ void WorldMap::buildDrainage() {
 }
 
 void WorldMap::buildRivers() {
-	debugRenderer.clear();
 	std::vector<DrainageNode*> nodes;
 
 	IntVec2 dirs[4];
@@ -501,7 +619,7 @@ void WorldMap::buildRivers() {
 
 	}
 
-	std::sort(nodes.begin(), nodes.end(), [=](DrainageNode* lhs, DrainageNode* rhs) {
+	std::sort(nodes.begin(), nodes.end(), [](DrainageNode* lhs, DrainageNode* rhs) {
 		return lhs->drainage > rhs->drainage;
 	});
 
@@ -511,14 +629,20 @@ void WorldMap::buildRivers() {
 			DrainageNode& n = drainageGrid[i][j];
 			Vec3 p = Vec3(n.drainageIndex.x * DRAINAGE_NODE_SIZE / nodeSize, n.drainageIndex.y * DRAINAGE_NODE_SIZE / nodeSize, heightMap[n.coor.index] * 3.0f / nodeSize);
 
-			debugRenderer.addLine(p, p + Vec3(0.0f, 0.0f, (n.drainage - minDrainage) * 10.0f / (maxDrainage - minDrainage)), 0xFFFF0000, 100.0f);
+			//debugRenderer.addLine(p, p + Vec3(0.0f, 0.0f, (n.drainage - minDrainage) * 10.0f / (maxDrainage - minDrainage)), 0xFFFF0000, 100.0f);
 
 		}
 	}
- 	generateRiver(nodes[0]->drainageIndex);
+ 	generateRiver(nodes[0]->drainageIndex, nodes[1]->drainageIndex);
 }
 
-bool WorldMap::generateRiver(const IntVec2& index) {
+
+Vec3 WorldMap::drainageNodeToVec3(const DrainageNode& node){
+	return Vec3(node.drainageIndex.x * DRAINAGE_NODE_SIZE / nodeSize, node.drainageIndex.y * DRAINAGE_NODE_SIZE / nodeSize,
+		node.coor.h * 3.0f / nodeSize);
+}
+
+bool WorldMap::generateRiver(const IntVec2& startIndex, const IntVec2& endIndex) {
 	class SearchNode{
 	public:
 		IntVec2 index;
@@ -539,7 +663,12 @@ bool WorldMap::generateRiver(const IntVec2& index) {
 
 	std::priority_queue<SearchNode, std::vector<SearchNode>, Compare> searchQueue;
 
-	searchQueue.push(SearchNode(index, drainageGrid[index].drainage));
+	debugRenderer.addSphere(drainageNodeToVec3(drainageGrid[startIndex]), 0.5f, 0xFF00FF00, 500.0f);
+	debugRenderer.addSphere(drainageNodeToVec3(drainageGrid[endIndex]), 0.5f, 0xFF00FF00, 500.0f);
+
+
+	/*
+	searchQueue.push(SearchNode(startIndex, drainageGrid[startIndex].drainage));
 
 	Grid<bool> added;
 	added.init(drainageEdgeCount);
@@ -582,22 +711,12 @@ bool WorldMap::generateRiver(const IntVec2& index) {
 		}
 	}
 
-	Vec3 p = Vec3(addedNodes[0].index.x * DRAINAGE_NODE_SIZE / nodeSize, addedNodes[0].index.y * DRAINAGE_NODE_SIZE / nodeSize,
-		drainageGrid[addedNodes[0].index].coor.h * 3.0f / nodeSize);
 
-	debugRenderer.addSphere(p, 0.5f, 0xFF00FF00, 500.0f);
 
 	for (unsigned a = 1; a < addedNodes.size(); a++) {
-
-		Vec3 p0 = Vec3(addedNodes[a].index.x * DRAINAGE_NODE_SIZE / nodeSize, addedNodes[a].index.y * DRAINAGE_NODE_SIZE / nodeSize,
-			drainageGrid[addedNodes[a].index].coor.h * 3.0f / nodeSize);
-
-		Vec3 p1 = Vec3(addedNodes[a-1].index.x * DRAINAGE_NODE_SIZE / nodeSize, addedNodes[a-1].index.y * DRAINAGE_NODE_SIZE / nodeSize,
-			drainageGrid[addedNodes[a-1].index].coor.h * 3.0f / nodeSize);
 		
-		
-		debugRenderer.addLine(p0, p1, 0xFF0000FF, 500.0f);
+		debugRenderer.addLine(drainageNodeToVec3(drainageGrid[addedNodes[a]]), drainageNodeToVec3(drainageGrid[addedNodes[a-1]]), 0xFF0000FF, 500.0f);
 
-	}
+	}*/
 	return false;
 }

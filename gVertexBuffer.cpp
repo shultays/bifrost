@@ -122,25 +122,25 @@ void gVertexBuffer::bind() {
 		glBindBuffer(GL_ARRAY_BUFFER, gl_buffer);
 
 		if (hasPosition) {
-			gears.game->currentShader->bindPosition(vertexCount, positionStart);
+			gears.game->currentShader->bindPosition(vertexSize, positionStart);
 		}
 		if (hasNormal) {
-			gears.game->currentShader->bindNormal(vertexCount, normalStart);
+			gears.game->currentShader->bindNormal(vertexSize, normalStart);
 		} else if (hasConstantNormal) {
 			gears.game->currentShader->setAttributeNormal(constantNormal);
 		}
 
 		if (hasColor) {
-			gears.game->currentShader->bindColor(vertexCount, colorStart);
+			gears.game->currentShader->bindColor(vertexSize, colorStart);
 		} else if (hasConstantColor) {
 			gears.game->currentShader->setAttributeColor(constantColor);
 		}
 
 		if (hasUV) {
-			gears.game->currentShader->bindUV(vertexCount, uvStart);
+			gears.game->currentShader->bindUV(vertexSize, uvStart);
 		}
 		if (hasTextureWeights) {
-			gears.game->currentShader->bindPosition(vertexCount, textureWeightsStart);
+			gears.game->currentShader->bindPosition(vertexSize, textureWeightsStart);
 		} else if (hasConstantTextureWeights) {
 			gears.game->currentShader->setAttributeTextureWeights(constantTextureWeights);
 		}
@@ -160,33 +160,33 @@ void gVertexBuffer::init(int props, unsigned maxVertexCount, bool isStatic) {
 	this->extraSize = props & 0xFF;
 	hasExtra = extraSize > 0;
 
-	vertexCount = 0;
+	vertexSize = 0;
 	positionStart = normalStart = colorStart = uvStart = textureWeightsStart = -1;
 
 	if (hasPosition) {
-		positionStart = vertexCount;
-		vertexCount += sizeof(Vec3);
+		positionStart = vertexSize;
+		vertexSize += sizeof(Vec3);
 	}
 
 	if (hasNormal) {
-		normalStart = vertexCount;
-		vertexCount += sizeof(Vec3);
+		normalStart = vertexSize;
+		vertexSize += sizeof(Vec3);
 	}
 	if (hasColor) {
-		colorStart = vertexCount;
-		vertexCount += sizeof(Vec4);
+		colorStart = vertexSize;
+		vertexSize += sizeof(Vec4);
 	}
 	if (hasUV) {
-		uvStart = vertexCount;
-		vertexCount += sizeof(Vec2);
+		uvStart = vertexSize;
+		vertexSize += sizeof(Vec2);
 	}
 	if (hasTextureWeights) {
-		textureWeightsStart = vertexCount;
-		vertexCount += sizeof(Vec4);
+		textureWeightsStart = vertexSize;
+		vertexSize += sizeof(Vec4);
 	}
 	if (hasExtra) {
-		extraStart = vertexCount;
-		vertexCount += extraSize;
+		extraStart = vertexSize;
+		vertexSize += extraSize;
 	}
 	this->maxVertexCount = maxVertexCount;
 	int buffsize = getStartPositionAt(maxVertexCount);

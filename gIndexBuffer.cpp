@@ -78,7 +78,7 @@ void gIndexBuffer::build() {
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, getStartPositionAt(maxIndexCount), buffer, isStatic ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
 	} else {
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gl_buffer);
-		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, getStartPositionAt(maxIndexCount), buffer);
+		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, getStartPositionAt(isStatic ? maxIndexCount : indexCount), buffer);
 	}
 
 	if (isStatic) {
@@ -104,7 +104,7 @@ void gIndexBuffer::drawAll() {
 		if (drawCount) {
 			glDrawElements(
 				primitiveType,
-				isStatic ? maxIndexCount : indexCount,
+				drawCount,
 				getGlType(),
 				(void*)0
 				);

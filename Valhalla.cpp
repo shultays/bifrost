@@ -50,8 +50,6 @@ void Valhalla::tick(float dt) {
 
 
 void Valhalla::update(float fixed_dt) {
-
-
 	if (input.isKeyPressed(GLFW_KEY_C)) {
 		bool hasJob = detailedMapController->hasWaitingJob() || detailedMapController2->hasWaitingJob() || forestGenerator->hasWaitingJob();
 		if (hasJob == false) {
@@ -87,7 +85,8 @@ void Valhalla::update(float fixed_dt) {
 
 
 	if (input.isKeyPressed(GLFW_KEY_SPACE)) {
-		world->buildRivers();
+		random.setSeed(0x42042);
+		world->build();
 	}
 
 	if (isFPS) {

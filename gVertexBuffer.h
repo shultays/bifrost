@@ -51,11 +51,12 @@ protected:
 	int textureWeightsStart;
 	int extraStart;
 
-	unsigned vertexCount;
+	unsigned vertexSize;
+
 	unsigned maxVertexCount;
 
 	unsigned getStartPositionAt(unsigned i) {
-		return i*vertexCount;
+		return i*vertexSize;
 	}
 	bool built;
 	bool inited;

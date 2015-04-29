@@ -43,6 +43,17 @@ public:
 		while (p-- > data) *p = a;
 	}
 
+	bool isValid(int x, int y)
+	{
+		return data && x >= 0 && y >= 0 && x < w && y < h; 
+	}
+
+	bool isValid(const IntVec2& side)
+	{
+		return isValid(side.x, side.y);
+	}
+
+
 	void setZero() {
 		memset(data, 0, sizeof(T)*w*h);
 	}

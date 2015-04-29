@@ -57,8 +57,7 @@ void gDebugRenderer::addSphere(const Vec3& mid, float radius, unsigned lineColor
 		addLine(sphere[i] * radius + mid, sphere[i + 2] * radius + mid, lineColor, lifeTime);
 
 	}
-
-	build();
+	needsBuild = true;
 }
 
 void gDebugRenderer::addLine(const Vec3& lineBegin, const Vec3& lineEnd, unsigned lineColor, float lifeTime) {
@@ -71,7 +70,7 @@ void gDebugRenderer::addLine(const Vec3& lineBegin, const Vec3& lineEnd, unsigne
 		*linePointer.p1.position = lineEnd;
 		*linePointer.p1.color = Vec4::fromColor(lineColor);
 		*(float*)linePointer.p0.extra = timeToDie;
-		*(float*)linePointer.p0.extra = timeToDie;
+		*(float*)linePointer.p1.extra = timeToDie;
 
 		needsBuild = true;
 	}
@@ -97,6 +96,7 @@ void gDebugRenderer::render() {
 }
 
 void gDebugRenderer::clear() {
-	lineCount = indexCount = vertexCount = 0;
+	lineCount = indexCount  = 0;
+	needsBuild = true;
 }
 

@@ -62,6 +62,7 @@ const float epsilon = 0.000001f;
 
 #define round(x) (((x)>((int)x + 0.5f))?((int)x)+1:(int)x)
 
+#define same_sign(x, y) ((x >= 0 && y >= 0 ) || (x < 0 && y < 0))
 
 inline float degreeToRadian(float deg) {
 	return deg * pi / 180.0f;
