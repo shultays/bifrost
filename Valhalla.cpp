@@ -85,8 +85,9 @@ void Valhalla::update(float fixed_dt) {
 
 
 	if (input.isKeyPressed(GLFW_KEY_SPACE)) {
-		random.setSeed(0x42042);
-		world->build();
+		debugRenderer.clear();
+		//world->buildDrainage();
+		world->buildRivers();
 	}
 
 	if (isFPS) {

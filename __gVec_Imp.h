@@ -15,6 +15,14 @@
 #define G_IS_TYPE_FLOATING
 #endif
 
+
+#ifdef G_IS_TYPE_FLOATING
+#define G_SQRT_RET_TYPE G_VEC_TYPE
+#else
+#define G_SQRT_RET_TYPE G_VEC_FLOATING_TYPE
+#endif
+
+
 struct G_VEC_IMP_NAME {
 public:
 	union {
@@ -209,6 +217,10 @@ public:
 		return ret;
 	}
 
+	bool operator!=(const G_VEC_IMP_NAME& other) const {
+		return !(other == *this);
+	}
+
 	inline G_VEC_TYPE& operator[](int index) {
 		return ((G_VEC_TYPE*)this)[index];
 	}
@@ -217,15 +229,12 @@ public:
 		return ((G_VEC_TYPE*)this)[index];
 	}
 
-	G_VEC_TYPE length() const {
+	G_SQRT_RET_TYPE length() const {
 		G_VEC_TYPE ret = 0;
 		for (int i = 0; i < GVEC_N; ++i)
 			ret += data[i] * data[i];
-#if G_VEC_TYPE_ID == G_TYPE_INT || G_VEC_TYPE_ID == G_TYPE_LONG
-		return (G_VEC_TYPE)sqrt((double)ret);
-#else
-		return sqrt(ret);
-#endif
+
+		return (G_SQRT_RET_TYPE)sqrt((double)ret);
 	}
 
 	G_VEC_TYPE lengthSquared() const {
@@ -239,11 +248,8 @@ public:
 		G_VEC_TYPE ret = 0;
 		for (int i = 0; i < GVEC_N; ++i)
 			ret += vec.data[i] * vec.data[i];
-#if G_VEC_TYPE_ID == G_TYPE_INT || G_VEC_TYPE_ID == G_TYPE_LONG
+
 		return (G_VEC_TYPE)sqrt((double)ret);
-#else
-		return sqrt(ret);
-#endif
 	}
 
 	static G_VEC_TYPE lengthSquared(const G_VEC_IMP_NAME& vec) {
@@ -253,17 +259,13 @@ public:
 		return ret;
 	}
 
-	G_VEC_TYPE distance(const G_VEC_IMP_NAME& other) const {
+	G_SQRT_RET_TYPE distance(const G_VEC_IMP_NAME& other) const {
 		G_VEC_TYPE ret = 0;
 		for (int i = 0; i < GVEC_N; ++i) {
 			G_VEC_TYPE diff = data[i] - other.data[i];
 			ret += diff*diff;
 		}
-#if G_VEC_TYPE_ID == G_TYPE_INT || G_VEC_TYPE_ID == G_TYPE_LONG
-		return (G_VEC_TYPE)sqrt((double)ret);
-#else
-		return sqrt(ret);
-#endif
+		return (G_SQRT_RET_TYPE)sqrt((double)ret);
 	}
 
 	G_VEC_TYPE distanceSquared(const G_VEC_IMP_NAME& other) const {
@@ -275,17 +277,13 @@ public:
 		return ret;
 	}
 
-	static G_VEC_TYPE distance(const G_VEC_IMP_NAME& vec1, const G_VEC_IMP_NAME& vec2) {
+	static G_SQRT_RET_TYPE distance(const G_VEC_IMP_NAME& vec1, const G_VEC_IMP_NAME& vec2) {
 		G_VEC_TYPE ret = 0;
 		for (int i = 0; i < GVEC_N; ++i) {
 			G_VEC_TYPE diff = vec1.data[i] - vec2.data[i];
 			ret += diff*diff;
 		}
-#if G_VEC_TYPE_ID == G_TYPE_INT || G_VEC_TYPE_ID == G_TYPE_LONG
-		return (G_VEC_TYPE)sqrt((double)ret);
-#else
-		return sqrt(ret);
-#endif
+		return (G_SQRT_RET_TYPE)sqrt((double)ret);
 	}
 
 	static G_VEC_TYPE distanceSquared(const G_VEC_IMP_NAME& vec1, const G_VEC_IMP_NAME& vec2) {
@@ -524,3 +522,4 @@ public:
 #ifdef G_IS_TYPE_FLOATING
 #undef G_IS_TYPE_FLOATING
 #endif
+#undef G_SQRT_RET_TYPE

@@ -21,6 +21,8 @@ struct DrainageNode {
 	IntVec2 drainageIndex;
 	Vec3 normal;
 	float drainage;
+	bool hasWater;
+	int waterIndex;
 };
 
 class HeightCacher {
@@ -108,6 +110,8 @@ protected:
 	int drainageEdgeCount;
 	float maxDrainage, minDrainage;
 	std::vector<DrainageNode*> drainageNodes;
+	std::vector<DrainageNode*> nearWaterNodes;
+	Grid<float> distanceToWater;
 	Grid<DrainageNode> drainageGrid;
 
 
