@@ -12,12 +12,28 @@
 #include "TreeGenerator.h"
 #include "ForestGenerator.h"
 #include "Sky.h"
+#include "gBinaryStream.h"
+
 
 void Valhalla::init() {
 	activeCamera = camera = new gFocusCamera();
 
 	world = new WorldMap(512 * 1024.0f, 128);
+	/*
 	world->build();
+	gBinaryFileOutputStream bOutput;
+	bOutput.open("data.dat", std::ifstream::in | std::ifstream::binary);
+	world->serialize(bOutput);
+	bOutput.close();
+	*/
+
+	gBinaryFileInputStream bInput;
+	bInput.open("data.dat", std::ifstream::in | std::ifstream::binary);
+	world->deserialize(bInput);
+
+	bInput.close();
+	world->buildBuffer();
+
 
 	playerCoor.index = IntVec2(world->getEdgeCount() / 2, world->getEdgeCount() / 2);
 	playerCoor.pos.setZero();

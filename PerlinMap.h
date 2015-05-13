@@ -3,13 +3,14 @@
 #ifndef PERLIN_MAP_H__
 #define PERLIN_MAP_H__
 
+#include <vector>
+#include <stdlib.h>
+#include <iostream>
+
 #include "gVec.h"
 #include "PerlinShell.h"
 #include "Tools.h"
-
-#include <vector>
-#include <stdlib.h>
-
+#include "gBinaryStream.h"
 
 class PerlinMap {
 	std::vector<PerlinShell> shells;
@@ -49,6 +50,22 @@ public:
 		return world;
 	}
 
+	void serialize(gBinaryFileOutputStream& output) {
+		output << shells.size();
+		for (unsigned i = 0; i < shells.size(); i++) {
+			shells.at(i).serialize(output);
+		}
+	}
+	void deserialize(gBinaryFileInputStream& input) {
+		int size;
+		input >> size;
+		shells.clear();
+		shells.resize(size);
+		for (unsigned i = 0; i < shells.size(); i++) {
+			shells.at(i).deserialize(input);
+			shells.at(i).setWorldMap(world);
+		}
+	}
 };
 
 #endif

@@ -3,12 +3,14 @@
 #ifndef WORLD_MAP_H__
 #define WORLD_MAP_H__
 
+#include <vector>
+#include <stdlib.h>
+#include <iostream>
+
 #include "gVec.h"
 #include "PerlinMap.h"
 #include "Grid.h"
 
-#include <vector>
-#include <stdlib.h>
 #include "TerrainNode.h"
 #include "Tools.h"
 
@@ -49,7 +51,10 @@ public:
 		heightCacheSize = size;
 		heightCacheIndex = 0;
 
+		clear();
+	}
 
+	void clear() {
 		heightCacheIndex = 0;
 		for (int i = 0; i < heightCacheSize; i++) {
 			heightCaches[i].coor.index = -1;
@@ -78,7 +83,6 @@ public:
 		heightCacheIndex++;
 		if (heightCacheIndex >= heightCacheSize) heightCacheIndex = 0;
 	}
-
 };
 
 class WorldMap : public gRenderable {
@@ -165,6 +169,83 @@ public:
 	bool generateRiver(const IntVec2& start_index, const IntVec2& end_index);
 	Vec3 drainageNodeToVec3(const DrainageNode& node);
 	Vec3 toWorldGamePos(int i, int j);
+
+
+
+	void serialize(gBinaryFileOutputStream& output) {
+		perlinMap.serialize(output);
+		detailMap.serialize(output);
+		earthMap.serialize(output);
+
+		output << mapSize;
+		output << nodeSize;
+		output << edgeCount;
+
+		heightMap.serialize(output);
+		normalMap.serialize(output);
+		colorMap.serialize(output);
+		islandMap.serialize(output);
+
+		output << drainageEdgeCount;
+		output << maxDrainage;
+		output << minDrainage;
+
+		distanceToWater.serialize(output);
+		drainageGrid.serialize(output);
+
+		output << (int)drainageNodes.size();
+		for (unsigned i = 0; i < drainageNodes.size(); i++) {
+			output << (int)(drainageNodes[i] - &drainageGrid[0][0]);
+		}
+
+		output << (int)nearWaterNodes.size();
+		for (unsigned i = 0; i < nearWaterNodes.size(); i++) {
+			output << (int)(nearWaterNodes[i] - &nearWaterNodes[0][0]);
+		}
+	}
+
+	void deserialize(gBinaryFileInputStream& input) {
+		mainCacher.clear();
+
+		perlinMap.deserialize(input);
+		detailMap.deserialize(input);
+		earthMap.deserialize(input);
+
+		input >> mapSize;
+		input >> nodeSize;
+		input >> edgeCount;
+
+		heightMap.deserialize(input);
+		normalMap.deserialize(input);
+		colorMap.deserialize(input);
+		islandMap.deserialize(input);
+
+		input >> drainageEdgeCount;
+		input >> maxDrainage;
+		input >> minDrainage;
+
+		distanceToWater.deserialize(input);
+		drainageGrid.deserialize(input);
+
+		int size;
+
+		input >> size;
+		drainageNodes.clear();
+		for (int i = 0; i < size; i++) {
+			int index;
+			input >> index;
+			drainageNodes.push_back(&drainageGrid.atRawIndex(index));
+		}
+
+		input >> size;
+		nearWaterNodes.clear();
+		for (int i = 0; i < size; i++) {
+			int index;
+			input >> index;
+			nearWaterNodes.push_back(&drainageGrid.atRawIndex(index));
+		}
+	}
+
 };
 
 #endif

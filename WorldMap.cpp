@@ -33,6 +33,7 @@ WorldMap::WorldMap(float mapSize, int edgeCount) : gRenderable(true, 1) {
 	isScaled = false;
 	//texture = new gTexture("images/lena.png");
 
+	mainCacher.init(16);
 }
 
 
@@ -87,14 +88,7 @@ void WorldMap::build() {
 	earthMap.addPerlinShell(55, 0.0, 0.05f, 0.50f);
 	earthMap.addPerlinShell(85, 0.0, 0.05f, 0.50f);
 
-	SAFE_DELETE(terrainDrawable);
-	SAFE_DELETE(waterDrawable);
-
-	terrainDrawable = new gVertexBufferRenderable(VERTEX_PROP_COLOR | VERTEX_PROP_NORMAL | VERTEX_PROP_POSITION, (edgeCount - 1)*(edgeCount - 1) * 6, false);
-	waterDrawable = new gVertexBufferRenderable(VERTEX_PROP_POSITION, 6, false);
-
-
-	mainCacher.init(16);
+	mainCacher.clear();
 
 	printf("buildHeightMap.\n");
 	buildHeightMap();
@@ -207,7 +201,7 @@ void WorldMap::buildHeightMap() {
 	int nextLandID = 1;
 	int nextWaterID = -1;
 
-	auto paint = [&] (const IntVec2& startPos, int toSet, int setIf, std::unordered_map<int, IntVec2>& edges, std::vector<IntVec2>& added) {
+	auto paint = [&](const IntVec2& startPos, int toSet, int setIf, std::unordered_map<int, IntVec2>& edges, std::vector<IntVec2>& added) {
 		std::queue<IntVec2> queue;
 		queue.push(startPos);
 
@@ -215,19 +209,19 @@ void WorldMap::buildHeightMap() {
 		added.clear();
 		islandMap[startPos] = toSet;
 
-		while(queue.size()){
+		while (queue.size()) {
 			IntVec2 pos = queue.front();
 			queue.pop();
 			added.push_back(pos);
-			for(int i=0; i<IntVec2::sideCount(); i++){
+			for (int i = 0; i < IntVec2::sideCount(); i++) {
 				IntVec2 side = pos.getSide(i);
-				if(heightMap.isValid(side)){
-					if(islandMap[side] == setIf){
-						if(same_sign(toSet, heightMap[side])){
+				if (heightMap.isValid(side)) {
+					if (islandMap[side] == setIf) {
+						if (same_sign(toSet, heightMap[side])) {
 							islandMap[side] = toSet;
 							queue.push(side);
 						}
-					}else if(islandMap[side] != toSet){
+					} else if (islandMap[side] != toSet) {
 						edges[islandMap[side]] = side;
 					}
 				}
@@ -240,12 +234,12 @@ void WorldMap::buildHeightMap() {
 
 	for (int i = 0; i < edgeCount; i++) {
 		for (int j = 0; j < edgeCount; j++) {
-			if(islandMap[i][j] == 0){
+			if (islandMap[i][j] == 0) {
 				IntVec2 startPos = IntVec2(i, j);
 				int id;
-				if(heightMap[i][j] > 0.0f){
+				if (heightMap[i][j] > 0.0f) {
 					id = nextLandID++;
-				}else{
+				} else {
 					id = nextWaterID--;
 				}
 				sizes[id] = 0;
@@ -255,25 +249,25 @@ void WorldMap::buildHeightMap() {
 
 				paint(startPos, id, 0, edges, added);
 
-				if(added.size() < 6){
-					for(unsigned k=0; k<added.size(); k++){
+				if (added.size() < 6) {
+					for (unsigned k = 0; k < added.size(); k++) {
 						heightMap[added[k]] = -heightMap[added[k]] - 0.1f;
 					}
-				
+
 					int oldId = id;
 					id = edges.begin()->first;
 
-					for (auto it=edges.begin(); it!=edges.end(); ++it){
-						if(abs(it->first) < id){
+					for (auto it = edges.begin(); it != edges.end(); ++it) {
+						if (abs(it->first) < id) {
 							id = it->first;
 						}
 					}
 					std::unordered_map<int, IntVec2> edgesTemp;
 					std::vector<IntVec2> addedTemp;
 
-					for (auto it=edges.begin(); it!=edges.end(); ++it){
-						if(id != it->first){
-							if(same_sign(heightMap[startPos], heightMap[it->second])){
+					for (auto it = edges.begin(); it != edges.end(); ++it) {
+						if (id != it->first) {
+							if (same_sign(heightMap[startPos], heightMap[it->second])) {
 								paint(it->second, 0, it->first, edgesTemp, addedTemp);
 							}
 						}
@@ -282,8 +276,8 @@ void WorldMap::buildHeightMap() {
 					paint(startPos, 0, oldId, edgesTemp, addedTemp);
 					paint(startPos, id, 0, edgesTemp, addedTemp);
 
-				}else{
-					debugRenderer.addLine(toWorldGamePos(i, j), toWorldGamePos(i, j) + Vec3(0.0f, 0.0f, 1.0f), id>0?0xFFFFFFFF : 0xFFFF0000, 100.0f);
+				} else {
+					debugRenderer.addLine(toWorldGamePos(i, j), toWorldGamePos(i, j) + Vec3(0.0f, 0.0f, 1.0f), id > 0 ? 0xFFFFFFFF : 0xFFFF0000, 100.0f);
 				}
 			}
 		}
@@ -293,12 +287,12 @@ void WorldMap::buildHeightMap() {
 			sizes[islandMap[i][j]]++;
 		}
 	}
-	
+
 	int totalSize = 0;
-	
-	for (auto it=sizes.begin(); it!=sizes.end(); ++it){
+
+	for (auto it = sizes.begin(); it != sizes.end(); ++it) {
 		totalSize += it->second;
-		printf("%s %d count %d\n", it->second>0?"land": "watr", it->first, it->second);
+		printf("%s %d count %d\n", it->second>0 ? "land" : "watr", it->first, it->second);
 	}
 	printf("total %d (%d)\n", totalSize, edgeCount * edgeCount);
 
@@ -411,6 +405,14 @@ float WorldMap::getHeightAt(WorldCoor &coor, HeightCacher& cacher) const {
 }
 
 void WorldMap::buildBuffer() {
+
+	SAFE_DELETE(terrainDrawable);
+	SAFE_DELETE(waterDrawable);
+
+	terrainDrawable = new gVertexBufferRenderable(VERTEX_PROP_COLOR | VERTEX_PROP_NORMAL | VERTEX_PROP_POSITION, (edgeCount - 1)*(edgeCount - 1) * 6, false);
+	waterDrawable = new gVertexBufferRenderable(VERTEX_PROP_POSITION, 6, false);
+
+
 	*waterDrawable->getVertexPointerAt(0).position = Vec3(0.0f, 0.0f, 0.0f);
 	*waterDrawable->getVertexPointerAt(1).position = Vec3((float)edgeCount, 0.0f, 0.0f);
 	*waterDrawable->getVertexPointerAt(2).position = Vec3(0.0f, (float)edgeCount, 0.0f);
@@ -433,8 +435,8 @@ void WorldMap::buildBuffer() {
 
 
 			*pointer0.position = toWorldGamePos(i, j);
-			*pointer1.position = toWorldGamePos(i+1, j);
-			*pointer2.position = toWorldGamePos(i+1, j+1);
+			*pointer1.position = toWorldGamePos(i + 1, j);
+			*pointer2.position = toWorldGamePos(i + 1, j + 1);
 
 			*pointer0.normal = *pointer1.normal = *pointer2.normal = Vec3::cross(*pointer1.position - *pointer0.position, *pointer2.position - *pointer0.position);
 
@@ -449,8 +451,8 @@ void WorldMap::buildBuffer() {
 			pointer2 = terrainDrawable->getVertexPointerAt(k++);
 
 
-			*pointer0.position = toWorldGamePos(i+1, j+1);
-			*pointer1.position = toWorldGamePos(i, j+1);
+			*pointer0.position = toWorldGamePos(i + 1, j + 1);
+			*pointer1.position = toWorldGamePos(i, j + 1);
 			*pointer2.position = toWorldGamePos(i, j);
 
 			*pointer0.normal = *pointer1.normal = *pointer2.normal = Vec3::cross(*pointer1.position - *pointer0.position, *pointer2.position - *pointer0.position);
@@ -619,12 +621,12 @@ void WorldMap::buildDrainage() {
 
 
 
-	class DistanceWaterNode{
+	class DistanceWaterNode {
 	public:
 		IntVec2 index;
 		IntVec2 waterIndex;
 		int distance;
-		DistanceWaterNode(const IntVec2& index, const IntVec2& waterIndex, int distance){
+		DistanceWaterNode(const IntVec2& index, const IntVec2& waterIndex, int distance) {
 			this->index = index;
 			this->waterIndex = waterIndex;
 			this->distance = distance;
@@ -645,25 +647,25 @@ void WorldMap::buildDrainage() {
 
 	for (int i = 0; i < drainageEdgeCount; i++) {
 		for (int j = 0; j < drainageEdgeCount; j++) {
-			if(drainageGrid[i][j].coor.h < 0){
+			if (drainageGrid[i][j].coor.h < 0) {
 				squaredDistance[i][j] = 0;
 				searchQueue.push(DistanceWaterNode(IntVec2(i, j), IntVec2(i, j), 0));
 			}
 		}
 	}
 
-	while(searchQueue.size()){
+	while (searchQueue.size()) {
 
 		DistanceWaterNode n = searchQueue.top();
 		searchQueue.pop();
 
-		if(squaredDistance[n.index] == n.distance){
-			for(int i=0; i<IntVec2::sideCount(); i++){
+		if (squaredDistance[n.index] == n.distance) {
+			for (int i = 0; i<IntVec2::sideCount(); i++) {
 				IntVec2 side = n.index.getSide(i);
-				if(squaredDistance.isValid(side)){
+				if (squaredDistance.isValid(side)) {
 					int distance = side.distanceSquared(n.waterIndex);
 
-					if(squaredDistance[side] > distance){
+					if (squaredDistance[side] > distance) {
 						squaredDistance[side] = distance;
 
 						searchQueue.push(DistanceWaterNode(side, n.waterIndex, distance));
@@ -681,8 +683,8 @@ void WorldMap::buildDrainage() {
 		}
 	}
 
-	for (int i = 0; i < drainageEdgeCount; i+=10) {
-		for (int j = 0; j < drainageEdgeCount; j+=10) {
+	for (int i = 0; i < drainageEdgeCount; i += 10) {
+		for (int j = 0; j < drainageEdgeCount; j += 10) {
 			debugRenderer.addLine(drainageNodeToVec3(drainageGrid[i][j]), drainageNodeToVec3(drainageGrid[i][j]) + Vec3(0.0f, 0.0f, distanceToWater[i][j] / 10.0f), 0xFFFFFFFF, 100.0f);
 		}
 	}
@@ -697,30 +699,30 @@ void WorldMap::buildRivers() {
 	for (unsigned a = 0; a < drainageNodes.size(); a++) {
 		DrainageNode* n = drainageNodes[a];
 		int dist = n->drainageIndex.distanceSquared(endIndex);
-		if(n->hasWater == false && dist > 3500 && dist < 8000 && random.randBool(0.5f)){
+		if (n->hasWater == false && dist > 3500 && dist < 8000 && random.randBool(0.5f)) {
 			startIndex = n->drainageIndex;
 			break;
 		}
 
 	}
-	if(startIndex.x != -1)
- 	generateRiver(startIndex, endIndex);
+	if (startIndex.x != -1)
+		generateRiver(startIndex, endIndex);
 
 }
 
 
-Vec3 WorldMap::drainageNodeToVec3(const DrainageNode& node){
+Vec3 WorldMap::drainageNodeToVec3(const DrainageNode& node) {
 	return Vec3(node.drainageIndex.x * DRAINAGE_NODE_SIZE / nodeSize, node.drainageIndex.y * DRAINAGE_NODE_SIZE / nodeSize,
 		node.coor.h * 3.0f / nodeSize);
 }
 
 bool WorldMap::generateRiver(const IntVec2& startIndex, const IntVec2& endIndex) {
-	class SearchNode{
+	class SearchNode {
 	public:
 		IntVec2 index;
 		float score;
 		Vec2 dir;
-		SearchNode(const IntVec2& index, float score, const Vec2& dir){
+		SearchNode(const IntVec2& index, float score, const Vec2& dir) {
 			this->index = index;
 			this->score = score;
 			this->dir = dir;
@@ -741,7 +743,7 @@ bool WorldMap::generateRiver(const IntVec2& startIndex, const IntVec2& endIndex)
 	debugRenderer.addSphere(drainageNodeToVec3(drainageGrid[endIndex]), 0.5f, 0xFF00FF00, 500.0f);
 
 
-	Vec2 dir = (endIndex-startIndex).toVec();
+	Vec2 dir = (endIndex - startIndex).toVec();
 	dir.normalize();
 	searchQueue.push(SearchNode(startIndex, drainageGrid[startIndex].drainage, dir));
 
@@ -752,37 +754,37 @@ bool WorldMap::generateRiver(const IntVec2& startIndex, const IntVec2& endIndex)
 	Grid<IntVec2> prev;
 	prev.init(drainageEdgeCount);
 
-	for(int i=0; i<drainageEdgeCount; i++){
+	for (int i = 0; i < drainageEdgeCount; i++) {
 		added[0][i] = 1000000000000000.0f;
 		added[i][0] = 1000000000000000.0f;
-		added[drainageEdgeCount-1][i] = 1000000000000000.0f;
-		added[i][drainageEdgeCount-1] = 1000000000000000.0f;
+		added[drainageEdgeCount - 1][i] = 1000000000000000.0f;
+		added[i][drainageEdgeCount - 1] = 1000000000000000.0f;
 	}
 
-	while(searchQueue.size()){
+	while (searchQueue.size()) {
 		SearchNode n = searchQueue.top();
 		searchQueue.pop();
-		if(n.index == endIndex){
+		if (n.index == endIndex) {
 			break;
 		}
 		added[n.index] = true;
 
-		for(int i=0; i<IntVec2::sideCount(); i++){
+		for (int i = 0; i < IntVec2::sideCount(); i++) {
 			IntVec2 side = n.index.getSide(i);
 			float t1, t2, t3, t4, t5;
 			float score = n.score;
-			
+
 			score += t1 = drainageGrid[side].drainage * 0.001f;
 			Vec2 dir = dir * 0.9f + (side - n.index).toVec() * 0.1f;
 			dir.normalize();
 			score += t2 = (n.dir - dir).length() * -1.0f;
-			score += t3 = - (drainageGrid[side].coor.h - drainageGrid[n.index].coor.h) * 1.0f;
+			score += t3 = -(drainageGrid[side].coor.h - drainageGrid[n.index].coor.h) * 1.0f;
 
 			score += t4 = distanceToWater[n.index] * 3.0f;
 
 			score -= t5 = endIndex.distance(side) * 3.0f;
 
-			if(added[side] == 0.0f && drainageGrid[side].coor.h > 0.0f){
+			if (added[side] == 0.0f && drainageGrid[side].coor.h > 0.0f) {
 				prev[side] = n.index;
 				added[side] = 1000000000000000.0f;
 				searchQueue.push(SearchNode(side, score, dir));
@@ -794,11 +796,9 @@ bool WorldMap::generateRiver(const IntVec2& startIndex, const IntVec2& endIndex)
 
 	IntVec2 index = endIndex;
 
-	while(index != startIndex) {
-		
+	while (index != startIndex) {
 		debugRenderer.addLine(drainageNodeToVec3(drainageGrid[index]), drainageNodeToVec3(drainageGrid[prev[index]]), 0xFF0000FF, 500.0f);
 		index = prev[index];
-
 	}
 	return false;
 }
