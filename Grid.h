@@ -3,7 +3,9 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <iostream>
 #include "gTools.h"
+#include "gBinaryStream.h"
 
 template <class T>
 class Grid {
@@ -43,13 +45,11 @@ public:
 		while (p-- > data) *p = a;
 	}
 
-	bool isValid(int x, int y)
-	{
-		return data && x >= 0 && y >= 0 && x < w && y < h; 
+	bool isValid(int x, int y) {
+		return data && x >= 0 && y >= 0 && x < w && y < h;
 	}
 
-	bool isValid(const IntVec2& side)
-	{
+	bool isValid(const IntVec2& side) {
 		return isValid(side.x, side.y);
 	}
 
@@ -70,6 +70,26 @@ public:
 	~Grid() {
 		SAFE_DELETE(data);
 	}
+
+	void serialize(gBinaryFileOutputStream& output) {
+		assert(data);
+		output << w;
+		output << h;
+		output.writeBinary((const char*)data, sizeof(T)*w*h);
+	}
+
+	void deserialize(gBinaryFileInputStream& input) {
+		SAFE_DELETE(data);
+		input >> w;
+		input >> h;
+		init(w, h);
+		input.readBinary((char*)data, sizeof(T)*w*h);
+	}
+
+	inline T& atRawIndex(int i) const {
+		return *(data + i);
+	}
+
 };
 
 #endif
