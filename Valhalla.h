@@ -23,6 +23,8 @@ class Valhalla : public gGame, public gTickable, public gUpdatable {
 
 	WorldCoor playerCoor;
 
+
+
 	bool isFPS;
 
 	void init() override;

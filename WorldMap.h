@@ -162,7 +162,7 @@ public:
 	float getTreeProbabilityAt(WorldCoor &coor, HeightCacher& cacher) const;
 	void buildDrainage();
 	void buildRivers();
-	bool generateRiver(const IntVec2& start_index, const IntVec2& end_index);
+	bool generateRiver(const IntVec2& start_index, const IntVec2& end_index, std::vector<IntVec2>& indices);
 	Vec3 drainageNodeToVec3(const DrainageNode& node);
 	Vec3 toWorldGamePos(int i, int j);
 };

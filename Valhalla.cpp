@@ -32,6 +32,7 @@ void Valhalla::init() {
 	forestGenerator = new ForestGenerator(world);
 	sky = new Sky(world);
 
+
 	gShaderShr worldShader = resources.getShader("default.vs", "terrain.ps");
 	worldShader->addUniform("uDiscardArea", TypeVec4);
 
