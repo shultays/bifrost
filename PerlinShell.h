@@ -22,10 +22,12 @@ class PerlinShell {
 	Vec2 add;
 	unsigned int maxHash;
 	unsigned int acceptHash;
-	WorldMap *world;
 	float pow_val;
 	int pow_type;
 	float cellPerNode;
+	float mapSize;
+	float nodeSize;
+	bool inited;
 
 	enum {
 		pow_1 = 1,
@@ -37,17 +39,17 @@ class PerlinShell {
 	float getNodeHeight(int i, int j) const;
 
 public:
-	PerlinShell() {}
-
-	void setWorldMap(WorldMap* world) {
-		this->world = world;
+	PerlinShell() {
+		inited = false;
 	}
-
-	PerlinShell(WorldMap* world, int edgeCount, float minHeight, float maxHeight, float percentage = 0.5f, float pow_val = 1.0f, unsigned int seed = -1);
+	PerlinShell(float mapSize, float nodeSize, int edgeCount, float minHeight, float maxHeight, float percentage = 0.5f, float pow_val = 1.0f, unsigned int seed = -1);
 	float getHeightAt(const WorldCoor& coor) const;
 
 
 	void serialize(gBinaryFileOutputStream& output) {
+		output << mapSize;
+		output << nodeSize;
+
 		output << edgeCount;
 		output << seed;
 		output << cellSize;
@@ -65,6 +67,11 @@ public:
 		output << cellPerNode;
 	}
 	void deserialize(gBinaryFileInputStream& input) {
+		inited = true;
+
+		input >> mapSize;
+		input >> nodeSize;
+
 		input >> edgeCount;
 		input >> seed;
 		input >> cellSize;

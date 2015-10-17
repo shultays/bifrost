@@ -12,11 +12,15 @@ float PerlinShell::getNodeHeight(int i, int j) const {
 	return (((unsigned int)(hasher(i + edgeCount*j)) ^ seed) > acceptHash) ? 1.0f : 0.0f;
 }
 
-PerlinShell::PerlinShell(WorldMap* world, int edgeCount, float minHeight, float maxHeight, float percentage, float pow_val, unsigned int seed) {
+PerlinShell::PerlinShell(float mapSize, float nodeSize, int edgeCount, float minHeight, float maxHeight, float percentage, float pow_val, unsigned int seed) {
 	maxHash = std::numeric_limits<size_t>::max();
-	this->world = world;
-	this->cellSize = world->getMapSize() / (edgeCount - 1);
-	this->cellPerNode = world->getNodeSize() / this->cellSize;
+	inited = true;
+	this->mapSize = mapSize;
+	this->nodeSize = nodeSize;
+
+	this->cellSize = mapSize / (edgeCount - 1);
+	this->cellPerNode = nodeSize / cellSize;
+
 	if (seed == -1) {
 		seed = random.randInt();
 	}
@@ -54,6 +58,7 @@ PerlinShell::PerlinShell(WorldMap* world, int edgeCount, float minHeight, float 
 	add = Vec2(addX, addY);
 }
 float PerlinShell::getHeightAt(const WorldCoor& coor) const {
+	assert(inited);
 	Vec2 p;
 	p.x = (float)coor.index.x;
 	p.y = (float)coor.index.y;
@@ -70,7 +75,7 @@ float PerlinShell::getHeightAt(const WorldCoor& coor) const {
 	Vec2 p2 = coor.pos;
 	p2 = p2*rotate;
 
-	p = p * world->getNodeSize() + p2;
+	p = p * nodeSize + p2;
 
 
 	int i, j;

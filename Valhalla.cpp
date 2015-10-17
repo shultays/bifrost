@@ -18,21 +18,23 @@
 void Valhalla::init() {
 	activeCamera = camera = new gFocusCamera();
 
-	world = new WorldMap(512 * 1024.0f, 128);
-	/*
-	world->build();
-	gBinaryFileOutputStream bOutput;
-	bOutput.open("data.dat", std::ifstream::in | std::ifstream::binary);
-	world->serialize(bOutput);
-	bOutput.close();
-	*/
+	world = new WorldMap(256 * 1024.0f);
+	if (false) {
+		world->build();
+		gBinaryFileOutputStream bOutput;
+		bOutput.open("data.dat", std::ifstream::in | std::ifstream::binary);
+		world->serialize(bOutput);
+		bOutput.close();
+	} else {
 
-	gBinaryFileInputStream bInput;
-	bInput.open("data.dat", std::ifstream::in | std::ifstream::binary);
-	world->deserialize(bInput);
+		gBinaryFileInputStream bInput;
+		bInput.open("data.dat", std::ifstream::in | std::ifstream::binary);
+		world->deserialize(bInput);
 
-	bInput.close();
-	world->buildBuffer();
+		bInput.close();
+		world->buildBuffer();
+
+	}
 
 
 	playerCoor.index = IntVec2(world->getEdgeCount() / 2, world->getEdgeCount() / 2);

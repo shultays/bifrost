@@ -111,17 +111,14 @@ protected:
 
 	HeightCacher mainCacher;
 
-	int drainageEdgeCount;
 	float maxDrainage, minDrainage;
 	std::vector<DrainageNode*> drainageNodes;
 	std::vector<DrainageNode*> nearWaterNodes;
 	Grid<float> distanceToWater;
 	Grid<DrainageNode> drainageGrid;
-
-
 public:
 
-	WorldMap(float mapSize, int edgeCount);
+	WorldMap(float mapSize);
 
 	~WorldMap() {
 		SAFE_DELETE(terrainDrawable);
@@ -186,7 +183,6 @@ public:
 		colorMap.serialize(output);
 		islandMap.serialize(output);
 
-		output << drainageEdgeCount;
 		output << maxDrainage;
 		output << minDrainage;
 
@@ -220,7 +216,6 @@ public:
 		colorMap.deserialize(input);
 		islandMap.deserialize(input);
 
-		input >> drainageEdgeCount;
 		input >> maxDrainage;
 		input >> minDrainage;
 

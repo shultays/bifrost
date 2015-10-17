@@ -14,20 +14,26 @@
 
 class PerlinMap {
 	std::vector<PerlinShell> shells;
-	WorldMap *world;
+	float mapSize;
+	float nodeSize;
+	bool inited;
 public:
-	PerlinMap() {}
-
-	void setWorldMap(WorldMap *world) {
-		this->world = world;
+	PerlinMap() {
+		inited = false;
+	}
+	void init(float mapSize, float nodeSize) {
+		this->mapSize = mapSize;
+		this->nodeSize = nodeSize;
+		inited = true;
 	}
 
 	int getShellCount() {
 		return shells.size();
 	}
 
-	void addPerlinShell(int nodeCount, float min_height, float max_height, float percentage = 0.5f, float pow_val = 1.0f, int seed = -1) {
-		shells.push_back(PerlinShell(world, nodeCount, min_height, max_height, percentage, pow_val, seed));
+	void addPerlinShell(int edgeCount, float min_height, float max_height, float percentage = 0.5f, float pow_val = 1.0f, int seed = -1) {
+		assert(inited);
+		shells.push_back(PerlinShell(mapSize, nodeSize, edgeCount, min_height, max_height, percentage, pow_val, seed));
 	}
 
 	float getHeightAt(const WorldCoor& coor) const {
@@ -46,24 +52,25 @@ public:
 		shells.clear();
 	}
 
-	WorldMap* getWorldMap() {
-		return world;
-	}
-
 	void serialize(gBinaryFileOutputStream& output) {
+		output << mapSize;
+		output << nodeSize;
+
 		output << shells.size();
 		for (unsigned i = 0; i < shells.size(); i++) {
 			shells.at(i).serialize(output);
 		}
 	}
 	void deserialize(gBinaryFileInputStream& input) {
+		inited = true;
+		input >> mapSize;
+		input >> nodeSize;
 		int size;
 		input >> size;
 		shells.clear();
 		shells.resize(size);
 		for (unsigned i = 0; i < shells.size(); i++) {
 			shells.at(i).deserialize(input);
-			shells.at(i).setWorldMap(world);
 		}
 	}
 };

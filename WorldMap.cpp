@@ -9,26 +9,25 @@
 #include <queue>
 #include <set>
 
-WorldMap::WorldMap(float mapSize, int edgeCount) : gRenderable(true, 1) {
+WorldMap::WorldMap(float mapSize) : gRenderable(true, 1) {
 	this->mapSize = mapSize;
-	this->edgeCount = edgeCount;
+	this->edgeCount = (int)(mapSize / (4 * 1024));
 	this->nodeSize = mapSize / edgeCount;
+
 	waterDrawable = NULL;
 	terrainDrawable = NULL;
 
-	drainageEdgeCount = edgeCount;
-
+	perlinMap.init(mapSize, nodeSize);
+	detailMap.init(mapSize, nodeSize);
+	earthMap.init(mapSize, nodeSize);
 
 	heightMap.init(edgeCount);
 	normalMap.init(edgeCount);
 	colorMap.init(edgeCount);
-	drainageGrid.init(drainageEdgeCount);
-	islandMap.init(drainageEdgeCount);
-	distanceToWater.init(drainageEdgeCount);
+	drainageGrid.init(edgeCount);
+	islandMap.init(edgeCount);
+	distanceToWater.init(edgeCount);
 
-	earthMap.setWorldMap(this);
-	perlinMap.setWorldMap(this);
-	detailMap.setWorldMap(this);
 	isScaled = false;
 	//texture = new gTexture("images/lena.png");
 
@@ -94,9 +93,9 @@ void WorldMap::build() {
 	printf("buildNormalMap.\n");
 	buildNormalMap();
 	printf("buildDrainage.\n");
-	buildDrainage();
+	//buildDrainage();
 	printf("buildRivers.\n");
-	buildRivers();
+	//buildRivers();
 	printf("buildColorMap.\n");
 	buildColorMap();
 	printf("buildBuffer.\n");
@@ -108,10 +107,10 @@ void WorldMap::build() {
 
 
 	Grid<float> drainageVals;
-	drainageVals.init(drainageEdgeCount);
+	drainageVals.init(edgeCount);
 
-	for (int i = 0; i < drainageEdgeCount; i++) {
-		for (int j = 0; j < drainageEdgeCount; j++) {
+	for (int i = 0; i < edgeCount; i++) {
+		for (int j = 0; j < edgeCount; j++) {
 			drainageVals[i][j] = sqrt(drainageGrid[i][j].drainage);
 		}
 	}
@@ -529,8 +528,8 @@ float WorldMap::getTreeProbabilityAt(WorldCoor &coor, HeightCacher& cacher) cons
 
 void WorldMap::buildDrainage() {
 	drainageNodes.clear();
-	for (int i = 0; i < drainageEdgeCount; i++) {
-		for (int j = 0; j < drainageEdgeCount; j++) {
+	for (int i = 0; i < edgeCount; i++) {
+		for (int j = 0; j < edgeCount; j++) {
 			DrainageNode& n = drainageGrid[i][j];
 			n.drainageIndex = IntVec2(i, j);
 			n.coor.index = IntVec2(i, j);
@@ -541,7 +540,7 @@ void WorldMap::buildDrainage() {
 			n.drainage = 100.0f;
 
 			bool add = true;
-			if (i > 0 && i < drainageEdgeCount - 1 && j > 0 && j < drainageEdgeCount - 1) {
+			if (i > 0 && i < edgeCount - 1 && j > 0 && j < edgeCount - 1) {
 				float dt = 1.0f;
 				float sx = drainageGrid[i + 1][j].coor.h - drainageGrid[i - 1][j].coor.h;
 				float sy = drainageGrid[i][j + 1].coor.h - drainageGrid[i][j - 1].coor.h;
@@ -582,8 +581,8 @@ void WorldMap::buildDrainage() {
 
 	maxDrainage = -100000000.0f;
 	minDrainage = 100000000.0f;
-	for (int i = 0; i < drainageEdgeCount; i++) {
-		for (int j = 0; j < drainageEdgeCount; j++) {
+	for (int i = 0; i < edgeCount; i++) {
+		for (int j = 0; j < edgeCount; j++) {
 			if (drainageGrid[i][j].coor.h <= 0.0f) {
 				drainageGrid[i][j].drainage = 0.0f;
 				continue;
@@ -644,10 +643,10 @@ void WorldMap::buildDrainage() {
 	std::priority_queue<DistanceWaterNode, std::vector<DistanceWaterNode>, Compare> searchQueue;
 
 	Grid<int> squaredDistance;
-	squaredDistance.init(drainageEdgeCount, drainageEdgeCount, 10000000);
+	squaredDistance.init(edgeCount, edgeCount, 10000000);
 
-	for (int i = 0; i < drainageEdgeCount; i++) {
-		for (int j = 0; j < drainageEdgeCount; j++) {
+	for (int i = 0; i < edgeCount; i++) {
+		for (int j = 0; j < edgeCount; j++) {
 			if (drainageGrid[i][j].coor.h < 0) {
 				squaredDistance[i][j] = 0;
 				searchQueue.push(DistanceWaterNode(IntVec2(i, j), IntVec2(i, j), 0));
@@ -677,8 +676,8 @@ void WorldMap::buildDrainage() {
 
 	}
 
-	for (int i = 0; i < drainageEdgeCount; i++) {
-		for (int j = 0; j < drainageEdgeCount; j++) {
+	for (int i = 0; i < edgeCount; i++) {
+		for (int j = 0; j < edgeCount; j++) {
 			distanceToWater[i][j] = sqrtf((float)squaredDistance[i][j]);
 		}
 	}
@@ -687,8 +686,8 @@ void WorldMap::buildDrainage() {
 
 void WorldMap::buildRivers() {
 
-	for (int i = 0; i < drainageEdgeCount; i+=10) {
-		for (int j = 0; j < drainageEdgeCount; j+=10) {
+	for (int i = 0; i < edgeCount; i += 10) {
+		for (int j = 0; j < edgeCount; j += 10) {
 			//debugRenderer.addLine(drainageNodeToVec3(drainageGrid[i][j]), drainageNodeToVec3(drainageGrid[i][j]) + Vec3(0.0f, 0.0f, distanceToWater[i][j] / 10.0f), 0xFFFFFFFF, 100.0f);
 
 		}
@@ -700,7 +699,7 @@ void WorldMap::buildRivers() {
 	std::vector<IntVec2> allIndices;
 
 	Grid<bool> riverGrid;
-	riverGrid.init(drainageEdgeCount);
+	riverGrid.init(edgeCount);
 	riverGrid.setZero();
 
 	int added = 0;
@@ -708,42 +707,42 @@ void WorldMap::buildRivers() {
 	for (unsigned a = 0; a < drainageNodes.size() && added < 10; a++) {
 		DrainageNode* n = drainageNodes[a];
 		int dist = n->drainageIndex.distanceSquared(endIndex);
-		if(n->hasWater == false && dist < 8000 && distanceToWater[n->drainageIndex] > 15.0f && random.randBool(0.5f)){
+		if (n->hasWater == false && dist < 8000 && distanceToWater[n->drainageIndex] > 15.0f && random.randBool(0.5f)) {
 
 
 			std::vector<IntVec2> indices;
 			generateRiver(n->drainageIndex, endIndex, indices);
 
 
-			if(indices.size() > 60){
+			if (indices.size() > 60) {
 
 				unsigned toAdd = 0;
 
-				if(added == 0){
+				if (added == 0) {
 					added++;
 					toAdd = indices.size();
-				}else{
+				} else {
 					int connection = -1;
-					for(unsigned i=0; i<indices.size(); i++){
-						if(riverGrid[indices[i]]){
+					for (unsigned i = 0; i<indices.size(); i++) {
+						if (riverGrid[indices[i]]) {
 							connection = i;
 							break;
 						}
 					}
 
-					if(connection != -1 && (indices.size() - connection > 20) && connection > 15){
+					if (connection != -1 && (indices.size() - connection > 20) && connection > 15) {
 						toAdd = connection;
 					}
 				}
 
-				if(toAdd > 0) added++;
+				if (toAdd > 0) added++;
 
-				for(unsigned i=0; i<toAdd; i++){
+				for (unsigned i = 0; i < toAdd; i++) {
 					count++;
 					riverGrid[indices[i]] = true;
 
-					if(i < indices.size() - 1){
-						debugRenderer.addLine(drainageNodeToVec3(drainageGrid[indices[i]]), drainageNodeToVec3(drainageGrid[indices[i+1]]), 0xFF0000FF, 500.0f);
+					if (i < indices.size() - 1) {
+						debugRenderer.addLine(drainageNodeToVec3(drainageGrid[indices[i]]), drainageNodeToVec3(drainageGrid[indices[i + 1]]), 0xFF0000FF, 500.0f);
 					}
 				}
 
@@ -754,13 +753,13 @@ void WorldMap::buildRivers() {
 }
 
 
-Vec3 WorldMap::drainageNodeToVec3(const DrainageNode& node){
-	return Vec3(node.drainageIndex.x  / nodeSize, node.drainageIndex.y  / nodeSize,
+Vec3 WorldMap::drainageNodeToVec3(const DrainageNode& node) {
+	return Vec3(node.drainageIndex.x / nodeSize, node.drainageIndex.y / nodeSize,
 		node.coor.h * 3.0f / nodeSize);
 }
 
 bool WorldMap::generateRiver(const IntVec2& startIndex, const IntVec2& endIndex, std::vector<IntVec2>& indices) {
-	class SearchNode{
+	class SearchNode {
 	public:
 		IntVec2 index;
 		float score;
@@ -791,17 +790,17 @@ bool WorldMap::generateRiver(const IntVec2& startIndex, const IntVec2& endIndex,
 	searchQueue.push(SearchNode(startIndex, drainageGrid[startIndex].drainage, dir));
 
 	Grid<bool> added;
-	added.init(drainageEdgeCount);
+	added.init(edgeCount);
 	added.setZero();
 
 	Grid<IntVec2> prev;
-	prev.init(drainageEdgeCount);
+	prev.init(edgeCount);
 
-	for(int i=0; i<drainageEdgeCount; i++){
+	for (int i = 0; i < edgeCount; i++) {
 		added[0][i] = true;
 		added[i][0] = true;
-		added[drainageEdgeCount-1][i] = true;
-		added[i][drainageEdgeCount-1] = true;
+		added[edgeCount - 1][i] = true;
+		added[i][edgeCount - 1] = true;
 	}
 
 	while (searchQueue.size()) {
@@ -827,7 +826,7 @@ bool WorldMap::generateRiver(const IntVec2& startIndex, const IntVec2& endIndex,
 
 			score += t5 = -endIndex.distance(side) * 3.0f;
 
-			if(added[side] == false && drainageGrid[side].coor.h > 0.0f){
+			if (added[side] == false && drainageGrid[side].coor.h > 0.0f) {
 				prev[side] = n.index;
 				added[side] = true;
 				searchQueue.push(SearchNode(side, score, dir));
@@ -845,9 +844,9 @@ bool WorldMap::generateRiver(const IntVec2& startIndex, const IntVec2& endIndex,
 		//debugRenderer.addLine(drainageNodeToVec3(drainageGrid[index]), drainageNodeToVec3(drainageGrid[nextIndex]), 0xFF0000FF, 500.0f);
 		index = nextIndex;
 
-	}while(index != startIndex);
+	} while (index != startIndex);
 
-	for(unsigned i=0; i<indices_reversed.size(); i++){
+	for (unsigned i = 0; i < indices_reversed.size(); i++) {
 		indices.push_back(indices_reversed[indices_reversed.size() - i - 1]);
 	}
 
