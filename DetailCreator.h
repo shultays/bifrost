@@ -13,6 +13,7 @@ protected:
 	int cellPerNode;
 	float cellSize;
 	WorldMap* world;
+	bool inited;
 
 	IntVec2 centerIndex;
 
@@ -43,8 +44,11 @@ protected:
 		return coor;
 	}
 public:
-
-	DetailCreator(WorldMap* world, int cellPerNode, int squareCount) {
+	DetailCreator() {
+		this->inited = false;
+	}
+	void init(WorldMap* world, int cellPerNode, int squareCount) {
+		this->inited = true;
 
 		this->world = world;
 		this->cellPerNode = cellPerNode;
@@ -65,6 +69,7 @@ public:
 
 
 	virtual void updateMap(WorldCoor& coor) {
+		assert(inited);
 		if (waitingJobs) return;
 
 		IntVec2 newCenterIndex = coorToIndex(coor);

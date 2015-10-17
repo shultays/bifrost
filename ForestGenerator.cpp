@@ -77,8 +77,9 @@ public:
 	}
 };
 
-ForestGenerator::ForestGenerator(WorldMap* world) : DetailCreator(world, 200, 3) {
+ForestGenerator::ForestGenerator(WorldMap* world) {
 
+	DetailCreator::init(world, world->getNodeSize() / 20, 3);
 }
 
 void ForestGenerator::initNode(gVertexBufferRenderable*& node, WorldCoor& nodeCoor, gRandom& random, int a, int b) {

@@ -19,7 +19,7 @@ void Valhalla::init() {
 	activeCamera = camera = new gFocusCamera();
 
 	world = new WorldMap(256 * 1024.0f);
-	if (false) {
+	if (true) {
 		world->build();
 		gBinaryFileOutputStream bOutput;
 		bOutput.open("data.dat", std::ifstream::in | std::ifstream::binary);

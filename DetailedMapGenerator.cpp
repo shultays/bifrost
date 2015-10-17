@@ -30,11 +30,13 @@ public:
 	}
 };
 
-DetailedMapGenerator::DetailedMapGenerator(WorldMap* world, int squareCount, int cellPerNode, int edgePerCell) : DetailCreator<TerrainNode>(world, cellPerNode, squareCount) {
+DetailedMapGenerator::DetailedMapGenerator(WorldMap* world, int squareCount, int cellPerNode, int edgePerCell) {
 	this->world = world;
 	this->edgePerCell = edgePerCell;
 	cellDetail = cellSize / edgePerCell;
 	waitingJobs = 0;
+
+	DetailCreator::init(world, cellPerNode, squareCount);
 }
 
 void DetailedMapGenerator::tick(float dt) {
