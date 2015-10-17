@@ -249,8 +249,6 @@ void generateBranch(const Vec3& pos, float maxHeight, float widthMultiplier, Mat
 			}
 		}
 	}
-
-
 }
 
 void TreeGenerator::generateTree(const Vec3& pos, std::vector<TreeTriangle>& vertices, gRandom& random) {
@@ -266,6 +264,136 @@ void TreeGenerator::generateTree(const Vec3& pos, std::vector<TreeTriangle>& ver
 
 	generateBranch(pos, random.randFloat(1.0f, 7.0f), 1.0f, mat, branches, 0, vertices, spheres, random);
 }
+
+
+
+void generateBranch2(const Vec3& pos, float maxHeight, float widthMultiplier, Mat3 mat, Branch& branch, int depth, std::vector<TreeTriangle>& vertices, gRandom& random) {
+	std::vector<TrunkNode>& nodes = branch.nodes;
+	nodes.resize(1);
+
+	nodes[0].mat = mat;
+
+	nodes[0].sideCount = 4;
+	nodes[0].height = 0.0f;
+	nodes[0].midPoint = pos;
+	nodes[0].sideCount = 4;
+
+	float widthMultiplierViaHeight = get_clamped(maxHeight * 0.2f, 0.1f, 1.5f);
+
+	nodes[0].width = 0.4f * widthMultiplier * widthMultiplierViaHeight;
+	float minWidth = 0.15f * widthMultiplier * widthMultiplierViaHeight;
+	nodes[0].createSides();
+
+	float lastZRotation = random.randFloat(pi_2);
+
+	while (nodes[nodes.size() - 1].height < maxHeight) {
+		nodes.push_back(nodes[nodes.size() - 1]);
+		TrunkNode& node = nodes[nodes.size() - 1];
+		TrunkNode& oldNode = nodes[nodes.size() - 2];
+
+		float heightDiff = random.randFloat(0.6f, 1.0f);
+		node.height += heightDiff;
+		node.midPoint = oldNode.midPoint + oldNode.mat.row2 * heightDiff;
+
+		node.width = oldNode.width * 0.6f + minWidth*0.4f;
+
+
+		node.mat.rotateByX(random.randFloat(-pi / 80, pi / 80));
+		node.mat.rotateByY(random.randFloat(-pi / 80, pi / 80));
+		node.mat.rotateByZ(random.randFloat(-pi / 10, pi / 10));
+
+
+		node.createSides();
+	}
+
+
+	for (unsigned i = 0; i < nodes.size() - 1; i++) {
+		TrunkNode& node = nodes[i];
+		TrunkNode& nextNode = nodes[i + 1];
+
+		float radiusMin = 10000.0f;
+		for (int j = 0; j < node.sideCount; j++) {
+			float t1 = ((node.sides[j] + node.sides[j + 1]) * 0.5f).distanceSquared(node.midPoint);
+			float t2 = ((nextNode.sides[j] + nextNode.sides[j + 1]) * 0.5f).distanceSquared(nextNode.midPoint);
+
+			radiusMin = gmin(radiusMin, t1);
+			radiusMin = gmin(radiusMin, t2);
+		}
+
+		for (int j = 0; j < node.sideCount; j++) {
+
+			TreeTriangle tri;
+
+			tri.vertices[0] = node.sides[j];
+			tri.vertices[1] = nextNode.sides[j];
+			tri.vertices[2] = nextNode.sides[j + 1];
+			tri.color = Vec3::fromColor(0x663500);
+			vertices.push_back(tri);
+
+			tri.vertices[0] = node.sides[j];
+			tri.vertices[1] = nextNode.sides[j + 1];
+			tri.vertices[2] = node.sides[j + 1];
+			tri.color = Vec3::fromColor(0x663500);
+			vertices.push_back(tri);
+		}
+	}
+}
+
+
+void TreeGenerator::generateTree2(const Vec3& pos, std::vector<TreeTriangle>& vertices, gRandom& random) {
+	Branch branch;
+
+	Mat3 mat;
+	mat.makeIdentity();
+	mat *= Mat3::rotationX(0.0f);
+	mat *= Mat3::rotationY(0.0f);
+	mat *= Mat3::rotationZ(random.randFloat(-pi, +pi));
+
+
+	generateBranch2(pos, random.randFloat(1.0f, 7.0f), 1.0f, mat, branch, 0, vertices, random);
+
+	float length = branch.nodes[branch.nodes.size() - 1].height;
+
+	float start_diameter = length / 3.0f;
+	float start = length * (1.0f / 3);
+	float end = length + 0.1f;
+
+	float current = start;
+
+	float l = 0.0f;
+	int i = 0;
+	while (current < end) {
+		while (i < branch.nodes.size() - 1 && l < branch.nodes[i + 1].height) {
+			l = branch.nodes[i].height;
+			i++;
+		}
+		std::vector<Vec3> points;
+		generateSphere(0.40f, points);
+		TrunkNode& node = branch.nodes[i - 1];
+		Vec3 mid = node.midPoint + node.mat.row2*(current - node.height);
+		mat.identity();
+		mat.rotateByX(random.randFloat(-pi, +pi));
+		mat.rotateByY(random.randFloat(-pi, +pi));
+		mat.rotateByZ(random.randFloat(-pi, +pi));
+
+		Vec3 color = lerp(Vec3::fromColor(0xB6E016), Vec3::fromColor(0x07B508), random.randFloat());
+		for (unsigned i = 0; i < points.size(); i += 3) {
+			TreeTriangle tri;
+
+			tri.vertices[0] = mid + points[i + 0] * mat;
+			tri.vertices[1] = mid + points[i + 1] * mat;
+			tri.vertices[2] = mid + points[i + 2] * mat;
+			tri.color = color;
+
+			vertices.push_back(tri);
+		}
+		current += 0.2f;
+	}
+
+
+}
+
+
 
 
 void TreeGenerator::generateCloud(const Vec3& pos, const Vec3& dir, std::vector<TreeTriangle>& triangles, gRandom& random) {

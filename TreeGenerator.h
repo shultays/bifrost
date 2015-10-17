@@ -18,6 +18,7 @@ class TreeGenerator {
 public:
 
 	static void generateTree(const Vec3& pos, std::vector<TreeTriangle>& triangles, gRandom& random);
+	static void generateTree2(const Vec3& pos, std::vector<TreeTriangle>& triangles, gRandom& random);
 	static void generateCloud(const Vec3& pos, const Vec3& dir, std::vector<TreeTriangle>& triangles, gRandom& random);
 };
 

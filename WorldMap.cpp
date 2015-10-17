@@ -213,15 +213,11 @@ void WorldMap::buildHeightMap() {
 			added.push_back(pos);
 			for (int i = 0; i < IntVec2::sideCount(); i++) {
 				IntVec2 side = pos.getSide(i);
-				if (heightMap.isValid(side)) {
-					if (islandMap[side] == setIf) {
-						if (same_sign(toSet, heightMap[side])) {
-							islandMap[side] = toSet;
-							queue.push(side);
-						}
-					} else if (islandMap[side] != toSet) {
-						edges[islandMap[side]] = side;
-					}
+				if (heightMap.isValid(side) && islandMap[side] == setIf) {
+					islandMap[side] = toSet;
+					queue.push(side);
+				} else if (islandMap[side] != toSet) {
+					edges[islandMap[side]] = side;
 				}
 			}
 		}
