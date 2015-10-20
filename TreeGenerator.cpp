@@ -354,40 +354,63 @@ void TreeGenerator::generateTree2(const Vec3& pos, std::vector<TreeTriangle>& ve
 
 	float length = branch.nodes[branch.nodes.size() - 1].height;
 
-	float start_diameter = length / 3.0f;
+	float startRadius = length / 2.0f;
+	startRadius = startRadius;
 	float start = length * (1.0f / 3);
 	float end = length + 0.1f;
 
 	float current = start;
+	Vec3 color = lerp(Vec3::fromColor(0xB6E016), Vec3::fromColor(0x07B508), random.randFloat());
 
 	float l = 0.0f;
-	int i = 0;
+	unsigned i = 0;
 	while (current < end) {
-		while (i < branch.nodes.size() - 1 && l < branch.nodes[i + 1].height) {
-			l = branch.nodes[i].height;
+		while (i < branch.nodes.size() - 1 && current > branch.nodes[i].height) {
 			i++;
 		}
 		std::vector<Vec3> points;
 		generateSphere(0.40f, points);
-		TrunkNode& node = branch.nodes[i - 1];
-		Vec3 mid = node.midPoint + node.mat.row2*(current - node.height);
-		mat.identity();
-		mat.rotateByX(random.randFloat(-pi, +pi));
-		mat.rotateByY(random.randFloat(-pi, +pi));
-		mat.rotateByZ(random.randFloat(-pi, +pi));
-
-		Vec3 color = lerp(Vec3::fromColor(0xB6E016), Vec3::fromColor(0x07B508), random.randFloat());
-		for (unsigned i = 0; i < points.size(); i += 3) {
-			TreeTriangle tri;
-
-			tri.vertices[0] = mid + points[i + 0] * mat;
-			tri.vertices[1] = mid + points[i + 1] * mat;
-			tri.vertices[2] = mid + points[i + 2] * mat;
-			tri.color = color;
-
-			vertices.push_back(tri);
+		TrunkNode& node = branch.nodes[i];
+		Vec3 up = node.mat.row2;
+		if (i != branch.nodes.size() - 1) {
+			up = lerp(up, branch.nodes[i + 1].mat.row2, (current - node.height) / (branch.nodes[i + 1].height - node.height));
 		}
-		current += 0.2f;
+		up.normalize();
+
+		Vec3 mid = node.midPoint + node.mat.row2*(current - node.height);
+		mat = node.mat;
+		mat.up = up;
+		mat.orthogonalizeUsingUp();
+		mat.rotateBy(random.randFloat(-pi, +pi), mat.up);
+
+		float radius = lerp(startRadius, startRadius*0.2f, current / end);
+		int edgeCount = radius / 0.3f;
+		edgeCount = gmax(edgeCount, 4);
+
+		Vec2 prev = Vec2(sin(0.0f), cos(0.0f));
+
+
+		float endH = gmax(0.2f, radius);
+		float startH = gmin(endH - 0.1f, radius*0.3f);
+
+		for (int i = 1; i <= edgeCount; i++) {
+
+			Vec2 current = Vec2(sin(i*pi_2 / edgeCount), cos(i*pi_2 / edgeCount));
+			TreeTriangle tri;
+			tri.vertices[0] = mid + mat.front*prev.x*radius + mat.side*prev.y*radius;
+			tri.vertices[1] = mid + mat.front*current.x*radius + mat.side*current.y*radius;
+			tri.vertices[2] = mid + mat.up*startH;
+			tri.color = color;
+			vertices.push_back(tri);
+
+
+			tri.vertices[2] = mid + mat.up*endH;
+			vertices.push_back(tri);
+
+			prev = current;
+		}
+
+		current += endH*0.6f;
 	}
 
 

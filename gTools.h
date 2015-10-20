@@ -19,7 +19,6 @@
 #else
 #endif
 
-
 typedef unsigned char byte;
 
 const float pi = (float)E_PI;

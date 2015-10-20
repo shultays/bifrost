@@ -4,7 +4,14 @@
 #define G_MAT_H__
 
 #include "gVec.h"
+#include "gSettings.h"
 #include <math.h>
+
+static_assert(MAT_UP_AXIS >= 0 && MAT_UP_AXIS <= 2, "Invalid MAT_UP_AXIS");
+static_assert(MAT_SIDE_AXIS >= 0 && MAT_SIDE_AXIS <= 2, "Invalid MAT_SIDE_AXIS");
+static_assert(MAT_FRONT_AXIS >= 0 && MAT_FRONT_AXIS <= 2, "Invalid MAT_FRONT_AXIS");
+
+static_assert(MAT_FRONT_AXIS + MAT_UP_AXIS + MAT_SIDE_AXIS == 3, "Mat axis are wrong");
 
 class Mat4;
 class Mat3;
@@ -578,6 +585,38 @@ public:
 			Vec3 row2;
 		};
 		struct {
+			Vec3 rows[3];
+		};
+		struct {
+#if MAT_FRONT_AXIS == 0
+			Vec3 front;
+#endif
+#if MAT_SIDE_AXIS == 0
+			Vec3 side;
+#endif
+#if MAT_UP_AXIS == 0
+			Vec3 up;
+#endif
+#if MAT_FRONT_AXIS == 1
+			Vec3 front;
+#endif
+#if MAT_SIDE_AXIS == 1
+			Vec3 side;
+#endif
+#if MAT_UP_AXIS == 1
+			Vec3 up;
+#endif
+#if MAT_FRONT_AXIS == 2
+			Vec3 front;
+#endif
+#if MAT_SIDE_AXIS == 2
+			Vec3 side;
+#endif
+#if MAT_UP_AXIS == 2
+			Vec3 up;
+#endif
+		};
+		struct {
 			float _00, _01, _02;
 			float _10, _11, _12;
 			float _20, _21, _22;
@@ -836,6 +875,44 @@ public:
 		result[2] = v[0] * _20 + v[1] * _21 + v[2] * _22;
 
 		return result;
+	}
+
+	void orthogonalize() {
+		front.normalize();
+		side = Vec3::cross(front, up);
+		side.normalize();
+		up = Vec3::cross(side, front);
+		up.normalize();
+	}
+
+	void orthogonalizeUsingFront() {
+		orthogonalize();
+	}
+	void orthogonalizeUsingUp() {
+		up.normalize();
+		side = Vec3::cross(up, front);
+		side.normalize();
+
+		front = Vec3::cross(side, up);
+		front.normalize();
+	}
+	void orthogonalizeUsingSide() {
+		side.normalize();
+		up = Vec3::cross(side, front);
+		up.normalize();
+
+		front = Vec3::cross(side, up);
+		front.normalize();
+	}
+	void orthogonalize(int keepAxis, int helpAxis) {
+		int otherAxis = 3 - keepAxis - helpAxis;
+		rows[keepAxis].normalize();
+
+		rows[otherAxis] = Vec3::cross(rows[keepAxis], rows[helpAxis]);
+		rows[otherAxis].normalize();
+
+		rows[helpAxis] = Vec3::cross(rows[otherAxis], rows[keepAxis]);
+		rows[helpAxis].normalize();
 	}
 };
 

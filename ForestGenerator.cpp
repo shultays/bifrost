@@ -44,8 +44,12 @@ public:
 
 				if (treeProb > 0.0f || true) {
 					Vec3 treePos = world->toGamePos(treeCoor, cacher);
-
-					TreeGenerator::generateTree2(treePos, vertices, random);
+					treePos.z -= 0.1f;
+					if (random.randBool()) {
+						TreeGenerator::generateTree(treePos, vertices, random);
+					} else {
+						TreeGenerator::generateTree2(treePos, vertices, random);
+					}
 				}
 			}
 		}
