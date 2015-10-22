@@ -1,5 +1,6 @@
 #include "Valhalla.h"
 #include <stdio.h>
+#include "gears.h"
 #include "gInput.h"
 #include "gGlobals.h"
 #include "gTools.h"
@@ -199,3 +200,13 @@ void Valhalla::resize(int width, int height) {
 
 }
 
+int main(int argc, char *argv[]) {
+	Valhalla* valhalla = new Valhalla();
+	startGears(argc, argv, valhalla);
+
+	gearsLoop();
+	SAFE_DELETE(valhalla);
+	terminateGears();
+
+	return 0;
+}

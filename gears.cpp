@@ -2,11 +2,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include "gears.h"
 #include "gTools.h"
 #include "gGears.h"
 #include "gGlobals.h"
-#include "Valhalla.h"
 
+
+GLFWwindow* window;
 
 void key(GLFWwindow* window, int k, int s, int action, int mods) {
 	gears.key(k, s, action, mods);
@@ -32,8 +34,7 @@ void reshape(GLFWwindow* window, int width, int height) {
 	gears.resize(width, height);
 }
 
-int main(int argc, char *argv[]) {
-	GLFWwindow* window;
+int startGears(int argc, char *argv[], gGame* game) {
 	int width, height;
 
 	if (!glfwInit()) {
@@ -71,21 +72,26 @@ int main(int argc, char *argv[]) {
 	gears.width = width;
 	gears.height = height;
 
-	gears.game = new Valhalla();
+	gears.game = game;
 
 	reshape(window, width, height);
 
 
 	gears.init(argc, argv);
 
+	return 0;
+}
+
+void gearsLoop() {
 	while (!glfwWindowShouldClose(window)) {
 		gears.tick();
 
 		glfwPollEvents();
 	}
+}
 
+void terminateGears() {
 	glfwTerminate();
-
 	exit(EXIT_SUCCESS);
 }
 
