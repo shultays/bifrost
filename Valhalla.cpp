@@ -105,7 +105,7 @@ void Valhalla::update(float fixed_dt) {
 
 	if (input.isKeyPressed(GLFW_KEY_SPACE)) {
 		debugRenderer.clear();
-		//world->buildDrainage();
+		world->buildDrainage();
 		world->buildRivers();
 	}
 
