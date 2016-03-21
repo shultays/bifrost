@@ -59,6 +59,8 @@ const float epsilon = 0.000001f;
 #define gmax3(x, y, z) ((x)<(y)?gmin((z),(y)):gmin((x),(y)))
 #define gmax4(x, y, z, o) ((x)<(y)?gmin3((y), (z), (o)):gmin3((x), (z), (o)))
 
+#define gabs(x) ((x>0)?x:-x)
+
 #define round(x) (((x)>((int)x + 0.5f))?((int)x)+1:(int)x)
 
 #define same_sign(x, y) ((x >= 0 && y >= 0 ) || (x < 0 && y < 0))

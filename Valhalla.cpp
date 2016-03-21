@@ -27,14 +27,12 @@ void Valhalla::init() {
 		world->serialize(bOutput);
 		bOutput.close();
 	} else {
-
 		gBinaryFileInputStream bInput;
 		bInput.open("data.dat", std::ifstream::in | std::ifstream::binary);
 		world->deserialize(bInput);
 
 		bInput.close();
 		world->buildBuffer();
-
 	}
 
 
@@ -150,7 +148,7 @@ void Valhalla::update(float fixed_dt) {
 		Vec3 oldPos = fpsCamera->pos;
 
 		fpsCamera->pos.vec2 = shift + playerCoor.pos;
-		fpsCamera->pos.z = world->getHeightAt(playerCoor) + 1.8f * 1.0f;
+		fpsCamera->pos.z = world->getHeightAt(playerCoor) + 1.8f + (input.isKeyDown(GLFW_KEY_T) ? 20.0f : 0.0f);
 
 		if (input.isKeyDown(GLFW_KEY_R)) {
 			debugRenderer.addLine(oldPos, fpsCamera->pos, 0xFF00FFFF, 1.0f);
@@ -185,13 +183,14 @@ void Valhalla::update(float fixed_dt) {
 			playerCoor.pos -= side * (input.getMouseDelta().x * camera->distanceToFocus * 10.0f);
 		}
 
+		if (input.isKeyDown(GLFW_KEY_V)) {
+			playerCoor.index = world->cityCoor;
+			playerCoor.pos.setZero();
+		}
 
 		playerCoor.fix(world->getNodeSize());
 
-
-
 		camera->focusPoint = Vec3(playerCoor.index.x + playerCoor.pos.x / world->getNodeSize(), playerCoor.index.y + playerCoor.pos.y / world->getNodeSize(), 0.0f);
-
 	}
 
 }

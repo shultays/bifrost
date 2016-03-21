@@ -292,11 +292,6 @@ void WorldMap::buildHeightMap() {
 		printf("%s %d count %d\n", it->second>0 ? "land" : "watr", it->first, it->second);
 	}
 	printf("total %d (%d)\n", totalSize, edgeCount * edgeCount);
-
-
-
-
-
 }
 
 void WorldMap::buildNormalMap() {
@@ -318,6 +313,26 @@ void WorldMap::buildNormalMap() {
 		normalMap[edgeCount - 1][i] = Vec3(0.0f, 0.0f, 1.0f);
 		normalMap[0][i] = Vec3(0.0f, 0.0f, 1.0f);
 	}
+
+	float minNormalScore = 1000.0f;
+	IntVec2 minCoor;
+	for (int i = 0; i < edgeCount - 1; i++) {
+		for (int j = 0; j < edgeCount - 1; j++) {
+			if (heightMap[i][j] < 20.0f) {
+				continue;
+			}
+
+			float average_normal = (normalMap[i][j].z + normalMap[i][j + 1].z + normalMap[i + 1][j].z + normalMap[i + 1][j + 1].z) * 0.25f;
+
+			float normal_score = gabs(normalMap[i][j].z - average_normal) + gabs(normalMap[i + 1][j].z - average_normal) + gabs(normalMap[i][j + 1].z - average_normal) + gabs(normalMap[i + 1][j + 1].z - average_normal);
+
+			if (minNormalScore > normal_score) {
+				minNormalScore = normal_score;
+				minCoor = IntVec2(i, j);
+			}
+		}
+	}
+	cityCoor = minCoor;
 }
 void WorldMap::buildColorMap() {
 	for (int i = 0; i < edgeCount; i++) {
@@ -352,6 +367,8 @@ void WorldMap::buildColorMap() {
 
 		}
 	}
+
+	colorMap[cityCoor.x][cityCoor.y] = Vec3(1.0f, 0.0f, 1.0f);
 }
 
 float WorldMap::getHeightAt(WorldCoor &coor, HeightCacher& cacher) const {
@@ -425,11 +442,10 @@ void WorldMap::buildBuffer() {
 	int k = 0;
 	for (int i = 0; i < edgeCount - 1; i++) {
 		for (int j = 0; j < edgeCount - 1; j++) {
-
+			bool swap = ((i + j) & 1);
 			VertexPointer pointer0 = terrainDrawable->getVertexPointerAt(k++);
 			VertexPointer pointer1 = terrainDrawable->getVertexPointerAt(k++);
 			VertexPointer pointer2 = terrainDrawable->getVertexPointerAt(k++);
-
 
 			*pointer0.position = toWorldGamePos(i, j);
 			*pointer1.position = toWorldGamePos(i + 1, j);
@@ -446,7 +462,6 @@ void WorldMap::buildBuffer() {
 			pointer0 = terrainDrawable->getVertexPointerAt(k++);
 			pointer1 = terrainDrawable->getVertexPointerAt(k++);
 			pointer2 = terrainDrawable->getVertexPointerAt(k++);
-
 
 			*pointer0.position = toWorldGamePos(i + 1, j + 1);
 			*pointer1.position = toWorldGamePos(i, j + 1);

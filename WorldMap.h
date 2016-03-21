@@ -97,6 +97,7 @@ protected:
 	int edgeCount;
 
 
+
 	Grid<float> heightMap;
 	Grid<Vec3> normalMap;
 	Grid<Vec3> colorMap;
@@ -117,6 +118,8 @@ protected:
 	Grid<float> distanceToWater;
 	Grid<DrainageNode> drainageGrid;
 public:
+
+	IntVec2 cityCoor; // debug
 
 	WorldMap(float mapSize);
 
